@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "181926172740",
+    "project_id": "duelingo-ccf90",
+    "storage_bucket": "duelingo-ccf90.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:181926172740:android:1def00d40f0dff55d14411",
+        "android_client_info": {
+          "package_name": "com.example.duelingo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkWcRxT-MxA4wqwcWXiPQ8wPXMDBDr3-k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

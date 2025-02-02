@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Duelingo" parent="android:Theme.Material.Light.NoActionBar" />
+        <style name="Theme.Duelingo" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+                <item name="colorPrimary">@color/blue_primary</item>
+        </style>
 </resources>
