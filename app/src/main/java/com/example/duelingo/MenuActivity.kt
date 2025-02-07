@@ -25,23 +25,26 @@ class MenuActivity : AppCompatActivity() {
         binding = ActivityMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.mainIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
+        binding.mainTest.setTextColor(Color.parseColor("#FF00A5FE"))
+
         binding.btnDuel.setOnClickListener {
             showToast("Поиск дуэли...")
         }
 
-        binding.test.setOnClickListener {
+        binding.tests.setOnClickListener {
             resetAll();
             changeColorAndIcon(binding.testIcon, binding.testTest, R.drawable.grad)
             playAnimation(binding.testAnimation, binding.testIcon, binding.testTest, "graAnim.json")
         }
 
-        binding.main.setOnClickListener {
+        binding.duel.setOnClickListener {
             resetAll();
             changeColorAndIcon(binding.mainIcon, binding.mainTest, R.drawable.swo)
             playAnimation(binding.duelAnimation, binding.mainIcon, binding.mainTest, "swordAnim.json")
         }
 
-        binding.cup.setOnClickListener {
+        binding.leaderboard.setOnClickListener {
             resetAll();
             changeColorAndIcon(binding.cupIcon, binding.cupTest, R.drawable.tro)
             playAnimation(binding.cupAnimation, binding.cupIcon, binding.cupTest, "cupAnim.json")
@@ -60,6 +63,7 @@ class MenuActivity : AppCompatActivity() {
 
     private fun changeColorAndIcon(icon: ImageView, text: TextView, iconRes: Int) {
         text.setTextColor(ContextCompat.getColor(this, R.color.blue_primary))
+        icon.setColorFilter(ContextCompat.getColor(this, R.color.blue_primary))
         icon.setImageResource(iconRes)
     }
 
@@ -68,8 +72,10 @@ class MenuActivity : AppCompatActivity() {
             cancelAnimation()
             visibility = View.GONE
         }
-        currentIcon?.visibility = View.VISIBLE
+
+        currentIcon?.setColorFilter(Color.parseColor("#7A7A7B"))
         currentText?.setTextColor(Color.parseColor("#7A7A7B"))
+        currentIcon?.visibility = View.VISIBLE
 
         currentAnimationView = animationView
         currentIcon = icon
@@ -108,6 +114,8 @@ class MenuActivity : AppCompatActivity() {
         binding.mainTest.setTextColor(Color.parseColor("#7A7A7B"))
         binding.cupTest.setTextColor(Color.parseColor("#7A7A7B"))
         binding.profileTest.setTextColor(Color.parseColor("#7A7A7B"))
+
+        binding.mainIcon.setColorFilter(Color.parseColor("#7A7A7B"))
 
         binding.testIcon.setImageResource(R.drawable.graduation24)
         binding.mainIcon.setImageResource(R.drawable.swords24)

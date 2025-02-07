@@ -20,13 +20,16 @@
             android:exported="false" />
         <activity
             android:name=".MenuActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:launchMode="singleTop"/>
         <activity
             android:name=".ui.theme.auth.LoginActivity"
             android:exported="true" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
+
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
