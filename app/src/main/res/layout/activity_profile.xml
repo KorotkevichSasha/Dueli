@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="#0B0B0D">
+
+    <!-- Круглая форма для фотографии профиля -->
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/profile_image"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/default_profile"
+        android:layout_marginTop="20dp"/>
+
+    <!-- Имя игрока -->
+    <TextView
+        android:id="@+id/player_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/profile_image"
+        android:textColor="@color/gray"
+        android:layout_centerHorizontal="true"
+        android:text="Имя игрока"
+        android:textSize="24sp"
+        android:layout_marginTop="16dp"/>
+
+    <!-- Почта игрока -->
+    <TextView
+        android:id="@+id/player_email"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/player_name"
+        android:textColor="@color/gray"
+        android:layout_centerHorizontal="true"
+        android:text="email@example.com"
+        android:textSize="16sp"
+        android:layout_marginTop="8dp"/>
+
+    <!-- Кнопка "Добавить в друзья" -->
+    <Button
+        android:id="@+id/add_friend_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/player_email"
+        android:background="@drawable/bg_button"
+        android:layout_centerHorizontal="true"
+        android:text="Добавить в друзья"
+        android:layout_marginTop="32dp"/>
+
+    <!-- Количество друзей -->
+
+    <!--    Заявки в друзья-->
+
+
+    <TextView
+        android:id="@+id/friend_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/add_friend_button"
+        android:layout_centerHorizontal="true"
+        android:text="Друзей: 0"
+        android:textColor="@color/gray"
+        android:textSize="18sp"
+        android:layout_marginTop="0dp"/>
+
+    <Button
+        android:id="@+id/acceptFriends"
+        android:layout_width="198dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/add_friend_button"
+        android:layout_alignStart="@+id/add_friend_button"
+        android:background="@drawable/bg_button"
+        android:layout_marginTop="80dp"
+        android:text="Заявки в друзья" />
+
+    <Button
+        android:id="@+id/listFriends"
+        android:layout_width="198dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/acceptFriends"
+        android:layout_alignStart="@+id/acceptFriends"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="80dp"
+        android:background="@drawable/bg_button"
+        android:text="Ваши друзья" />
+
+    <include
+        android:id="@+id/bottomNavigationBar"
+        layout="@layout/bottom_navigation_bar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"/>
+
+</RelativeLayout>
