@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0B0B0D">
-
+    tools:context=".TestActivity">
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/animationView"
@@ -16,56 +16,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnDuel"
-        android:layout_width="160dp"
-        android:layout_height="160dp"
-        android:background="@drawable/round_button"
-        android:insetTop="0dp"
-        android:insetBottom="0dp"
-        android:text="Поиск дуэли"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.336" />
-
-    <TextView
-        android:id="@+id/tvPoints"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="68dp"
-        android:text="Очки: 0"
-        android:textColor="@color/blue_primary"
-        android:textSize="34sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnDuel" />
-
-    <TextView
-        android:id="@+id/tvRank"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="72dp"
-        android:text="Рейтинг: 25"
-        android:textColor="@color/blue_primary"
-        android:textSize="34sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvPoints" />
-
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:orientation="horizontal"
         android:background="#0B0B0D"
+        android:layout_alignParentBottom="true"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
@@ -118,12 +74,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
-            <ImageView
-                android:id="@+id/mainIcon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/swords24"
-                android:contentDescription="Дуэль" />
+                <ImageView
+                    android:id="@+id/mainIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/swords24"
+                    android:contentDescription="Дуэль" />
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/duelAnimation"
@@ -156,12 +112,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
-            <ImageView
-                android:id="@+id/cupIcon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/trophy24"
-                android:contentDescription="Рейтинг"/>
+                <ImageView
+                    android:id="@+id/cupIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/trophy24"
+                    android:contentDescription="Рейтинг"/>
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/cupAnimation"
@@ -193,12 +149,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
-            <ImageView
-                android:id="@+id/profileIcon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/profile24"
-                android:contentDescription="Профиль"/>
+                <ImageView
+                    android:id="@+id/profileIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/profile24"
+                    android:contentDescription="Профиль"/>
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/profAnimation"
@@ -216,4 +172,5 @@
                 android:textSize="12sp"/>
         </LinearLayout>
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
