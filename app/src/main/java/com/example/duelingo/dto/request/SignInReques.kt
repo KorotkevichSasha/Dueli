@@ -1,4 +1,4 @@
-package com.example.duelingo.data.dto.request
+package com.example.duelingo.dto.request
 
 data class SignInRequest(
     val username: String,

@@ -1,4 +1,4 @@
-package com.example.duelingo
+package com.example.duelingo.activity
 
 import android.animation.Animator
 import android.content.Intent
@@ -8,14 +8,20 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
-import com.example.duelingo.databinding.ActivityProfileBinding
+import com.example.duelingo.R
+import com.example.duelingo.adapters.LeaderboardAdapter
 import com.example.duelingo.databinding.ActivityRankBinding
+import com.example.duelingo.dto.response.PaginationResponse
+import com.example.duelingo.dto.response.UserInLeaderboardResponse
+import com.example.duelingo.network.ApiClient
+import com.example.duelingo.storage.TokenManager
+import kotlinx.coroutines.launch
 
 class RankActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRankBinding
@@ -23,44 +29,68 @@ class RankActivity : AppCompatActivity() {
     private var currentIcon: ImageView? = null
     private var currentText: TextView? = null
 
+    private lateinit var leaderboardAdapter: LeaderboardAdapter
+    private lateinit var leaderboardRecyclerView: RecyclerView
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
         binding = ActivityRankBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         binding.cupIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.cupTest.setTextColor(Color.parseColor("#FF00A5FE"))
 
+        leaderboardRecyclerView = findViewById(R.id.rvLeaderboard)
+        leaderboardRecyclerView.layoutManager = LinearLayoutManager(this)
+        val emptyPaginationResponse = PaginationResponse<UserInLeaderboardResponse>(
+            content = emptyList(),
+            totalItems = 0,
+            totalPages = 0,
+            currentPage = 0
+        )
+        leaderboardAdapter = LeaderboardAdapter(emptyPaginationResponse)
+
+        leaderboardRecyclerView.adapter = leaderboardAdapter
+
+        loadLeaderboard()
+
+
         binding.tests.setOnClickListener {
             resetAll();
             startActivity(Intent(this@RankActivity, TestActivity::class.java))
-            changeColorAndIcon(binding.testIcon, binding.testTest, com.example.duelingo.R.drawable.grad)
+            changeColorAndIcon(
+                binding.testIcon,
+                binding.testTest,
+                R.drawable.grad
+            )
             playAnimation(binding.testAnimation, binding.testIcon, binding.testTest, "graAnim.json")
         }
-
         binding.duel.setOnClickListener {
             resetAll();
             startActivity(Intent(this@RankActivity, MenuActivity::class.java))
             changeColorAndIcon(binding.mainIcon, binding.mainTest, R.drawable.swo)
-            playAnimation(binding.duelAnimation, binding.mainIcon, binding.mainTest, "swordAnim.json")
+            playAnimation(
+                binding.duelAnimation,
+                binding.mainIcon,
+                binding.mainTest,
+                "swordAnim.json"
+            )
         }
-
         binding.leaderboard.setOnClickListener {
 
         }
-
         binding.profile.setOnClickListener {
             resetAll();
             startActivity(Intent(this@RankActivity, ProfileActivity::class.java))
             changeColorAndIcon(binding.profileIcon, binding.profileTest, R.drawable.prof)
-            playAnimation(binding.profAnimation, binding.profileIcon, binding.profileTest, "profAnim.json")
+            playAnimation(
+                binding.profAnimation,
+                binding.profileIcon,
+                binding.profileTest,
+                "profAnim.json"
+            )
         }
-    }
-
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
     private fun changeColorAndIcon(icon: ImageView, text: TextView, iconRes: Int) {
@@ -69,7 +99,12 @@ class RankActivity : AppCompatActivity() {
         icon.setImageResource(iconRes)
     }
 
-    private fun playAnimation(animationView: LottieAnimationView, icon: ImageView, text: TextView, animationFile: String) {
+    private fun playAnimation(
+        animationView: LottieAnimationView,
+        icon: ImageView,
+        text: TextView,
+        animationFile: String
+    ) {
         currentAnimationView?.apply {
             cancelAnimation()
             visibility = View.GONE
@@ -105,12 +140,14 @@ class RankActivity : AppCompatActivity() {
 
             override fun onAnimationRepeat(animation: Animator) {
             }
+
             private fun playAnimation(animationFile: String) {
                 binding.animationView.setAnimation(animationFile)
                 binding.animationView.playAnimation()
             }
         })
     }
+
     private fun resetAll() {
         binding.testTest.setTextColor(Color.parseColor("#7A7A7B"))
         binding.mainTest.setTextColor(Color.parseColor("#7A7A7B"))
@@ -119,9 +156,36 @@ class RankActivity : AppCompatActivity() {
 
         binding.mainIcon.setColorFilter(Color.parseColor("#7A7A7B"))
 
-        binding.testIcon.setImageResource(com.example.duelingo.R.drawable.graduation24)
-        binding.mainIcon.setImageResource(com.example.duelingo.R.drawable.swords24)
-        binding.cupIcon.setImageResource(com.example.duelingo.R.drawable.trophy24)
-        binding.profileIcon.setImageResource(com.example.duelingo.R.drawable.profile24)
+        binding.testIcon.setImageResource(R.drawable.graduation24)
+        binding.mainIcon.setImageResource(R.drawable.swords24)
+        binding.cupIcon.setImageResource(R.drawable.trophy24)
+        binding.profileIcon.setImageResource(R.drawable.profile24)
     }
+
+    private fun loadLeaderboard() {
+        val tokenManager = TokenManager(this)
+        val accessToken = tokenManager.getAccessToken()
+
+        if (accessToken != null) {
+            val tokenWithBearer = "Bearer $accessToken"
+
+            lifecycleScope.launch {
+                try {
+                    val response = ApiClient.leaderboardService.getLeaderboard(tokenWithBearer)
+                    leaderboardAdapter.updateData(response)
+                } catch (e: Exception) {
+                    showToast(e.toString())
+
+                }
+            }
+        } else {
+            showToast("RankActivity" + "Access token is missing.")
+        }
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+
 }

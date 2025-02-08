@@ -1,4 +1,4 @@
-package com.example.duelingo.data.dto.response
+package com.example.duelingo.dto.response
 
 data class JwtAuthenticationResponse(
     val accessToken: String,

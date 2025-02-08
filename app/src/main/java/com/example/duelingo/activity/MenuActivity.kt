@@ -1,4 +1,4 @@
-package com.example.duelingo
+package com.example.duelingo.activity
 
 import android.animation.Animator
 import android.content.Intent
@@ -8,17 +8,15 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.airbnb.lottie.LottieAnimationView
-import com.example.duelingo.databinding.ActivityRankBinding
-import com.example.duelingo.databinding.ActivityTestBinding
+import com.example.duelingo.R
+import com.example.duelingo.databinding.ActivityMenuBinding
 
-class TestActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityTestBinding
+class MenuActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMenuBinding
     private var currentAnimationView: LottieAnimationView? = null
     private var currentIcon: ImageView? = null
     private var currentText: TextView? = null
@@ -26,35 +24,42 @@ class TestActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
-        binding = ActivityTestBinding.inflate(layoutInflater)
+        binding = ActivityMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.testIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
-        binding.testTest.setTextColor(Color.parseColor("#FF00A5FE"))
+        binding.mainIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
+        binding.mainTest.setTextColor(Color.parseColor("#FF00A5FE"))
+
+        binding.btnDuel.setOnClickListener {
+            showToast("Поиск дуэли...")
+        }
 
         binding.tests.setOnClickListener {
+            resetAll();
+            startActivity(Intent(this@MenuActivity, TestActivity::class.java))
+            changeColorAndIcon(binding.testIcon, binding.testTest, R.drawable.grad)
+            playAnimation(binding.testAnimation, binding.testIcon, binding.testTest, "graAnim.json")
         }
 
-        binding.duel.setOnClickListener {
-            resetAll();
-            startActivity(Intent(this@TestActivity, MenuActivity::class.java))
-            changeColorAndIcon(binding.mainIcon, binding.mainTest, R.drawable.swo)
-            playAnimation(binding.duelAnimation, binding.mainIcon, binding.mainTest, "swordAnim.json")
-        }
+        binding.duel.setOnClickListener {}
 
         binding.leaderboard.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@TestActivity, RankActivity::class.java))
+            startActivity(Intent(this@MenuActivity, RankActivity::class.java))
             changeColorAndIcon(binding.cupIcon, binding.cupTest, R.drawable.tro)
             playAnimation(binding.cupAnimation, binding.cupIcon, binding.cupTest, "cupAnim.json")
         }
 
         binding.profile.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@TestActivity, ProfileActivity::class.java))
+            startActivity(Intent(this@MenuActivity, ProfileActivity::class.java))
             changeColorAndIcon(binding.profileIcon, binding.profileTest, R.drawable.prof)
-            playAnimation(binding.profAnimation, binding.profileIcon, binding.profileTest, "profAnim.json")
+            playAnimation(
+                binding.profAnimation,
+                binding.profileIcon,
+                binding.profileTest,
+                "profAnim.json"
+            )
         }
     }
 
@@ -68,7 +73,12 @@ class TestActivity : AppCompatActivity() {
         icon.setImageResource(iconRes)
     }
 
-    private fun playAnimation(animationView: LottieAnimationView, icon: ImageView, text: TextView, animationFile: String) {
+    private fun playAnimation(
+        animationView: LottieAnimationView,
+        icon: ImageView,
+        text: TextView,
+        animationFile: String
+    ) {
         currentAnimationView?.apply {
             cancelAnimation()
             visibility = View.GONE
@@ -104,12 +114,10 @@ class TestActivity : AppCompatActivity() {
 
             override fun onAnimationRepeat(animation: Animator) {
             }
-            private fun playAnimation(animationFile: String) {
-                binding.animationView.setAnimation(animationFile)
-                binding.animationView.playAnimation()
-            }
+
         })
     }
+
     private fun resetAll() {
         binding.testTest.setTextColor(Color.parseColor("#7A7A7B"))
         binding.mainTest.setTextColor(Color.parseColor("#7A7A7B"))
@@ -118,9 +126,9 @@ class TestActivity : AppCompatActivity() {
 
         binding.mainIcon.setColorFilter(Color.parseColor("#7A7A7B"))
 
-        binding.testIcon.setImageResource(com.example.duelingo.R.drawable.graduation24)
-        binding.mainIcon.setImageResource(com.example.duelingo.R.drawable.swords24)
-        binding.cupIcon.setImageResource(com.example.duelingo.R.drawable.trophy24)
-        binding.profileIcon.setImageResource(com.example.duelingo.R.drawable.profile24)
+        binding.testIcon.setImageResource(R.drawable.graduation24)
+        binding.mainIcon.setImageResource(R.drawable.swords24)
+        binding.cupIcon.setImageResource(R.drawable.trophy24)
+        binding.profileIcon.setImageResource(R.drawable.profile24)
     }
 }

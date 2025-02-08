@@ -1,15 +1,14 @@
-package com.example.duelingo.ui.theme.auth
+package com.example.duelingo.activity.auth
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.duelingo.MainActivity
-import com.example.duelingo.MenuActivity
-import com.example.duelingo.data.dto.request.SignInRequest
-import com.example.duelingo.network.ApiClient
+import com.example.duelingo.activity.MenuActivity
 import com.example.duelingo.databinding.ActivityLoginBinding
+import com.example.duelingo.dto.request.SignInRequest
+import com.example.duelingo.network.ApiClient
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import retrofit2.HttpException
@@ -31,9 +30,11 @@ class LoginActivity : AppCompatActivity() {
                 username.isEmpty() || password.isEmpty() -> {
                     showToast("Fields cannot be empty")
                 }
+
                 password.length < 8 -> {
                     showToast("Password must be at least 8 characters")
                 }
+
                 else -> {
                     val signInRequest = SignInRequest(username, password)
                     loginUser(signInRequest)

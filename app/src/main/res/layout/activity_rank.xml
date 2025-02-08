@@ -3,9 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
+
+    android:scrollbars="vertical"
+    android:fadeScrollbars="false"
+    android:scrollbarSize="4dp"
+    android:scrollbarStyle="outsideOverlay"
+    android:overScrollMode="never"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RankActivity">
+    tools:context=".activity.RankActivity"
+    android:background="#0B0B0D">
+
+
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/animationView"
@@ -16,6 +26,89 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@android:color/black"
+        android:padding="16dp">
+
+        <!-- Заголовок -->
+        <TextView
+            android:id="@+id/tvLeaderboardTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LEADERBOARD"
+            android:textSize="24sp"
+            android:textColor="@color/gray"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:paddingBottom="16dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="598dp"
+            android:orientation="vertical">
+
+            <!-- Отдельный блок для текущего пользователя -->
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvLeaderboard"
+                android:layout_width="match_parent"
+                android:layout_height="545dp"
+                android:scrollbars="vertical" />
+
+            <LinearLayout
+                android:id="@+id/userContainer"
+                android:layout_width="match_parent"
+                android:layout_height="51dp"
+                android:background="#2A2A2E"
+                android:orientation="horizontal"
+                android:padding="8dp">
+
+                <TextView
+                    android:id="@+id/tvUserRank"
+                    android:layout_width="40dp"
+                    android:layout_height="38dp"
+                    android:gravity="center"
+                    android:textColor="@color/blue_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/ivUserAvatar"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:scaleType="centerCrop" />
+
+                <TextView
+                    android:id="@+id/tvUsername"
+                    android:layout_width="0dp"
+                    android:layout_height="33dp"
+                    android:layout_weight="1"
+                    android:paddingStart="8dp"
+                    android:textColor="@color/blue_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvUserPoints"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:textColor="@color/blue_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
@@ -23,6 +116,8 @@
         android:background="#0B0B0D"
         android:layout_alignParentBottom="true"
         app:layout_constraintBottom_toBottomOf="parent">
+
+
 
         <LinearLayout
             android:id="@+id/tests"

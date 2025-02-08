@@ -1,13 +1,12 @@
-package com.example.duelingo
+package com.example.duelingo.activity
+
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.NavController
+import com.example.duelingo.activity.auth.LoginActivity
 import com.example.duelingo.databinding.ActivityMainBinding
-import com.example.duelingo.ui.theme.auth.LoginActivity
-import okhttp3.internal.wait
 
 class MainActivity : AppCompatActivity() {
 

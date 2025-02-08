@@ -1,4 +1,4 @@
-package com.example.duelingo.data.dto.storage
+package com.example.duelingo.storage
 
 import android.content.Context
 import android.content.SharedPreferences

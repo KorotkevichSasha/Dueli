@@ -16,26 +16,26 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".RankActivity"
+            android:name=".activity.RankActivity"
             android:exported="false" />
         <activity
-            android:name=".TestActivity"
+            android:name=".activity.TestActivity"
             android:exported="false" />
         <activity
-            android:name=".ProfileActivity"
+            android:name=".activity.ProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.theme.auth.RegisterActivity"
+            android:name=".activity.auth.RegisterActivity"
             android:exported="false" />
         <activity
-            android:name=".MenuActivity"
+            android:name=".activity.MenuActivity"
             android:exported="true"
             android:launchMode="singleTop" />
         <activity
-            android:name=".ui.theme.auth.LoginActivity"
+            android:name=".activity.auth.LoginActivity"
             android:exported="true" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

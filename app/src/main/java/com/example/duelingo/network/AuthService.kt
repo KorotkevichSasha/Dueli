@@ -1,8 +1,8 @@
 package com.example.duelingo.network
 
-import com.example.duelingo.data.dto.request.SignInRequest
-import com.example.duelingo.data.dto.request.SignUpRequest
-import com.example.duelingo.data.dto.response.JwtAuthenticationResponse
+import com.example.duelingo.dto.request.SignInRequest
+import com.example.duelingo.dto.request.SignUpRequest
+import com.example.duelingo.dto.response.JwtAuthenticationResponse
 import retrofit2.http.Body
 import retrofit2.http.POST
 

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/fon"
-    tools:context=".ui.theme.auth.RegisterActivity">
+    tools:context=".activity.auth.RegisterActivity">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_top"

@@ -1,4 +1,4 @@
-package com.example.duelingo.ui.theme.auth
+package com.example.duelingo.activity.auth
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,12 +6,12 @@ import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.duelingo.MainActivity
-import com.example.duelingo.MenuActivity
-import com.example.duelingo.data.dto.request.SignUpRequest
-import com.example.duelingo.data.dto.response.JwtAuthenticationResponse
-import com.example.duelingo.network.ApiClient
+import com.example.duelingo.activity.MenuActivity
 import com.example.duelingo.databinding.ActivityRegisterBinding
+import com.example.duelingo.dto.request.SignUpRequest
+import com.example.duelingo.dto.response.JwtAuthenticationResponse
+import com.example.duelingo.network.ApiClient
+import com.example.duelingo.storage.TokenManager
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import retrofit2.HttpException
@@ -39,15 +39,19 @@ class RegisterActivity : AppCompatActivity() {
                 email.isEmpty() || password.isEmpty() || username.isEmpty() || confirmPassword.isEmpty() -> {
                     showToast("Fields cannot be empty")
                 }
+
                 password != confirmPassword -> {
                     showToast("Passwords must match")
                 }
+
                 password.length < 8 -> {
                     showToast("Password must be at least 8 characters")
                 }
+
                 !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
                     showToast("Please enter a valid email address")
                 }
+
                 else -> {
                     val signUpRequest = SignUpRequest(username, email, password)
                     registerUser(signUpRequest)
@@ -100,6 +104,8 @@ class RegisterActivity : AppCompatActivity() {
             putString("refresh_token", response.refreshToken)
             apply()
         }
+        val tokenManager = TokenManager(this)
+        tokenManager.saveTokens(response.accessToken, response.refreshToken)
     }
 
     private fun showToast(message: String) {
