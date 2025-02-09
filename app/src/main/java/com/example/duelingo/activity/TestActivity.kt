@@ -32,7 +32,6 @@ class TestActivity : AppCompatActivity() {
 
         binding.tests.setOnClickListener {
         }
-
         binding.duel.setOnClickListener {
             resetAll();
             startActivity(Intent(this@TestActivity, MenuActivity::class.java))
@@ -44,14 +43,12 @@ class TestActivity : AppCompatActivity() {
                 "swordAnim.json"
             )
         }
-
         binding.leaderboard.setOnClickListener {
             resetAll();
             startActivity(Intent(this@TestActivity, RankActivity::class.java))
             changeColorAndIcon(binding.cupIcon, binding.cupTest, R.drawable.tro)
             playAnimation(binding.cupAnimation, binding.cupIcon, binding.cupTest, "cupAnim.json")
         }
-
         binding.profile.setOnClickListener {
             resetAll();
             startActivity(Intent(this@TestActivity, ProfileActivity::class.java))
@@ -68,19 +65,12 @@ class TestActivity : AppCompatActivity() {
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
-
     private fun changeColorAndIcon(icon: ImageView, text: TextView, iconRes: Int) {
         text.setTextColor(ContextCompat.getColor(this, R.color.blue_primary))
         icon.setColorFilter(ContextCompat.getColor(this, R.color.blue_primary))
         icon.setImageResource(iconRes)
     }
-
-    private fun playAnimation(
-        animationView: LottieAnimationView,
-        icon: ImageView,
-        text: TextView,
-        animationFile: String
-    ) {
+    private fun playAnimation(animationView: LottieAnimationView, icon: ImageView, text: TextView, animationFile: String) {
         currentAnimationView?.apply {
             cancelAnimation()
             visibility = View.GONE
@@ -123,7 +113,6 @@ class TestActivity : AppCompatActivity() {
             }
         })
     }
-
     private fun resetAll() {
         binding.testTest.setTextColor(Color.parseColor("#7A7A7B"))
         binding.mainTest.setTextColor(Color.parseColor("#7A7A7B"))

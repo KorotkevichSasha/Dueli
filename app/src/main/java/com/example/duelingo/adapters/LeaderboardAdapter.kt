@@ -9,10 +9,11 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.duelingo.R
+import com.example.duelingo.dto.response.LeaderboardResponse
 import com.example.duelingo.dto.response.PaginationResponse
 import com.example.duelingo.dto.response.UserInLeaderboardResponse
 
-class LeaderboardAdapter(private var users: PaginationResponse<UserInLeaderboardResponse>) :
+class LeaderboardAdapter(private var users: LeaderboardResponse) :
     RecyclerView.Adapter<LeaderboardAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -29,7 +30,7 @@ class LeaderboardAdapter(private var users: PaginationResponse<UserInLeaderboard
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val user = users.content[position]
+        val user = users.top.content[position]
         holder.rankText.text = user.rank.toString()
         holder.usernameText.text = user.username
         holder.pointsText.text = user.points.toString()
@@ -63,9 +64,9 @@ class LeaderboardAdapter(private var users: PaginationResponse<UserInLeaderboard
             .into(holder.avatarImage)
     }
 
-    override fun getItemCount(): Int = users.content.size
+    override fun getItemCount(): Int = users.top.content.size
 
-    fun updateData(newUsers: PaginationResponse<UserInLeaderboardResponse>) {
+    fun updateData(newUsers: LeaderboardResponse) {
         users = newUsers
         notifyDataSetChanged()
     }

@@ -10,9 +10,17 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
+import com.bumptech.glide.Glide
 import com.example.duelingo.R
 import com.example.duelingo.databinding.ActivityProfileBinding
+import com.example.duelingo.dto.response.UserProfileResponse
+import com.example.duelingo.network.ApiClient
+import com.example.duelingo.storage.TokenManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ProfileActivity : AppCompatActivity() {
 
@@ -23,13 +31,14 @@ class ProfileActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         binding.profileIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.profileTest.setTextColor(Color.parseColor("#FF00A5FE"))
+
+
+        loadProfile()
 
         binding.tests.setOnClickListener {
             resetAll();
@@ -37,7 +46,6 @@ class ProfileActivity : AppCompatActivity() {
             changeColorAndIcon(binding.testIcon, binding.testTest, R.drawable.grad)
             playAnimation(binding.testAnimation, binding.testIcon, binding.testTest, "graAnim.json")
         }
-
         binding.duel.setOnClickListener {
             resetAll();
             startActivity(Intent(this@ProfileActivity, MenuActivity::class.java))
@@ -49,33 +57,59 @@ class ProfileActivity : AppCompatActivity() {
                 "swordAnim.json"
             )
         }
-
         binding.leaderboard.setOnClickListener {
             resetAll();
             startActivity(Intent(this@ProfileActivity, RankActivity::class.java))
             changeColorAndIcon(binding.cupIcon, binding.cupTest, R.drawable.tro)
             playAnimation(binding.cupAnimation, binding.cupIcon, binding.cupTest, "cupAnim.json")
         }
-
         binding.profile.setOnClickListener {}
+    }
+
+
+    private fun loadProfile() {
+        val tokenManager = TokenManager(this)
+        val accessToken = tokenManager.getAccessToken()
+
+        if (accessToken != null) {
+            val tokenWithBearer = "Bearer $accessToken"
+
+            lifecycleScope.launch {
+                try {
+                    val response = ApiClient.profileService.getProfile(tokenWithBearer)
+                    withContext(Dispatchers.Main) {
+                        updateUI(response)
+                    }
+                } catch (e: Exception) {
+                    showToast("Ex" + e.toString())
+
+                }
+            }
+        } else {
+            showToast("RankActivity" + "Access token is missing.")
+        }
+    }
+
+    private fun updateUI(profileResponse: UserProfileResponse) {
+        binding.playerName.text = profileResponse.username
+        binding.playerEmail.text = profileResponse.email
+        binding.pointCount.text = "Очки: ${profileResponse.points}"
+
+        Glide.with(this)
+            .load(profileResponse.avatarUrl)
+            .placeholder(R.drawable.default_profile)
+            .into(binding.profileImage)
     }
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
-
     private fun changeColorAndIcon(icon: ImageView, text: TextView, iconRes: Int) {
         text.setTextColor(ContextCompat.getColor(this, R.color.blue_primary))
         icon.setColorFilter(ContextCompat.getColor(this, R.color.blue_primary))
         icon.setImageResource(iconRes)
     }
-
-    private fun playAnimation(
-        animationView: LottieAnimationView,
-        icon: ImageView,
-        text: TextView,
-        animationFile: String
-    ) {
+    private fun playAnimation(animationView: LottieAnimationView, icon: ImageView, text: TextView, animationFile: String) {
         currentAnimationView?.apply {
             cancelAnimation()
             visibility = View.GONE
@@ -118,7 +152,6 @@ class ProfileActivity : AppCompatActivity() {
             }
         })
     }
-
     private fun resetAll() {
         binding.testTest.setTextColor(Color.parseColor("#7A7A7B"))
         binding.mainTest.setTextColor(Color.parseColor("#7A7A7B"))

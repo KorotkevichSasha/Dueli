@@ -40,16 +40,13 @@ class MenuActivity : AppCompatActivity() {
             changeColorAndIcon(binding.testIcon, binding.testTest, R.drawable.grad)
             playAnimation(binding.testAnimation, binding.testIcon, binding.testTest, "graAnim.json")
         }
-
         binding.duel.setOnClickListener {}
-
         binding.leaderboard.setOnClickListener {
             resetAll();
             startActivity(Intent(this@MenuActivity, RankActivity::class.java))
             changeColorAndIcon(binding.cupIcon, binding.cupTest, R.drawable.tro)
             playAnimation(binding.cupAnimation, binding.cupIcon, binding.cupTest, "cupAnim.json")
         }
-
         binding.profile.setOnClickListener {
             resetAll();
             startActivity(Intent(this@MenuActivity, ProfileActivity::class.java))
@@ -66,19 +63,12 @@ class MenuActivity : AppCompatActivity() {
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
-
     private fun changeColorAndIcon(icon: ImageView, text: TextView, iconRes: Int) {
         text.setTextColor(ContextCompat.getColor(this, R.color.blue_primary))
         icon.setColorFilter(ContextCompat.getColor(this, R.color.blue_primary))
         icon.setImageResource(iconRes)
     }
-
-    private fun playAnimation(
-        animationView: LottieAnimationView,
-        icon: ImageView,
-        text: TextView,
-        animationFile: String
-    ) {
+    private fun playAnimation(animationView: LottieAnimationView, icon: ImageView, text: TextView, animationFile: String) {
         currentAnimationView?.apply {
             cancelAnimation()
             visibility = View.GONE
@@ -117,7 +107,6 @@ class MenuActivity : AppCompatActivity() {
 
         })
     }
-
     private fun resetAll() {
         binding.testTest.setTextColor(Color.parseColor("#7A7A7B"))
         binding.mainTest.setTextColor(Color.parseColor("#7A7A7B"))

@@ -53,55 +53,92 @@
 
             <!-- Отдельный блок для текущего пользователя -->
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvLeaderboard"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="545dp"
-                android:scrollbars="vertical" />
+                android:layout_height="match_parent">
 
-            <LinearLayout
-                android:id="@+id/userContainer"
-                android:layout_width="match_parent"
-                android:layout_height="51dp"
-                android:background="#2A2A2E"
-                android:orientation="horizontal"
-                android:padding="8dp">
-
-                <TextView
-                    android:id="@+id/tvUserRank"
-                    android:layout_width="40dp"
-                    android:layout_height="38dp"
-                    android:gravity="center"
-                    android:textColor="@color/blue_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <ImageView
-                    android:id="@+id/ivUserAvatar"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="8dp"
-                    android:scaleType="centerCrop" />
-
-                <TextView
-                    android:id="@+id/tvUsername"
+                <!-- RecyclerView для отображения списка лидеров -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvLeaderboard"
                     android:layout_width="0dp"
-                    android:layout_height="33dp"
-                    android:layout_weight="1"
-                    android:paddingStart="8dp"
-                    android:textColor="@color/blue_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:layout_height="0dp"
+                    android:scrollbars="vertical"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/userContainer" />
 
-                <TextView
-                    android:id="@+id/tvUserPoints"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="end"
-                    android:textColor="@color/blue_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
+                <!-- Контейнер для текущего пользователя -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/userContainer"
+                    android:layout_width="0dp"
+                    android:layout_height="51dp"
+                    android:background="#2A2A2E"
+                    android:padding="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <!-- Ранг пользователя -->
+                    <TextView
+                        android:id="@+id/tvUserRank"
+                        android:layout_width="32dp"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/blue_primary"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                    <!-- Аватар пользователя -->
+                    <ImageView
+                        android:id="@+id/ivUserAvatar"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="8dp"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/default_profile"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/tvUserRank"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                    <!-- Имя пользователя -->
+                    <TextView
+                        android:id="@+id/tvUsername"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textColor="@color/blue_primary"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="@id/ivUserAvatar"
+                        app:layout_constraintEnd_toStartOf="@id/tvUserPoints"
+                        app:layout_constraintStart_toEndOf="@id/ivUserAvatar"
+                        app:layout_constraintTop_toTopOf="@id/ivUserAvatar"/>
+
+                    <!-- Очки пользователя -->
+                    <TextView
+                        android:id="@+id/tvUserPoints"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:minWidth="64dp"
+                        android:gravity="end"
+                        android:textColor="@color/blue_primary"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="@id/ivUserAvatar"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/tvUsername"
+                        app:layout_constraintTop_toTopOf="@id/ivUserAvatar"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>
 

@@ -17,6 +17,7 @@ import com.airbnb.lottie.LottieAnimationView
 import com.example.duelingo.R
 import com.example.duelingo.adapters.LeaderboardAdapter
 import com.example.duelingo.databinding.ActivityRankBinding
+import com.example.duelingo.dto.response.LeaderboardResponse
 import com.example.duelingo.dto.response.PaginationResponse
 import com.example.duelingo.dto.response.UserInLeaderboardResponse
 import com.example.duelingo.network.ApiClient
@@ -49,7 +50,9 @@ class RankActivity : AppCompatActivity() {
             totalPages = 0,
             currentPage = 0
         )
-        leaderboardAdapter = LeaderboardAdapter(emptyPaginationResponse)
+        val emptyUser = UserInLeaderboardResponse("", "", 0, "", 0)
+        val emptyLeaderboardResponse = LeaderboardResponse(emptyPaginationResponse, emptyUser)
+        leaderboardAdapter = LeaderboardAdapter(emptyLeaderboardResponse)
 
         leaderboardRecyclerView.adapter = leaderboardAdapter
 
@@ -98,13 +101,7 @@ class RankActivity : AppCompatActivity() {
         icon.setColorFilter(ContextCompat.getColor(this, R.color.blue_primary))
         icon.setImageResource(iconRes)
     }
-
-    private fun playAnimation(
-        animationView: LottieAnimationView,
-        icon: ImageView,
-        text: TextView,
-        animationFile: String
-    ) {
+    private fun playAnimation(animationView: LottieAnimationView, icon: ImageView, text: TextView, animationFile: String) {
         currentAnimationView?.apply {
             cancelAnimation()
             visibility = View.GONE
@@ -147,7 +144,6 @@ class RankActivity : AppCompatActivity() {
             }
         })
     }
-
     private fun resetAll() {
         binding.testTest.setTextColor(Color.parseColor("#7A7A7B"))
         binding.mainTest.setTextColor(Color.parseColor("#7A7A7B"))
@@ -161,7 +157,6 @@ class RankActivity : AppCompatActivity() {
         binding.cupIcon.setImageResource(R.drawable.trophy24)
         binding.profileIcon.setImageResource(R.drawable.profile24)
     }
-
     private fun loadLeaderboard() {
         val tokenManager = TokenManager(this)
         val accessToken = tokenManager.getAccessToken()
@@ -173,6 +168,7 @@ class RankActivity : AppCompatActivity() {
                 try {
                     val response = ApiClient.leaderboardService.getLeaderboard(tokenWithBearer)
                     leaderboardAdapter.updateData(response)
+                    updateCurrentUserInfo(response.currentUser)
                 } catch (e: Exception) {
                     showToast(e.toString())
 
@@ -181,6 +177,13 @@ class RankActivity : AppCompatActivity() {
         } else {
             showToast("RankActivity" + "Access token is missing.")
         }
+    }
+
+    private fun updateCurrentUserInfo(currentUser: UserInLeaderboardResponse) {
+        binding.tvUserRank.text = currentUser.rank.toString()
+        binding.tvUsername.text = currentUser.username
+        binding.tvUserPoints.text = currentUser.points.toString()
+        //  аватар пользователя
     }
 
     private fun showToast(message: String) {
