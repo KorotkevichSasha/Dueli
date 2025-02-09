@@ -35,8 +35,8 @@ class MenuActivity : AppCompatActivity() {
         }
 
         binding.tests.setOnClickListener {
-            resetAll();
-            startActivity(Intent(this@MenuActivity, TestActivity::class.java))
+            resetAll()
+            startActivity(Intent(this@MenuActivity, TopicsActivity::class.java))
             changeColorAndIcon(binding.testIcon, binding.testTest, R.drawable.grad)
             playAnimation(binding.testAnimation, binding.testIcon, binding.testTest, "graAnim.json")
         }

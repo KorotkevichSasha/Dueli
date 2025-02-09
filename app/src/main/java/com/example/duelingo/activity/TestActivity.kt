@@ -10,9 +10,15 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.airbnb.lottie.LottieAnimationView
 import com.example.duelingo.R
+import com.example.duelingo.adapters.TestsAdapter
 import com.example.duelingo.databinding.ActivityTestBinding
+import com.example.duelingo.network.ApiClient
+import com.example.duelingo.storage.TokenManager
+import kotlinx.coroutines.launch
 
 class TestActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTestBinding
@@ -20,15 +26,18 @@ class TestActivity : AppCompatActivity() {
     private var currentIcon: ImageView? = null
     private var currentText: TextView? = null
 
+    private lateinit var testsAdapter: TestsAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
         binding = ActivityTestBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         binding.testIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.testTest.setTextColor(Color.parseColor("#FF00A5FE"))
+
+        setupRecyclerView()
+        loadTests()
 
         binding.tests.setOnClickListener {
         }
@@ -59,6 +68,39 @@ class TestActivity : AppCompatActivity() {
                 binding.profileTest,
                 "profAnim.json"
             )
+        }
+    }
+
+    private fun setupRecyclerView() {
+        binding.rvTests.layoutManager = LinearLayoutManager(this)
+        testsAdapter = TestsAdapter(emptyList()) { test ->
+            // Обработка клика по тесту
+            val intent = Intent(this, TestDetailsActivity::class.java).apply {
+                putExtra("testId", test.id)
+            }
+            startActivity(intent)
+        }
+        binding.rvTests.adapter = testsAdapter
+    }
+
+    private fun loadTests() {
+        val tokenManager = TokenManager(this)
+        val accessToken = tokenManager.getAccessToken()
+        val topic = intent.getStringExtra("topic") ?: ""
+
+        if (accessToken != null && topic.isNotEmpty()) {
+            val tokenWithBearer = "Bearer $accessToken"
+
+            lifecycleScope.launch {
+                try {
+                    val tests = ApiClient.testService.getTestsForTopic(tokenWithBearer, topic)
+                    testsAdapter.updateData(tests)
+                } catch (e: Exception) {
+                    showToast("Error loading tests: ${e.message}")
+                }
+            }
+        } else {
+            showToast("Authentication error or missing topic")
         }
     }
 

@@ -15,4 +15,5 @@ object ApiClient {
     val authService: AuthService = retrofit.create(AuthService::class.java)
     val leaderboardService: LeaderboardService = retrofit.create(LeaderboardService::class.java)
     val profileService: ProfileService = retrofit.create(ProfileService::class.java)
+    val testService: TestService = retrofit.create(TestService::class.java)
 }

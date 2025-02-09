@@ -35,6 +35,12 @@
             android:name=".activity.auth.LoginActivity"
             android:exported="true" />
         <activity
+            android:name=".activity.TopicsActivity"
+            android:exported="true" />
+        <activity
+            android:name=".activity.TestDetailsActivity"
+            android:exported="true" />
+        <activity
             android:name=".activity.MainActivity"
             android:exported="true">
             <intent-filter>
