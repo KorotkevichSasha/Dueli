@@ -74,7 +74,6 @@ class TestActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         binding.rvTests.layoutManager = LinearLayoutManager(this)
         testsAdapter = TestsAdapter(emptyList()) { test ->
-            // Обработка клика по тесту
             val intent = Intent(this, TestDetailsActivity::class.java).apply {
                 putExtra("testId", test.id)
             }

@@ -61,7 +61,7 @@ class RankActivity : AppCompatActivity() {
 
         binding.tests.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@RankActivity, TestActivity::class.java))
+            startActivity(Intent(this@RankActivity, TopicsActivity::class.java))
             changeColorAndIcon(
                 binding.testIcon,
                 binding.testTest,
