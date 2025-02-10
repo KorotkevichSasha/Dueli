@@ -8,7 +8,9 @@ import androidx.lifecycle.lifecycleScope
 import com.example.duelingo.activity.MenuActivity
 import com.example.duelingo.databinding.ActivityLoginBinding
 import com.example.duelingo.dto.request.SignInRequest
+import com.example.duelingo.dto.response.JwtAuthenticationResponse
 import com.example.duelingo.network.ApiClient
+import com.example.duelingo.storage.TokenManager
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import retrofit2.HttpException
@@ -53,12 +55,7 @@ class LoginActivity : AppCompatActivity() {
                 val response = ApiClient.authService.signIn(signInRequest)
                 showToast("Login Successful")
 
-                val sharedPreferences = getSharedPreferences("auth_prefs", MODE_PRIVATE)
-                with(sharedPreferences.edit()) {
-                    putString("access_token", response.accessToken)
-                    putString("refresh_token", response.refreshToken)
-                    apply()
-                }
+                saveTokens(response)
 
                 startActivity(Intent(this@LoginActivity, MenuActivity::class.java))
                 finish()
@@ -70,6 +67,16 @@ class LoginActivity : AppCompatActivity() {
                 showToast("Error: ${e.message}")
             }
         }
+    }
+    private fun saveTokens(response: JwtAuthenticationResponse) {
+        val sharedPreferences = getSharedPreferences("auth_prefs", MODE_PRIVATE)
+        with(sharedPreferences.edit()) {
+            putString("access_token", response.accessToken)
+            putString("refresh_token", response.refreshToken)
+            apply()
+        }
+        val tokenManager = TokenManager(this)
+        tokenManager.saveTokens(response.accessToken, response.refreshToken)
     }
 
 

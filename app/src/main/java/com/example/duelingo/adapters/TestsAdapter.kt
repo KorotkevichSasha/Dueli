@@ -25,7 +25,7 @@ class TestsAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val test = tests[position]
-        holder.tvTestTitle.text = test.topic + " -- " + test.difficulty
+        holder.tvTestTitle.text = test.difficulty
         holder.itemView.setOnClickListener { onItemClick(test) }
     }
 

@@ -62,7 +62,6 @@
         android:layout_marginTop="0dp"/>
 
     <!--    Заявки в друзья-->
-
     <Button
         android:id="@+id/acceptFriends"
         android:layout_width="198dp"
@@ -74,6 +73,17 @@
         android:background="@drawable/bg_button"
         android:text="Заявки в друзья" />
 
+    <Button
+        android:id="@+id/logout"
+        android:layout_width="198dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/acceptFriends"
+        android:layout_alignStart="@+id/player_email"
+        android:layout_marginStart="-24dp"
+        android:layout_marginTop="101dp"
+        android:background="@drawable/bg_button_red"
+        android:text="Выйти из акканта" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
@@ -81,6 +91,7 @@
         android:background="#0B0B0D"
         android:layout_alignParentBottom="true"
         app:layout_constraintBottom_toBottomOf="parent">
+
 
         <!-- Дуэль -->
         <LinearLayout

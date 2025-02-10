@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.example.duelingo.R
+import com.example.duelingo.activity.auth.LoginActivity
 import com.example.duelingo.databinding.ActivityProfileBinding
 import com.example.duelingo.dto.response.UserProfileResponse
 import com.example.duelingo.network.ApiClient
@@ -38,6 +39,9 @@ class ProfileActivity : AppCompatActivity() {
         binding.profileTest.setTextColor(Color.parseColor("#FF00A5FE"))
 
 
+        binding.logout.setOnClickListener {
+            logout()
+        }
         loadProfile()
 
         binding.tests.setOnClickListener {
@@ -66,6 +70,15 @@ class ProfileActivity : AppCompatActivity() {
         binding.profile.setOnClickListener {}
     }
 
+    private fun logout() {
+        val tokenManager = TokenManager(this)
+        tokenManager.clearTokens()
+
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
 
     private fun loadProfile() {
         val tokenManager = TokenManager(this)

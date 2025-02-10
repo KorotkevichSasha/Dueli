@@ -21,11 +21,11 @@ import com.example.duelingo.storage.TokenManager
 import kotlinx.coroutines.launch
 
 class TestActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityTestBinding
     private var currentAnimationView: LottieAnimationView? = null
     private var currentIcon: ImageView? = null
     private var currentText: TextView? = null
 
+    private lateinit var binding: ActivityTestBinding
     private lateinit var testsAdapter: TestsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,8 +39,7 @@ class TestActivity : AppCompatActivity() {
         setupRecyclerView()
         loadTests()
 
-        binding.tests.setOnClickListener {
-        }
+        binding.tests.setOnClickListener {}
         binding.duel.setOnClickListener {
             resetAll();
             startActivity(Intent(this@TestActivity, MenuActivity::class.java))
