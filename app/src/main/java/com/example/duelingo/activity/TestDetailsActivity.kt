@@ -1,37 +1,41 @@
 package com.example.duelingo.activity
-import QuestionsAdapter
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager2.widget.ViewPager2
+import com.example.duelingo.adapters.QuestionsPagerAdapter
 import com.example.duelingo.databinding.ActivityTestDetailsBinding
 import com.example.duelingo.dto.response.TestDetailedResponse
+import com.example.duelingo.fragment.QuestionFragment
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
 import kotlinx.coroutines.launch
 
 class TestDetailsActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityTestDetailsBinding
-    private lateinit var questionsAdapter: QuestionsAdapter
+    private lateinit var questionsAdapter: QuestionsPagerAdapter
     private var testDetails: TestDetailedResponse? = null
+    private val userAnswers = mutableMapOf<Int, String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTestDetailsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupRecyclerView()
+        setupViewPager()
         loadTestDetails()
+        setupButton()
     }
 
-    private fun setupRecyclerView() {
-        questionsAdapter = QuestionsAdapter(emptyList())
-        binding.rvQuestions.apply {
-            layoutManager = LinearLayoutManager(this@TestDetailsActivity)
-            adapter = questionsAdapter
-        }
+    private fun setupViewPager() {
+        binding.viewPager.isUserInputEnabled = false
+        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                updateButtonText(position)
+            }
+        })
     }
 
     private fun loadTestDetails() {
@@ -49,21 +53,64 @@ class TestDetailsActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                // Загружаем тест по его ID
                 val test = ApiClient.testService.getTestById("Bearer $token", testId)
                 testDetails = test
                 updateTestInfo(test)
-
-                // Обновляем адаптер с вопросами из теста
-                questionsAdapter.updateData(test.questions)
+                questionsAdapter = QuestionsPagerAdapter(this@TestDetailsActivity, test.questions)
+                binding.viewPager.adapter = questionsAdapter
+                updateButtonText(0)
             } catch (e: Exception) {
                 showToast("Error loading test: ${e.message}")
             }
         }
     }
 
+    private fun setupButton() {
+        binding.btnSubmit.setOnClickListener {
+            val currentPosition = binding.viewPager.currentItem
+            saveAnswer(currentPosition)
+
+            if (currentPosition < questionsAdapter.itemCount - 1) {
+                binding.viewPager.currentItem = currentPosition + 1
+            } else {
+                submitTest()
+            }
+        }
+    }
+
+    private fun saveAnswer(position: Int) {
+        val fragment = supportFragmentManager.findFragmentByTag("f${binding.viewPager.currentItem}")
+        if (fragment is QuestionFragment) {
+            userAnswers[position] = fragment.getAnswer()
+        }
+    }
+
+    private fun updateButtonText(position: Int) {
+        binding.btnSubmit.text = if (position == questionsAdapter.itemCount - 1) {
+            "Submit Test"
+        } else {
+            "Next"
+        }
+    }
+
+    private fun submitTest() {
+        val correctAnswers = testDetails?.questions?.mapIndexed { index, question ->
+            userAnswers[index] in question.correctAnswers
+        }?.count { it } ?: 0
+
+        showResultsDialog(correctAnswers)
+    }
+
+    private fun showResultsDialog(correct: Int) {
+        AlertDialog.Builder(this)
+            .setTitle("Test Results")
+            .setMessage("Correct answers: $correct/${questionsAdapter.itemCount}")
+            .setPositiveButton("OK") { _, _ -> finish() }
+            .show()
+    }
+
     private fun updateTestInfo(test: TestDetailedResponse) {
-        binding.tvTestInfo.text = "Тема: ${test.topic}\nСложность: ${test.difficulty}"
+        binding.tvTestInfo.text = "${test.topic} - ${test.difficulty}"
     }
 
     private fun showToast(message: String) {

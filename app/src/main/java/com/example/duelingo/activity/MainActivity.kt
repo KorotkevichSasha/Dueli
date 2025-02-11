@@ -19,13 +19,15 @@ class MainActivity : AppCompatActivity() {
 
         val sharedPreferences = getSharedPreferences("auth_prefs", MODE_PRIVATE)
         val accessToken = sharedPreferences.getString("access_token", null)
-        Log.d("MainActivity", "AccessToken: $accessToken")
+        val username = sharedPreferences.getString("username", null)
 
-        if (accessToken.isNullOrEmpty()) {
+        Log.d("MainActivity", "AccessToken: $accessToken, Username: $username")
+
+        if (accessToken.isNullOrEmpty() || username.isNullOrEmpty()) {
             startActivity(Intent(this@MainActivity, LoginActivity::class.java))
         } else {
-            Toast.makeText(applicationContext, "User is authenticated", Toast.LENGTH_SHORT).show()
             startActivity(Intent(this@MainActivity, MenuActivity::class.java))
         }
+        finish()
     }
 }
