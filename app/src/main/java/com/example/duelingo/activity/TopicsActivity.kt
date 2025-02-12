@@ -39,8 +39,7 @@ class TopicsActivity : AppCompatActivity() {
         setupRecyclerView()
         loadTopics()
 
-        binding.tests.setOnClickListener {
-        }
+        binding.tests.setOnClickListener {}
         binding.duel.setOnClickListener {
             resetAll();
             startActivity(Intent(this@TopicsActivity, MenuActivity::class.java))
@@ -73,12 +72,18 @@ class TopicsActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         binding.rvTopics.layoutManager = LinearLayoutManager(this)
-        topicsAdapter = TopicsAdapter(emptyList()) { topic ->
-            val intent = Intent(this, TestActivity::class.java).apply {
-                putExtra("topic", topic)
+        topicsAdapter = TopicsAdapter(
+            emptyList(),
+            onTopicClick = { topic -> // Обработчик для обычных тем
+                val intent = Intent(this, TestActivity::class.java).apply {
+                    putExtra("topic", topic)
+                }
+                startActivity(intent)
+            },
+            onRandomTestClick = {
+                loadRandomTest()
             }
-            startActivity(intent)
-        }
+        )
         binding.rvTopics.adapter = topicsAdapter
     }
 
@@ -92,7 +97,11 @@ class TopicsActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
                     val topics = ApiClient.testService.getUniqueTestTopics(tokenWithBearer)
-                    topicsAdapter.updateData(topics)
+
+                    val randomTestTopic = "Random Test"
+                    val updatedTopics = listOf(randomTestTopic) + topics
+
+                    topicsAdapter.updateData(updatedTopics)
                 } catch (e: Exception) {
                     showToast("Error loading topics: ${e.message}")
                 }
@@ -102,6 +111,39 @@ class TopicsActivity : AppCompatActivity() {
         }
     }
 
+    private fun loadRandomTest() {
+        val tokenManager = TokenManager(this)
+        val accessToken = tokenManager.getAccessToken()
+
+        if (accessToken != null) {
+            val tokenWithBearer = "Bearer $accessToken"
+
+            lifecycleScope.launch {
+                try {
+                    val randomQuestions = ApiClient.questionService.getRandomQuestions(
+                        tokenWithBearer,
+                        null,
+                        null,
+                        10
+                    )
+
+                    if (randomQuestions.isNotEmpty()) {
+                        val intent = Intent(this@TopicsActivity, TestDetailsActivity::class.java).apply {
+                            putExtra("randomTest", true)
+                            putParcelableArrayListExtra("questions", ArrayList(randomQuestions))
+                        }
+                        startActivity(intent)
+                    } else {
+                        showToast("No random questions available")
+                    }
+                } catch (e: Exception) {
+                    showToast("Error loading random test: ${e.message}")
+                }
+            }
+        } else {
+            showToast("Authentication error")
+        }
+    }
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }

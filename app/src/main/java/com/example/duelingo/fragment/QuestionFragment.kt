@@ -72,11 +72,15 @@ class QuestionFragment : Fragment() {
     }
 
     fun getAnswer(): String {
-        return when(question.type) {
-            "FILL_IN_CHOICE" -> (binding.radioGroup.checkedRadioButtonId
-                .takeIf { it != -1 }
-                ?.let { binding.radioGroup.findViewById<RadioButton>(it).text.toString() }
-                ?: "")
+        return when (question.type) {
+            "FILL_IN_CHOICE" -> {
+                val checkedId = binding.radioGroup.checkedRadioButtonId
+                if (checkedId != -1) {
+                    binding.radioGroup.findViewById<RadioButton>(checkedId).text.toString()
+                } else {
+                    ""
+                }
+            }
             "FILL_IN_INPUT" -> binding.editTextAnswer.text.toString()
             else -> ""
         }

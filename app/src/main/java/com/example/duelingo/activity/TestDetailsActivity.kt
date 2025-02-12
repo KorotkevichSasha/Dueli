@@ -1,5 +1,6 @@
 package com.example.duelingo.activity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -7,6 +8,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.example.duelingo.adapters.QuestionsPagerAdapter
 import com.example.duelingo.databinding.ActivityTestDetailsBinding
+import com.example.duelingo.dto.response.QuestionDetailedResponse
 import com.example.duelingo.dto.response.TestDetailedResponse
 import com.example.duelingo.fragment.QuestionFragment
 import com.example.duelingo.network.ApiClient
@@ -24,10 +26,29 @@ class TestDetailsActivity : AppCompatActivity() {
         binding = ActivityTestDetailsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupViewPager()
-        loadTestDetails()
+        val isRandomTest = intent.getBooleanExtra("randomTest", false)
+        if (isRandomTest) {
+            val questions = intent.getParcelableArrayListExtra<QuestionDetailedResponse>("questions")
+            if (questions != null) {
+                setupRandomTest(questions)
+            } else {
+                showToast("No questions available")
+                finish()
+            }
+        } else {
+            setupViewPager()
+            loadTestDetails()
+        }
+
         setupButton()
+
     }
+    private fun setupRandomTest(questions: List<QuestionDetailedResponse>) {
+        questionsAdapter = QuestionsPagerAdapter(this, questions)
+        binding.viewPager.adapter = questionsAdapter
+        updateButtonText(0)
+    }
+
 
     private fun setupViewPager() {
         binding.viewPager.isUserInputEnabled = false
@@ -81,13 +102,17 @@ class TestDetailsActivity : AppCompatActivity() {
     private fun saveAnswer(position: Int) {
         val fragment = supportFragmentManager.findFragmentByTag("f${binding.viewPager.currentItem}")
         if (fragment is QuestionFragment) {
-            userAnswers[position] = fragment.getAnswer()
+            val answer = fragment.getAnswer()
+            userAnswers[position] = answer
+            Log.d("TestDetailsActivity", "Saved answer for position $position: $answer")
+        } else {
+            Log.e("TestDetailsActivity", "Fragment is not QuestionFragment")
         }
     }
 
     private fun updateButtonText(position: Int) {
         binding.btnSubmit.text = if (position == questionsAdapter.itemCount - 1) {
-            "Submit Test"
+            "Submit"
         } else {
             "Next"
         }
@@ -95,12 +120,17 @@ class TestDetailsActivity : AppCompatActivity() {
 
     private fun submitTest() {
         val correctAnswers = testDetails?.questions?.mapIndexed { index, question ->
-            userAnswers[index] in question.correctAnswers
+            val userAnswer = userAnswers[index] ?: ""
+            val correctAnswers = question.correctAnswers
+
+            Log.d("TestDetailsActivity: User answer:", userAnswer)
+            Log.d("TestDetailsActivity: Correct answers:", correctAnswers.toString())
+
+            userAnswer in correctAnswers
         }?.count { it } ?: 0
 
         showResultsDialog(correctAnswers)
     }
-
     private fun showResultsDialog(correct: Int) {
         AlertDialog.Builder(this)
             .setTitle("Test Results")

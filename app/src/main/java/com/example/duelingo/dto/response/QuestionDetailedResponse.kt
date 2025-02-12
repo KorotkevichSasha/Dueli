@@ -9,5 +9,5 @@ data class QuestionDetailedResponse(
     val questionText: String,
     val options: List<String>,
     val correctAnswers: List<String>,
-    val audioUrl: String
+    val audioUrl: String? = null
 ): Parcelable

@@ -115,7 +115,7 @@ class QuestionsAdapter(
 
         fun bind(question: QuestionDetailedResponse, position: Int) {
             binding.tvQuestionText.text = question.questionText
-            binding.tvSentenceParts.text = "Слова для составления: ${question.options.joinToString()}"
+//            binding.tvSentenceParts.text = "Слова для составления: ${question.options.joinToString()}"
 
             // Базовая реализация выбора слов (можно улучшить)
             binding.containerWordBank.removeAllViews()

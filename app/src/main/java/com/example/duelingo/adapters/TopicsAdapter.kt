@@ -9,23 +9,28 @@ import com.example.duelingo.R
 
 class TopicsAdapter(
     private var topics: List<String>,
-    private val onItemClick: (String) -> Unit
-) : RecyclerView.Adapter<TopicsAdapter.ViewHolder>() {
+    private val onTopicClick: (String) -> Unit,
+    private val onRandomTestClick: () -> Unit
+) : RecyclerView.Adapter<TopicsAdapter.TopicViewHolder>() {
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val tvTopicTitle: TextView = itemView.findViewById(R.id.tvTopicTitle)
-    }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TopicViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_topic, parent, false)
-        return ViewHolder(view)
+        return TopicViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: TopicViewHolder, position: Int) {
         val topic = topics[position]
-        holder.tvTopicTitle.text = topic
-        holder.itemView.setOnClickListener { onItemClick(topic) }
+        holder.bind(topic)
+
+        holder.itemView.setOnClickListener {
+            if (topic == "Random Test") {
+                onRandomTestClick()
+            } else {
+                onTopicClick(topic)
+            }
+        }
     }
 
     override fun getItemCount() = topics.size
@@ -33,5 +38,10 @@ class TopicsAdapter(
     fun updateData(newTopics: List<String>) {
         topics = newTopics
         notifyDataSetChanged()
+    }
+    class TopicViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        fun bind(topic: String) {
+            itemView.findViewById<TextView>(R.id.tvTopicTitle).text = topic
+        }
     }
 }
