@@ -38,17 +38,17 @@ class LeaderboardAdapter(private var users: LeaderboardResponse, private val ava
         holder.pointsText.text = user.points.toString()
 
         when (user.rank) {
-            1 -> {
+            1L -> {
                 holder.rankText.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.gold))
                 holder.usernameText.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.gold))
                 holder.pointsText.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.gold))
             }
-            2 -> {
+            2L -> {
                 holder.rankText.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.silver))
                 holder.usernameText.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.silver))
                 holder.pointsText.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.silver))
             }
-            3 -> {
+            3L -> {
                 holder.rankText.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.bronze))
                 holder.usernameText.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.bronze))
                 holder.pointsText.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.bronze))

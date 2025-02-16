@@ -77,13 +77,17 @@ class QuestionsAdapter(
         notifyDataSetChanged()
     }
 
+    fun getUserAnswers(): Map<Int, String> {
+        return userAnswers
+    }
+
     inner class FillInChoiceViewHolder(
         private val binding: ItemQuestionFillInChoiceBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(question: QuestionDetailedResponse, position: Int) {
             binding.tvQuestionText.text = question.questionText
-            binding.radioGroupOptions.removeAllViews()
+            binding.rvOptions.removeAllViews()
 
             question.options.forEachIndexed { index, option ->
                 RadioButton(binding.root.context).apply {
@@ -92,7 +96,7 @@ class QuestionsAdapter(
                     setOnCheckedChangeListener { _, isChecked ->
                         if (isChecked) userAnswers[position] = option
                     }
-                }.let { binding.radioGroupOptions.addView(it) }
+                }.let { binding.rvOptions.addView(it) }
             }
         }
     }
@@ -115,10 +119,10 @@ class QuestionsAdapter(
 
         fun bind(question: QuestionDetailedResponse, position: Int) {
             binding.tvQuestionText.text = question.questionText
-//            binding.tvSentenceParts.text = "Слова для составления: ${question.options.joinToString()}"
 
-            // Базовая реализация выбора слов (можно улучшить)
             binding.containerWordBank.removeAllViews()
+            binding.containerSelectedWords.removeAllViews()
+
             question.options.shuffled().forEach { word ->
                 Button(binding.root.context).apply {
                     text = word

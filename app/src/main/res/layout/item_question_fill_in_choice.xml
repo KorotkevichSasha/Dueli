@@ -14,13 +14,20 @@
         android:textStyle="bold"
         android:gravity="center"
         android:layout_gravity="center"/>
+    <TextView
+        android:id="@+id/tvSelectedWord"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@color/blue_primary"
+        android:visibility="gone"
+        android:layout_marginTop="16dp"/>
 
-    <RadioGroup
-        android:id="@+id/radioGroupOptions"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvOptions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:gravity="center"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
         android:layout_gravity="center_horizontal"/>
-
 </LinearLayout>

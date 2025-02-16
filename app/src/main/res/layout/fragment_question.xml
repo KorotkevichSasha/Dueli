@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
@@ -12,29 +10,42 @@
         android:gravity="center"
         android:layout_gravity="center">
 
+        <!-- Текст вопроса -->
         <TextView
-            android:id="@+id/tvQuestion"
+            android:id="@+id/tvQuestionText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="18sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_gravity="center"/>
 
-        <RadioGroup
-            android:id="@+id/radioGroup"
+        <!-- Место для вставки выбранного слова -->
+        <TextView
+            android:id="@+id/tvSelectedWord"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/blue_primary"
+            android:visibility="gone"
+            android:layout_marginTop="16dp"/>
+
+        <!-- RecyclerView для отображения вариантов ответа -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvOptions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:visibility="gone"/>
+            android:orientation="horizontal"
+            android:layout_gravity="center_horizontal"/>
 
+        <!-- Поле для ввода текста (для других типов вопросов) -->
         <EditText
             android:id="@+id/editTextAnswer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:visibility="gone"
+            android:layout_marginTop="16dp"
             android:hint="Type your answer"/>
-
-        <!-- Добавьте другие типы вопросов по аналогии -->
-
     </LinearLayout>
 </ScrollView>

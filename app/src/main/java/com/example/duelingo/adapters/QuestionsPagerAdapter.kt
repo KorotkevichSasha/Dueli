@@ -1,5 +1,6 @@
 package com.example.duelingo.adapters
 
+import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -15,18 +16,10 @@ class QuestionsPagerAdapter(
     override fun getItemCount(): Int = questions.size
 
     override fun createFragment(position: Int): Fragment {
-        return QuestionFragment.newInstance(questions[position], position)
+        val fragment = QuestionFragment()
+        fragment.arguments = Bundle().apply {
+            putParcelable("question", questions[position])
+        }
+        return fragment
     }
 }
-
-//class QuestionsPagerAdapter(
-//    fragment: FragmentActivity,
-//    private val questions: List<QuestionDetailedResponse>
-//) : FragmentStateAdapter(fragment) {
-//
-//    override fun getItemCount(): Int = questions.size
-//
-//    override fun createFragment(position: Int): Fragment {
-//        return QuestionFragment.newInstance(questions[position], position)
-//    }
-//}
