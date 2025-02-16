@@ -1,13 +1,16 @@
 package com.example.duelingo.activity
 
 import android.animation.Animator
+import android.content.ContentResolver
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -22,6 +25,13 @@ import com.example.duelingo.storage.TokenManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
 
 class ProfileActivity : AppCompatActivity() {
 
@@ -29,6 +39,10 @@ class ProfileActivity : AppCompatActivity() {
     private var currentAnimationView: LottieAnimationView? = null
     private var currentIcon: ImageView? = null
     private var currentText: TextView? = null
+
+    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { uploadImage(it) }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +55,9 @@ class ProfileActivity : AppCompatActivity() {
 
         binding.logout.setOnClickListener {
             logout()
+        }
+        binding.profileImage.setOnClickListener {
+            getContent.launch("image/*")
         }
         loadProfile()
 
@@ -70,6 +87,67 @@ class ProfileActivity : AppCompatActivity() {
         binding.profile.setOnClickListener {}
     }
 
+    private fun uploadImage(uri: Uri) {
+        val mimeType = getMimeType(uri) ?: "image/*"
+        println("MIME type: $mimeType")
+
+        val tokenManager = TokenManager(this)
+        val accessToken = tokenManager.getAccessToken()
+
+        if (accessToken != null) {
+            val tokenWithBearer = "Bearer $accessToken"
+
+            val file = createTempFileFromUri(uri) ?: run {
+                showToast("Failed to create file from URI")
+                return
+            }
+            if (file.length() > 2 * 1024 * 1024) { // 5 MB
+                showToast("File is too large")
+                return
+            }
+
+            val requestFile = RequestBody.create("image/*".toMediaTypeOrNull(), file)
+            val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+
+            lifecycleScope.launch {
+                try {
+                    val response = ApiClient.profileService.uploadAvatar(tokenWithBearer, body)
+                    withContext(Dispatchers.Main) {
+                        updateUI(response)
+                    }
+                } catch (e: Exception) {
+                    showToast("Error uploading image: " + e.toString())
+                } finally {
+                    file.delete()
+                }
+            }
+        } else {
+            showToast("Access token is missing.")
+        }
+    }
+    private fun createTempFileFromUri(uri: Uri): File? {
+        val contentResolver: ContentResolver = applicationContext.contentResolver
+        val inputStream: InputStream? = contentResolver.openInputStream(uri)
+        return if (inputStream != null) {
+            try {
+                val file = File.createTempFile("temp_avatar", ".jpg", cacheDir)
+                val outputStream = FileOutputStream(file)
+                inputStream.copyTo(outputStream)
+                outputStream.close()
+                inputStream.close()
+                file
+            } catch (e: Exception) {
+                null
+            }
+        } else {
+            null
+        }
+    }
+    private fun getMimeType(uri: Uri): String? {
+        val contentResolver: ContentResolver = applicationContext.contentResolver
+        return contentResolver.getType(uri)
+    }
+
     private fun logout() {
         val tokenManager = TokenManager(this)
         tokenManager.clearTokens()
@@ -79,7 +157,6 @@ class ProfileActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-
     private fun loadProfile() {
         val tokenManager = TokenManager(this)
         val accessToken = tokenManager.getAccessToken()
@@ -102,7 +179,6 @@ class ProfileActivity : AppCompatActivity() {
             showToast("RankActivity" + "Access token is missing.")
         }
     }
-
     private fun updateUI(profileResponse: UserProfileResponse) {
         binding.playerName.text = profileResponse.username
         binding.playerEmail.text = profileResponse.email
