@@ -12,13 +12,15 @@ import com.example.duelingo.R
 import com.example.duelingo.dto.response.LeaderboardResponse
 import com.example.duelingo.dto.response.PaginationResponse
 import com.example.duelingo.dto.response.UserInLeaderboardResponse
+import com.example.duelingo.manager.AvatarManager
+import de.hdodenhof.circleimageview.CircleImageView
 
-class LeaderboardAdapter(private var users: LeaderboardResponse) :
+class LeaderboardAdapter(private var users: LeaderboardResponse, private val avatarManager: AvatarManager) :
     RecyclerView.Adapter<LeaderboardAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val rankText: TextView = view.findViewById(R.id.rankText)
-        val avatarImage: ImageView = view.findViewById(R.id.avatarImage)
+        val avatarImage: CircleImageView = view.findViewById(R.id.avatarImage)
         val usernameText: TextView = view.findViewById(R.id.usernameText)
         val pointsText: TextView = view.findViewById(R.id.pointsText)
     }
@@ -57,11 +59,10 @@ class LeaderboardAdapter(private var users: LeaderboardResponse) :
                 holder.pointsText.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.gray))
             }
         }
+        holder.avatarImage.setImageResource(R.drawable.default_profile)
 
-        Glide.with(holder.avatarImage.context)
-            .load(user.avatarUrl)
-            .placeholder(R.drawable.default_profile)
-            .into(holder.avatarImage)
+        avatarManager.loadAvatar(user.id, holder.avatarImage)
+
     }
 
     override fun getItemCount(): Int = users.top.content.size

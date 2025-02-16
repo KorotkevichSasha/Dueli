@@ -92,7 +92,7 @@
                         app:layout_constraintTop_toTopOf="parent"/>
 
                     <!-- Аватар пользователя -->
-                    <ImageView
+                    <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/ivUserAvatar"
                         android:layout_width="40dp"
                         android:layout_height="40dp"

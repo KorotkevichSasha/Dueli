@@ -21,6 +21,7 @@ import com.example.duelingo.R
 import com.example.duelingo.activity.auth.LoginActivity
 import com.example.duelingo.databinding.ActivityProfileBinding
 import com.example.duelingo.dto.response.UserProfileResponse
+import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
 import kotlinx.coroutines.Dispatchers
@@ -42,30 +43,21 @@ class ProfileActivity : AppCompatActivity() {
     private var currentAnimationView: LottieAnimationView? = null
     private var currentIcon: ImageView? = null
     private var currentText: TextView? = null
-
     private val tokenManager by lazy { TokenManager(this) }
+    private lateinit var avatarManager: AvatarManager
     private val sharedPreferences by lazy { getSharedPreferences("user_prefs", MODE_PRIVATE) }
-
-    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let { uploadImage(it) }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         binding.profileIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.profileTest.setTextColor(Color.parseColor("#FF00A5FE"))
+        binding.logout.setOnClickListener { logout() }
 
-        binding.logout.setOnClickListener {
-            logout()
-        }
-        binding.profileImage.setOnClickListener {
-            getContent.launch("image/*")
-        }
+        avatarManager = AvatarManager(this, tokenManager, sharedPreferences)
+        binding.profileImage.setOnClickListener { getContent.launch("image/*") }
         loadProfile()
-
 
         binding.tests.setOnClickListener {
             resetAll()
@@ -88,124 +80,6 @@ class ProfileActivity : AppCompatActivity() {
         binding.profile.setOnClickListener {}
     }
 
-    override fun onResume() {
-        super.onResume()
-        loadProfile()
-    }
-
-    private fun loadAvatar(userId: String) {
-        val accessToken = tokenManager.getAccessToken() ?: return
-        val tokenWithBearer = "Bearer $accessToken"
-
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val savedETag = sharedPreferences.getString("avatar_etag", null)
-                val response = ApiClient.profileService.getAvatar(tokenWithBearer, savedETag, userId)
-
-                if (response.code() == 304) {
-                    Log.d("Avatar", "Not modified, using cached version.")
-                    return@launch
-                }
-
-                response.body()?.let { body ->
-                    val bitmap = BitmapFactory.decodeStream(body.byteStream())
-                    withContext(Dispatchers.Main) {
-                        binding.profileImage.setImageBitmap(bitmap)
-                    }
-
-                    response.headers()["ETag"]?.let { newETag ->
-                        sharedPreferences.edit().putString("avatar_etag", newETag).apply()
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("Avatar", "Error loading avatar: ${e.message}")
-            }
-        }
-    }
-    private fun updateUI(response: UserProfileResponse) {
-        binding.playerName.text = response.username
-        binding.playerEmail.text = response.email
-        binding.pointCount.text = "Очки: ${response.points}"
-
-        loadAvatar(response.id)
-    }
-    private fun uploadImage(uri: Uri) {
-        val mimeType = getMimeType(uri) ?: "image/*"
-        println("MIME type: $mimeType")
-
-        val accessToken = tokenManager.getAccessToken() ?: run {
-            showToast("Access token is missing.")
-            return
-        }
-
-        val tokenWithBearer = "Bearer $accessToken"
-
-        val file = createTempFileFromUri(uri) ?: run {
-            showToast("Failed to create file from URI")
-            return
-        }
-
-        if (file.length() > 2 * 1024 * 1024) {
-            showToast("File is too large")
-            file.delete()
-            return
-        }
-
-        val sanitizedFileName = file.name.replace(Regex("[^a-zA-Z0-9._-]"), "_")
-
-        val requestFile = file.asRequestBody(mimeType.toMediaTypeOrNull())
-        val body = MultipartBody.Part.createFormData("file", sanitizedFileName, requestFile)
-
-        lifecycleScope.launch {
-            try {
-                val response = ApiClient.profileService.uploadAvatar(tokenWithBearer, body)
-                withContext(Dispatchers.Main) {
-                    updateUI(response)
-                }
-            } catch (e: HttpException) {
-                val errorBody = e.response()?.errorBody()?.string()
-                Log.e("UploadError", "HTTP ${e.code()}: $errorBody")
-                showToast("Error uploading image: ${e.message()}")
-            } catch (e: Exception) {
-                Log.e("UploadError", "Unexpected error: ${e.message}")
-                showToast("Unexpected error: ${e.message}")
-            } finally {
-                file.delete()
-            }
-        }
-    }
-    private fun createTempFileFromUri(uri: Uri): File? {
-        return try {
-            val contentResolver: ContentResolver = applicationContext.contentResolver
-            val inputStream: InputStream? = contentResolver.openInputStream(uri)
-
-            if (inputStream != null) {
-                val file = File.createTempFile("temp_avatar", ".jpg", cacheDir)
-                file.outputStream().use { outputStream ->
-                    inputStream.copyTo(outputStream)
-                }
-                inputStream.close()
-                file
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            Log.e("FileCreation", "Error creating temp file: ${e.message}")
-            null
-        }
-    }
-    private fun getMimeType(uri: Uri): String? {
-        return applicationContext.contentResolver.getType(uri)
-    }
-
-    private fun logout() {
-        tokenManager.clearTokens()
-
-        val intent = Intent(this, LoginActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        finish()
-    }
     private fun loadProfile() {
         val accessToken = tokenManager.getAccessToken() ?: run {
             showToast("Access token is missing.")
@@ -225,6 +99,35 @@ class ProfileActivity : AppCompatActivity() {
                 showToast("Error loading profile. Please try again.")
             }
         }
+    }
+
+    private fun updateUI(response: UserProfileResponse) {
+        binding.playerName.text = response.username
+        binding.playerEmail.text = response.email
+        binding.pointCount.text = "Очки: ${response.points}"
+
+        avatarManager.loadAvatar(response.id, binding.profileImage)
+    }
+    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            avatarManager.uploadImage(it,
+                onSuccess = { response ->
+                    updateUI(response)
+                },
+                onError = { message ->
+                    showToast(message)
+                }
+            )
+        }
+    }
+
+    private fun logout() {
+        tokenManager.clearTokens()
+
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()

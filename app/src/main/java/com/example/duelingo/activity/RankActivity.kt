@@ -20,6 +20,7 @@ import com.example.duelingo.databinding.ActivityRankBinding
 import com.example.duelingo.dto.response.LeaderboardResponse
 import com.example.duelingo.dto.response.PaginationResponse
 import com.example.duelingo.dto.response.UserInLeaderboardResponse
+import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
 import kotlinx.coroutines.launch
@@ -33,31 +34,28 @@ class RankActivity : AppCompatActivity() {
     private lateinit var leaderboardAdapter: LeaderboardAdapter
     private lateinit var leaderboardRecyclerView: RecyclerView
 
+    private lateinit var avatarManager: AvatarManager
+    private val tokenManager by lazy { TokenManager(this) }
+    private val sharedPreferences by lazy { getSharedPreferences("user_prefs", MODE_PRIVATE) }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRankBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        avatarManager = AvatarManager(this, tokenManager, sharedPreferences)
+
         binding.cupIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.cupTest.setTextColor(Color.parseColor("#FF00A5FE"))
 
         leaderboardRecyclerView = findViewById(R.id.rvLeaderboard)
         leaderboardRecyclerView.layoutManager = LinearLayoutManager(this)
-        val emptyPaginationResponse = PaginationResponse<UserInLeaderboardResponse>(
-            content = emptyList(),
-            totalItems = 0,
-            totalPages = 0,
-            currentPage = 0
-        )
-        val emptyUser = UserInLeaderboardResponse("", "", 0, "", 0)
-        val emptyLeaderboardResponse = LeaderboardResponse(emptyPaginationResponse, emptyUser)
-        leaderboardAdapter = LeaderboardAdapter(emptyLeaderboardResponse)
+        leaderboardAdapter = LeaderboardAdapter(createEmptyLeaderboardResponse(), avatarManager)
 
+        binding.rvLeaderboard.layoutManager = LinearLayoutManager(this)
         leaderboardRecyclerView.adapter = leaderboardAdapter
-
         loadLeaderboard()
-
 
         binding.tests.setOnClickListener {
             resetAll();
@@ -94,6 +92,17 @@ class RankActivity : AppCompatActivity() {
                 "profAnim.json"
             )
         }
+    }
+
+    private fun createEmptyLeaderboardResponse(): LeaderboardResponse {
+        val emptyPaginationResponse = PaginationResponse<UserInLeaderboardResponse>(
+            content = emptyList(),
+            totalItems = 0,
+            totalPages = 0,
+            currentPage = 0
+        )
+        val emptyUser = UserInLeaderboardResponse("", "", 0, "", 0)
+        return LeaderboardResponse(emptyPaginationResponse, emptyUser)
     }
 
     private fun changeColorAndIcon(icon: ImageView, text: TextView, iconRes: Int) {
@@ -168,7 +177,7 @@ class RankActivity : AppCompatActivity() {
                 try {
                     val response = ApiClient.leaderboardService.getLeaderboard(tokenWithBearer)
                     leaderboardAdapter.updateData(response)
-                    updateCurrentUserInfo(response.currentUser)
+                    updateUI(response)
                 } catch (e: Exception) {
                     showToast(e.toString())
 
@@ -178,17 +187,24 @@ class RankActivity : AppCompatActivity() {
             showToast("RankActivity" + "Access token is missing.")
         }
     }
+    private fun updateUI(response: LeaderboardResponse) {
+        val currentUser = response.currentUser
+        if (currentUser != null) {
+            updateCurrentUserInfo(currentUser)
+        }
 
+        val adapter = LeaderboardAdapter(response, avatarManager)
+        binding.rvLeaderboard.adapter = adapter
+        binding.rvLeaderboard.layoutManager = LinearLayoutManager(this)
+    }
     private fun updateCurrentUserInfo(currentUser: UserInLeaderboardResponse) {
         binding.tvUserRank.text = currentUser.rank.toString()
         binding.tvUsername.text = currentUser.username
         binding.tvUserPoints.text = currentUser.points.toString()
-        //  аватар пользователя
-    }
 
+        avatarManager.loadAvatar(currentUser.id, binding.ivUserAvatar)
+    }
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
-
-
 }
