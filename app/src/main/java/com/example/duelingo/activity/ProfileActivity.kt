@@ -1,5 +1,4 @@
 package com.example.duelingo.activity
-
 import android.animation.Animator
 import android.content.ContentResolver
 import android.content.Intent
@@ -37,8 +36,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 
-
-
 class ProfileActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityProfileBinding
@@ -69,6 +66,7 @@ class ProfileActivity : AppCompatActivity() {
         }
         loadProfile()
 
+
         binding.tests.setOnClickListener {
             resetAll()
             startActivity(Intent(this@ProfileActivity, TopicsActivity::class.java))
@@ -88,6 +86,11 @@ class ProfileActivity : AppCompatActivity() {
             playAnimation(binding.cupAnimation, binding.cupIcon, binding.cupTest, "cupAnim.json")
         }
         binding.profile.setOnClickListener {}
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadProfile()
     }
 
     private fun loadAvatar(userId: String) {
@@ -119,7 +122,6 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun updateUI(response: UserProfileResponse) {
         binding.playerName.text = response.username
         binding.playerEmail.text = response.email
@@ -127,7 +129,6 @@ class ProfileActivity : AppCompatActivity() {
 
         loadAvatar(response.id)
     }
-
     private fun uploadImage(uri: Uri) {
         val mimeType = getMimeType(uri) ?: "image/*"
         println("MIME type: $mimeType")
@@ -173,7 +174,6 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun createTempFileFromUri(uri: Uri): File? {
         return try {
             val contentResolver: ContentResolver = applicationContext.contentResolver
@@ -194,10 +194,10 @@ class ProfileActivity : AppCompatActivity() {
             null
         }
     }
-
     private fun getMimeType(uri: Uri): String? {
         return applicationContext.contentResolver.getType(uri)
     }
+
     private fun logout() {
         tokenManager.clearTokens()
 

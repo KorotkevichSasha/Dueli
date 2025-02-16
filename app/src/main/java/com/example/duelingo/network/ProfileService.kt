@@ -24,7 +24,7 @@ interface ProfileService {
         @Part file: MultipartBody.Part
     ): UserProfileResponse
 
-    @GET("/avatar/{userId}")
+    @GET("/users/avatar/{userId}")
     suspend fun getAvatar(
         @Header("Authorization") token: String,
         @Header("If-None-Match") eTag: String? = null,
