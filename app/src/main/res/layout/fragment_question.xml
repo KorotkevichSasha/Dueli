@@ -1,4 +1,5 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
@@ -30,6 +31,28 @@
             android:visibility="gone"
             android:layout_marginTop="16dp"/>
 
+        <!-- Контейнер для выбранных слов (под предложением) -->
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/containerSelectedWords"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:flexWrap="wrap"
+            app:alignItems="stretch"
+            app:justifyContent="flex_start"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"/>
+
+        <!-- Контейнер для слов, которые ещё не выбраны -->
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/containerWordBank"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:flexWrap="wrap"
+            app:alignItems="stretch"
+            app:justifyContent="flex_start"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"/>
+
         <!-- RecyclerView для отображения вариантов ответа -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvOptions"
@@ -46,6 +69,7 @@
             android:layout_height="wrap_content"
             android:visibility="gone"
             android:layout_marginTop="16dp"
+            android:textColor="@color/blue_primary"
             android:hint="Type your answer"/>
     </LinearLayout>
 </ScrollView>

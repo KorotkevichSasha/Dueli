@@ -105,4 +105,6 @@ dependencies {
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2")
 
     implementation ("de.hdodenhof:circleimageview:3.1.0")
+
+    implementation ("com.google.android.flexbox:flexbox:3.0.0")
 }
