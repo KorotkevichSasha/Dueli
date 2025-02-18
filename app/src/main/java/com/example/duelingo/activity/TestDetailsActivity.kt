@@ -119,18 +119,33 @@ class TestDetailsActivity : AppCompatActivity() {
     }
 
     private fun submitTest() {
-        val correctAnswers = testDetails?.questions?.mapIndexed { index, question ->
-            val userAnswer = userAnswers[index] ?: ""
-            val correctAnswers = question.correctAnswers
+        val correctAnswersCount = testDetails?.questions?.withIndex()?.count { (index, question) ->
+            val userAnswer = userAnswers[index]?.trim()?.lowercase() ?: ""
+            val correctAnswers = question.correctAnswers.map { it.trim().lowercase() }
 
-            Log.d("TestDetailsActivity: User answer:", userAnswer)
-            Log.d("TestDetailsActivity: Correct answers:", correctAnswers.toString())
+            Log.d("DEBUG", "Вопрос №$index (${question.type}):")
+            Log.d("DEBUG", "Ответ пользователя: '$userAnswer'")
+            Log.d("DEBUG", "Правильные ответы: $correctAnswers")
 
-            userAnswer in correctAnswers
-        }?.count { it } ?: 0
+            when (question.type) {
+                "SENTENCE_CONSTRUCTION" -> {
+                    // Проверяем без учета пробелов и знаков препинания
+                    correctAnswers.any { normalize(it) == normalize(userAnswer) }
+                }
+                else -> {
+                    correctAnswers.any { it == userAnswer }
+                }
+            }
+        } ?: 0
 
-        showResultsDialog(correctAnswers)
+        showResultsDialog(correctAnswersCount)
     }
+
+    // Функция для нормализации строки (убирает знаки препинания и лишние пробелы)
+    private fun normalize(input: String): String {
+        return input.replace(Regex("[^a-zA-Zа-яА-Я0-9 ]"), "").trim().replace("\\s+".toRegex(), " ")
+    }
+
     private fun showResultsDialog(correct: Int) {
         AlertDialog.Builder(this)
             .setTitle("Test Results")

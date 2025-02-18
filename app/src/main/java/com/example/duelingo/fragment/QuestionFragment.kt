@@ -1,6 +1,7 @@
 package com.example.duelingo.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -81,7 +82,6 @@ class QuestionFragment : Fragment() {
                 setOnClickListener {
                     moveWordToSelected(word)
                 }
-                // Настройка внешнего вида кнопки
                 setPadding(16, 8, 16, 8)
                 textSize = 14f
                 background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_option)
@@ -138,7 +138,11 @@ class QuestionFragment : Fragment() {
         return when (question.type) {
             "FILL_IN_CHOICE" -> selectedOption ?: ""
             "FILL_IN_INPUT" -> binding.editTextAnswer.text.toString()
-            "SENTENCE_CONSTRUCTION" -> getSelectedSentence()
+            "SENTENCE_CONSTRUCTION" -> {
+                val sentence = getSelectedSentence()
+                Log.d("QuestionFragment: Selected Sentence:", sentence)
+                sentence
+            }
             else -> ""
         }
     }
@@ -151,6 +155,6 @@ class QuestionFragment : Fragment() {
                 words.add(view.text.toString())
             }
         }
-        return words.joinToString(" ")
+        return words.joinToString(" ").trim().lowercase()
     }
 }
