@@ -21,6 +21,8 @@ class TestDetailsActivity : AppCompatActivity() {
     private var testDetails: TestDetailedResponse? = null
     private val userAnswers = mutableMapOf<Int, String>()
 
+    private var questions: List<QuestionDetailedResponse>? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTestDetailsBinding.inflate(layoutInflater)
@@ -44,6 +46,14 @@ class TestDetailsActivity : AppCompatActivity() {
 
     }
     private fun setupRandomTest(questions: List<QuestionDetailedResponse>) {
+        this.questions = questions
+        questions.forEach { question ->
+            if (question.correctAnswers.isNullOrEmpty()) {
+                showToast("Invalid question: no correct answers provided")
+                finish()
+                return
+            }
+        }
         questionsAdapter = QuestionsPagerAdapter(this, questions)
         binding.viewPager.adapter = questionsAdapter
         updateButtonText(0)
@@ -119,29 +129,35 @@ class TestDetailsActivity : AppCompatActivity() {
     }
 
     private fun submitTest() {
-        val correctAnswersCount = testDetails?.questions?.withIndex()?.count { (index, question) ->
-            val userAnswer = userAnswers[index]?.trim()?.lowercase() ?: ""
-            val correctAnswers = question.correctAnswers.map { it.trim().lowercase() }
+        val questionsToCheck = if (intent.getBooleanExtra("randomTest", false)) {
+            questions ?: run {
+                showToast("No questions available")
+                return
+            }
+        } else {
+            testDetails?.questions ?: run {
+                showToast("No questions available")
+                return
+            }
+        }
+
+        val correctAnswersCount = questionsToCheck.withIndex().count { (index, question) ->
+            val userAnswer = userAnswers.getOrElse(index) { "" }.trim().lowercase()
+            val correctAnswersString = question.correctAnswers.joinToString(" ").trim().lowercase()
 
             Log.d("DEBUG", "Вопрос №$index (${question.type}):")
             Log.d("DEBUG", "Ответ пользователя: '$userAnswer'")
-            Log.d("DEBUG", "Правильные ответы: $correctAnswers")
+            Log.d("DEBUG", "Правильные ответы (одной строкой): '$correctAnswersString'")
 
             when (question.type) {
-                "SENTENCE_CONSTRUCTION" -> {
-                    // Проверяем без учета пробелов и знаков препинания
-                    correctAnswers.any { normalize(it) == normalize(userAnswer) }
-                }
-                else -> {
-                    correctAnswers.any { it == userAnswer }
-                }
+                "SENTENCE_CONSTRUCTION" -> normalize(correctAnswersString) == normalize(userAnswer)
+                else -> correctAnswersString == userAnswer
             }
-        } ?: 0
+        }
 
         showResultsDialog(correctAnswersCount)
     }
 
-    // Функция для нормализации строки (убирает знаки препинания и лишние пробелы)
     private fun normalize(input: String): String {
         return input.replace(Regex("[^a-zA-Zа-яА-Я0-9 ]"), "").trim().replace("\\s+".toRegex(), " ")
     }

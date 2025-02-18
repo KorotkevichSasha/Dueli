@@ -77,6 +77,12 @@ class QuestionsAdapter(
         notifyDataSetChanged()
     }
 
+    fun getCorrectAnswers(): Map<Int, List<String>> {
+        return questions.withIndex().associate { (index, question) ->
+            index to question.correctAnswers
+        }
+    }
+
     fun getUserAnswers(): Map<Int, String> {
         return userAnswers
     }
