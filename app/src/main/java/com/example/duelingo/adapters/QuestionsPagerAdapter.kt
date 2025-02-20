@@ -24,4 +24,5 @@ class QuestionsPagerAdapter(
     fun getItem(position: Int): QuestionDetailedResponse {
         return questions[position]
     }
+
 }

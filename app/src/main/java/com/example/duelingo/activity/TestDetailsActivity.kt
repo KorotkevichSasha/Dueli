@@ -188,7 +188,6 @@ class TestDetailsActivity : AppCompatActivity() {
     private fun normalize(input: String): String {
         return input.replace(Regex("[^a-zA-Zа-яА-Я0-9 ]"), "").trim().replace("\\s+".toRegex(), " ")
     }
-
     private fun showResultsDialog(correct: Int) {
         AlertDialog.Builder(this)
             .setTitle("Test Results")
@@ -196,11 +195,9 @@ class TestDetailsActivity : AppCompatActivity() {
             .setPositiveButton("OK") { _, _ -> finish() }
             .show()
     }
-
     private fun updateTestInfo(test: TestDetailedResponse) {
         binding.tvTestInfo.text = "${test.topic} - ${test.difficulty}"
     }
-
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
