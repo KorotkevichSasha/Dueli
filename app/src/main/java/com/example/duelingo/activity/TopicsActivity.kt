@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -70,6 +71,45 @@ class TopicsActivity : AppCompatActivity() {
         }
     }
 
+
+    private fun loadTopics() {
+        val tokenManager = TokenManager(this)
+        val accessToken = tokenManager.getAccessToken()
+
+        if (accessToken != null) {
+            val tokenWithBearer = "Bearer $accessToken"
+
+            lifecycleScope.launch {
+                try {
+                    val topics = ApiClient.testService.getUniqueTestTopics(tokenWithBearer)
+                    val completionStatus = mutableMapOf<String, Map<String, Boolean>>()
+                    for (topic in topics) {
+                        val tests = ApiClient.testService.getTestsForTopic(tokenWithBearer, topic)
+
+                        val difficultyStatus = tests.groupBy { it.difficulty }
+                            .mapValues { (_, testsInDifficulty) ->
+                                testsInDifficulty.all { it.isCompleted }
+                            }
+
+                        completionStatus[topic] = difficultyStatus
+
+                        Log.d("CompletionStatus", "Topic: $topic, Status: $difficultyStatus")
+                    }
+
+                    val randomTestTopic = "Random Test"
+                    val updatedTopics = listOf(randomTestTopic) + topics
+
+                    Log.d("CompletionStatus", "Completion Status Map: $completionStatus")
+                    topicsAdapter.updateData(updatedTopics, completionStatus)
+                } catch (e: Exception) {
+                    showToast("Error loading topics: ${e.message}")
+                }
+            }
+        } else {
+            showToast("Authentication error")
+        }
+    }
+
     private fun setupRecyclerView() {
         binding.rvTopics.layoutManager = LinearLayoutManager(this)
         topicsAdapter = TopicsAdapter(
@@ -86,31 +126,6 @@ class TopicsActivity : AppCompatActivity() {
         )
         binding.rvTopics.adapter = topicsAdapter
     }
-
-    private fun loadTopics() {
-        val tokenManager = TokenManager(this)
-        val accessToken = tokenManager.getAccessToken()
-
-        if (accessToken != null) {
-            val tokenWithBearer = "Bearer $accessToken"
-
-            lifecycleScope.launch {
-                try {
-                    val topics = ApiClient.testService.getUniqueTestTopics(tokenWithBearer)
-
-                    val randomTestTopic = "Random Test"
-                    val updatedTopics = listOf(randomTestTopic) + topics
-
-                    topicsAdapter.updateData(updatedTopics)
-                } catch (e: Exception) {
-                    showToast("Error loading topics: ${e.message}")
-                }
-            }
-        } else {
-            showToast("Authentication error" + accessToken)
-        }
-    }
-
     private fun loadRandomTest() {
         val tokenManager = TokenManager(this)
         val accessToken = tokenManager.getAccessToken()
@@ -147,6 +162,7 @@ class TopicsActivity : AppCompatActivity() {
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
+
     private fun changeColorAndIcon(icon: ImageView, text: TextView, iconRes: Int) {
         text.setTextColor(ContextCompat.getColor(this, R.color.blue_primary))
         icon.setColorFilter(ContextCompat.getColor(this, R.color.blue_primary))

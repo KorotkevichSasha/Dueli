@@ -18,14 +18,25 @@
             android:id="@+id/tvTopicTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:text="Present Simple"
             android:textColor="@color/blue_primary"
-            android:textSize="23sp"
+            android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/ivTopicCheckmark"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- Галочка для темы -->
+        <ImageView
+            android:id="@+id/ivTopicCheckmark"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/check"
+            android:visibility="gone"
+            android:contentDescription="Topic Completed"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </androidx.cardview.widget.CardView>

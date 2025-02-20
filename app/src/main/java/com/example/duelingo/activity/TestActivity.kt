@@ -80,7 +80,6 @@ class TestActivity : AppCompatActivity() {
         }
         binding.rvTests.adapter = testsAdapter
     }
-
     private fun loadTests() {
         val tokenManager = TokenManager(this)
         val accessToken = tokenManager.getAccessToken()
@@ -101,10 +100,10 @@ class TestActivity : AppCompatActivity() {
             showToast("Authentication error or missing topic")
         }
     }
-
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
+
     private fun changeColorAndIcon(icon: ImageView, text: TextView, iconRes: Int) {
         text.setTextColor(ContextCompat.getColor(this, R.color.blue_primary))
         icon.setColorFilter(ContextCompat.getColor(this, R.color.blue_primary))

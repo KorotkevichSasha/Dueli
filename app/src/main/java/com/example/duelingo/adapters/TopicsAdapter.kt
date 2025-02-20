@@ -3,6 +3,7 @@ package com.example.duelingo.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.duelingo.R
@@ -13,6 +14,7 @@ class TopicsAdapter(
     private val onRandomTestClick: () -> Unit
 ) : RecyclerView.Adapter<TopicsAdapter.TopicViewHolder>() {
 
+    private var completionStatus: Map<String, Map<String, Boolean>> = emptyMap()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TopicViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -22,7 +24,11 @@ class TopicsAdapter(
 
     override fun onBindViewHolder(holder: TopicViewHolder, position: Int) {
         val topic = topics[position]
-        holder.bind(topic)
+        val difficultyStatus = completionStatus[topic] ?: emptyMap()
+
+        val isTopicCompleted = difficultyStatus.values.all { it }
+
+        holder.bind(topic, isTopicCompleted)
 
         holder.itemView.setOnClickListener {
             if (topic == "Random Test") {
@@ -35,13 +41,18 @@ class TopicsAdapter(
 
     override fun getItemCount() = topics.size
 
-    fun updateData(newTopics: List<String>) {
-        topics = newTopics
+    fun updateData(newTopics: List<String>, newCompletionStatus: Map<String, Map<String, Boolean>>) {
+        this.topics = newTopics
+        this.completionStatus = newCompletionStatus
         notifyDataSetChanged()
     }
     class TopicViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        fun bind(topic: String) {
-            itemView.findViewById<TextView>(R.id.tvTopicTitle).text = topic
+        private val tvTopicTitle: TextView = itemView.findViewById(R.id.tvTopicTitle)
+        private val ivTopicCheckmark: ImageView = itemView.findViewById(R.id.ivTopicCheckmark)
+
+        fun bind(topic: String, isTopicCompleted: Boolean) {
+            tvTopicTitle.text = topic
+            ivTopicCheckmark.visibility = if (isTopicCompleted) View.VISIBLE else View.GONE
         }
     }
 }
