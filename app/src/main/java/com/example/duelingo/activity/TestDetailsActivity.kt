@@ -20,6 +20,7 @@ class TestDetailsActivity : AppCompatActivity() {
     private lateinit var questionsAdapter: QuestionsPagerAdapter
     private var testDetails: TestDetailedResponse? = null
     private val userAnswers = mutableMapOf<Int, String>()
+    private var feedbackShownForCurrentQuestion: Boolean = false
 
     private var questions: List<QuestionDetailedResponse>? = null
 
@@ -99,12 +100,37 @@ class TestDetailsActivity : AppCompatActivity() {
     private fun setupButton() {
         binding.btnSubmit.setOnClickListener {
             val currentPosition = binding.viewPager.currentItem
-            saveAnswer(currentPosition)
 
-            if (currentPosition < questionsAdapter.itemCount - 1) {
-                binding.viewPager.currentItem = currentPosition + 1
+            if (!feedbackShownForCurrentQuestion) {
+                saveAnswer(currentPosition)
+
+                val fragment = supportFragmentManager.findFragmentByTag("f${binding.viewPager.currentItem}")
+                if (fragment is QuestionFragment) {
+                    val userAnswer = fragment.getAnswer()
+                    val correctAnswer = questionsAdapter.getItem(currentPosition).correctAnswers.joinToString(" ").trim().lowercase()
+
+                    val isCorrect = when (questionsAdapter.getItem(currentPosition).type) {
+                        "SENTENCE_CONSTRUCTION" -> normalize(correctAnswer) == normalize(userAnswer)
+                        else -> correctAnswer == userAnswer
+                    }
+
+                    fragment.showFeedback(isCorrect)
+
+                    if (currentPosition < questionsAdapter.itemCount - 1) {
+                        binding.btnSubmit.text = "Next"
+                    } else {
+                        binding.btnSubmit.text = "Submit"
+                    }
+
+                    feedbackShownForCurrentQuestion = true
+                }
             } else {
-                submitTest()
+                if (binding.btnSubmit.text == "Next") {
+                    binding.viewPager.currentItem = currentPosition + 1
+                    feedbackShownForCurrentQuestion = false // Reset the state for the next question
+                } else if (binding.btnSubmit.text == "Submit") {
+                    submitTest()
+                }
             }
         }
     }
@@ -126,6 +152,7 @@ class TestDetailsActivity : AppCompatActivity() {
         } else {
             "Next"
         }
+        feedbackShownForCurrentQuestion = false
     }
 
     private fun submitTest() {

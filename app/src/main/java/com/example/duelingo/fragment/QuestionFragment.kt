@@ -20,6 +20,7 @@ class QuestionFragment : Fragment() {
     private lateinit var binding: FragmentQuestionBinding
     private lateinit var question: QuestionDetailedResponse
     private var selectedOption: String? = null
+    private var feedbackShown: Boolean = false
 
     companion object {
         fun newInstance(question: QuestionDetailedResponse): QuestionFragment {
@@ -30,6 +31,8 @@ class QuestionFragment : Fragment() {
             }
         }
     }
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,6 +48,25 @@ class QuestionFragment : Fragment() {
         question = arguments?.getParcelable<QuestionDetailedResponse>("question") ?: return
 
         setupQuestionUI()
+    }
+
+
+
+    fun showFeedback(isCorrect: Boolean) {
+        binding.tvFeedback.visibility = View.VISIBLE
+        if (isCorrect) {
+            binding.tvFeedback.text = "Correct!"
+            binding.tvFeedback.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.green))
+        } else {
+            binding.tvFeedback.text = "Incorrect!"
+            binding.tvFeedback.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red))
+        }
+    }
+    fun setFeedbackShown(shown: Boolean) {
+        feedbackShown = shown
+    }
+    fun isFeedbackShown(): Boolean {
+        return feedbackShown
     }
 
     private fun setupQuestionUI() {

@@ -71,5 +71,17 @@
             android:layout_marginTop="16dp"
             android:textColor="@color/blue_primary"
             android:hint="Type your answer"/>
+
+        <TextView
+            android:id="@+id/tvFeedback"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:padding="8dp"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:visibility="gone"
+            android:text="Correct!"
+            android:background="@color/green"/>
     </LinearLayout>
 </ScrollView>
