@@ -19,12 +19,16 @@ import com.example.duelingo.adapters.TopicsAdapter
 import com.example.duelingo.databinding.ActivityTopicsBinding
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 
 class TopicsActivity : AppCompatActivity() {
     private var currentAnimationView: LottieAnimationView? = null
     private var currentIcon: ImageView? = null
     private var currentText: TextView? = null
+
+    private val MARK_TEST_AS_PASSED_REQUEST_CODE = 1001
 
     private lateinit var binding: ActivityTopicsBinding
     private lateinit var topicsAdapter: TopicsAdapter
@@ -81,25 +85,23 @@ class TopicsActivity : AppCompatActivity() {
 
             lifecycleScope.launch {
                 try {
-                    val topics = ApiClient.testService.getUniqueTestTopics(tokenWithBearer)
-                    val completionStatus = mutableMapOf<String, Map<String, Boolean>>()
-                    for (topic in topics) {
-                        val tests = ApiClient.testService.getTestsForTopic(tokenWithBearer, topic)
-
-                        val difficultyStatus = tests.groupBy { it.difficulty }
-                            .mapValues { (_, testsInDifficulty) ->
-                                testsInDifficulty.all { it.isCompleted }
-                            }
-
-                        completionStatus[topic] = difficultyStatus
-
-                        Log.d("CompletionStatus", "Topic: $topic, Status: $difficultyStatus")
+                    val topicsDeferred = async { ApiClient.testService.getUniqueTestTopics(tokenWithBearer) }
+                    val testsDeferred = topicsDeferred.await().map { topic ->
+                        async {
+                            val tests = ApiClient.testService.getTestsForTopic(tokenWithBearer, topic)
+                            topic to tests.groupBy { it.difficulty }
+                                .mapValues { (_, testsInDifficulty) ->
+                                    testsInDifficulty.all { it.isCompleted }
+                                }
+                        }
                     }
 
-                    val randomTestTopic = "Random Test"
-                    val updatedTopics = listOf(randomTestTopic) + topics
+                    val results = testsDeferred.awaitAll()
+                    val completionStatus = results.toMap()
 
-                    Log.d("CompletionStatus", "Completion Status Map: $completionStatus")
+                    val randomTestTopic = "Random Test"
+                    val updatedTopics = listOf(randomTestTopic) + topicsDeferred.await()
+
                     topicsAdapter.updateData(updatedTopics, completionStatus)
                 } catch (e: Exception) {
                     showToast("Error loading topics: ${e.message}")
@@ -110,11 +112,18 @@ class TopicsActivity : AppCompatActivity() {
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == MARK_TEST_AS_PASSED_REQUEST_CODE && resultCode == RESULT_OK) {
+            loadTopics()
+        }
+    }
+
     private fun setupRecyclerView() {
         binding.rvTopics.layoutManager = LinearLayoutManager(this)
         topicsAdapter = TopicsAdapter(
             emptyList(),
-            onTopicClick = { topic -> // Обработчик для обычных тем
+            onTopicClick = { topic ->
                 val intent = Intent(this, TestActivity::class.java).apply {
                     putExtra("topic", topic)
                 }

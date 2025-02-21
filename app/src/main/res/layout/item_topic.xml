@@ -23,18 +23,42 @@
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/ivTopicCheckmark"
+            app:layout_constraintEnd_toStartOf="@id/ivEasyCheckmark"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Галочка для темы -->
+        <!-- Галочка для EASY -->
         <ImageView
-            android:id="@+id/ivTopicCheckmark"
+            android:id="@+id/ivEasyCheckmark"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/check"
             android:visibility="gone"
-            android:contentDescription="Topic Completed"
+            android:contentDescription="Easy Completed"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/ivMediumCheckmark"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Галочка для MEDIUM -->
+        <ImageView
+            android:id="@+id/ivMediumCheckmark"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/check"
+            android:visibility="gone"
+            android:contentDescription="Medium Completed"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/ivHardCheckmark"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Галочка для HARD -->
+        <ImageView
+            android:id="@+id/ivHardCheckmark"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/check"
+            android:visibility="gone"
+            android:contentDescription="Hard Completed"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

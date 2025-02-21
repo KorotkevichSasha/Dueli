@@ -26,9 +26,11 @@ class TopicsAdapter(
         val topic = topics[position]
         val difficultyStatus = completionStatus[topic] ?: emptyMap()
 
-        val isTopicCompleted = difficultyStatus.values.all { it }
+        val isEasyCompleted = difficultyStatus["EASY"] ?: false
+        val isMediumCompleted = difficultyStatus["MEDIUM"] ?: false
+        val isHardCompleted = difficultyStatus["HARD"] ?: false
 
-        holder.bind(topic, isTopicCompleted)
+        holder.bind(topic, isEasyCompleted, isMediumCompleted, isHardCompleted)
 
         holder.itemView.setOnClickListener {
             if (topic == "Random Test") {
@@ -48,11 +50,15 @@ class TopicsAdapter(
     }
     class TopicViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvTopicTitle: TextView = itemView.findViewById(R.id.tvTopicTitle)
-        private val ivTopicCheckmark: ImageView = itemView.findViewById(R.id.ivTopicCheckmark)
+        private val ivEasyCheckmark: ImageView = itemView.findViewById(R.id.ivEasyCheckmark)
+        private val ivMediumCheckmark: ImageView = itemView.findViewById(R.id.ivMediumCheckmark)
+        private val ivHardCheckmark: ImageView = itemView.findViewById(R.id.ivHardCheckmark)
 
-        fun bind(topic: String, isTopicCompleted: Boolean) {
+        fun bind(topic: String, isEasyCompleted: Boolean, isMediumCompleted: Boolean, isHardCompleted: Boolean) {
             tvTopicTitle.text = topic
-            ivTopicCheckmark.visibility = if (isTopicCompleted) View.VISIBLE else View.GONE
+            ivEasyCheckmark.visibility = if (isEasyCompleted) View.VISIBLE else View.GONE
+            ivMediumCheckmark.visibility = if (isMediumCompleted) View.VISIBLE else View.GONE
+            ivHardCheckmark.visibility = if (isHardCompleted) View.VISIBLE else View.GONE
         }
     }
 }

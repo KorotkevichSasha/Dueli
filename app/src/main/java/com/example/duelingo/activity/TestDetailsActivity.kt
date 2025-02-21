@@ -23,6 +23,7 @@ class TestDetailsActivity : AppCompatActivity() {
     private var feedbackShownForCurrentQuestion: Boolean = false
 
     private var questions: List<QuestionDetailedResponse>? = null
+    private var isRandomTest: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +47,72 @@ class TestDetailsActivity : AppCompatActivity() {
         setupButton()
 
     }
+    private fun completeTest(testId: String) {
+        val tokenManager = TokenManager(this)
+        val accessToken = tokenManager.getAccessToken()
+
+        if (accessToken != null) {
+            val tokenWithBearer = "Bearer $accessToken"
+
+            lifecycleScope.launch {
+                try {
+                    Log.d("TestCompletion", "Marking test $testId as passed...")
+                    val response = ApiClient.testService.markTestAsPassed(tokenWithBearer, testId)
+                    if (response.isSuccessful) {
+                        Log.d("TestCompletion", "Test marked as passed successfully")
+                    } else {
+                        Log.e("TestCompletion", "Failed to mark test as passed: ${response.errorBody()?.string()}")
+                    }
+
+                    setResult(RESULT_OK)
+                    finish()
+                } catch (e: Exception) {
+                    Log.e("TestCompletion", "Error marking test as passed: ${e.message}")
+                }
+            }
+        } else {
+            Log.e("TestCompletion", "Access token is null")
+        }
+    }
+
+    private fun submitTest() {
+        val questionsToCheck = if (intent.getBooleanExtra("randomTest", false)) {
+            questions ?: run {
+                showToast("No questions available")
+                return
+            }
+        } else {
+            testDetails?.questions ?: run {
+                showToast("No questions available")
+                return
+            }
+        }
+
+        val correctAnswersCount = questionsToCheck.withIndex().count { (index, question) ->
+            val userAnswer = userAnswers.getOrElse(index) { "" }.trim().lowercase()
+            val correctAnswersString = question.correctAnswers.joinToString(" ").trim().lowercase()
+
+            Log.d("DEBUG", "Вопрос №$index (${question.type}):")
+            Log.d("DEBUG", "Ответ пользователя: '$userAnswer'")
+            Log.d("DEBUG", "Правильные ответы (одной строкой): '$correctAnswersString'")
+
+            when (question.type) {
+                "SENTENCE_CONSTRUCTION" -> normalize(correctAnswersString) == normalize(userAnswer)
+                else -> correctAnswersString == userAnswer
+            }
+        }
+
+        if (correctAnswersCount == questionsAdapter.itemCount && !isRandomTest) {
+            intent.getStringExtra("testId")?.let { testId ->
+                completeTest(testId)
+            }
+        } else {
+            Log.d("TestCompletion", "Test not completed successfully. Correct answers: $correctAnswersCount/${questionsAdapter.itemCount}")
+        }
+
+        showResultsDialog(correctAnswersCount)
+    }
+
     private fun setupRandomTest(questions: List<QuestionDetailedResponse>) {
         this.questions = questions
         questions.forEach { question ->
@@ -59,7 +126,6 @@ class TestDetailsActivity : AppCompatActivity() {
         binding.viewPager.adapter = questionsAdapter
         updateButtonText(0)
     }
-
 
     private fun setupViewPager() {
         binding.viewPager.isUserInputEnabled = false
@@ -155,35 +221,6 @@ class TestDetailsActivity : AppCompatActivity() {
         feedbackShownForCurrentQuestion = false
     }
 
-    private fun submitTest() {
-        val questionsToCheck = if (intent.getBooleanExtra("randomTest", false)) {
-            questions ?: run {
-                showToast("No questions available")
-                return
-            }
-        } else {
-            testDetails?.questions ?: run {
-                showToast("No questions available")
-                return
-            }
-        }
-
-        val correctAnswersCount = questionsToCheck.withIndex().count { (index, question) ->
-            val userAnswer = userAnswers.getOrElse(index) { "" }.trim().lowercase()
-            val correctAnswersString = question.correctAnswers.joinToString(" ").trim().lowercase()
-
-            Log.d("DEBUG", "Вопрос №$index (${question.type}):")
-            Log.d("DEBUG", "Ответ пользователя: '$userAnswer'")
-            Log.d("DEBUG", "Правильные ответы (одной строкой): '$correctAnswersString'")
-
-            when (question.type) {
-                "SENTENCE_CONSTRUCTION" -> normalize(correctAnswersString) == normalize(userAnswer)
-                else -> correctAnswersString == userAnswer
-            }
-        }
-
-        showResultsDialog(correctAnswersCount)
-    }
 
     private fun normalize(input: String): String {
         return input.replace(Regex("[^a-zA-Zа-яА-Я0-9 ]"), "").trim().replace("\\s+".toRegex(), " ")
