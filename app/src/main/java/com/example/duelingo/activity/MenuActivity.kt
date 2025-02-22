@@ -169,17 +169,17 @@ class MenuActivity : AppCompatActivity() {
         val view = layoutInflater.inflate(R.layout.item_user, container, false)
 
         val usernameText = view.findViewById<TextView>(R.id.usernameText)
-        val pointsText = view.findViewById<TextView>(R.id.pointsText)
+//        val pointsText = view.findViewById<TextView>(R.id.pointsText)
         val avatarImage = view.findViewById<ImageView>(R.id.avatarImage)
         val btnSendRequest = view.findViewById<Button>(R.id.btnSendRequest)
 
-        if (usernameText == null || pointsText == null || avatarImage == null || btnSendRequest == null) {
+        if (usernameText == null || /*pointsText == null */  avatarImage == null || btnSendRequest == null) {
             showToast("Error: User item layout is incorrect")
             return
         }
 
         usernameText.text = user.username
-        pointsText.text = "Points: ${user.points}"
+//        pointsText.text = "Points: ${user.points}"
 
         avatarManager.loadAvatar(user.id.toString(), avatarImage)
 
