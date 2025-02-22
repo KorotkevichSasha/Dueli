@@ -1,5 +1,7 @@
 package com.example.duelingo.network
 
+import com.example.duelingo.dto.response.FriendResponse
+import com.example.duelingo.dto.response.PaginationResponse
 import com.example.duelingo.dto.response.UserProfileResponse
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
@@ -9,8 +11,9 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
+import retrofit2.http.Query
 
-interface ProfileService {
+interface UserService {
 
     @GET("/users/profile")
     suspend fun getProfile(
@@ -31,4 +34,11 @@ interface ProfileService {
         @Path("userId") userId: String
     ): retrofit2.Response<ResponseBody>
 
+    @GET("/users/search")
+    suspend fun searchUsers(
+        @Header("Authorization") token: String,
+        @Query("query") query: String,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 10
+    ): PaginationResponse<FriendResponse>
 }

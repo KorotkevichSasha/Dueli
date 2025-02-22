@@ -29,7 +29,7 @@ class AvatarManager(
     private val sharedPreferences: SharedPreferences
 ) {
 
-    private val apiClient = ApiClient.profileService
+    private val apiClient = ApiClient.userService
 
     fun loadAvatar(userId: String, imageView: ImageView) {
         val accessToken = tokenManager.getAccessToken() ?: return

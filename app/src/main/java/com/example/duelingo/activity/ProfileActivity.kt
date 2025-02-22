@@ -1,8 +1,6 @@
 package com.example.duelingo.activity
 import android.animation.Animator
-import android.content.ContentResolver
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -15,27 +13,23 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
-import com.bumptech.glide.Glide
 import com.example.duelingo.R
 import com.example.duelingo.activity.auth.LoginActivity
+import com.example.duelingo.adapters.FriendRequestsAdapter
 import com.example.duelingo.databinding.ActivityProfileBinding
 import com.example.duelingo.dto.response.UserProfileResponse
 import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import retrofit2.HttpException
-import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
+import java.util.UUID
+
 
 class ProfileActivity : AppCompatActivity() {
 
@@ -51,13 +45,18 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         binding.profileIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.profileTest.setTextColor(Color.parseColor("#FF00A5FE"))
-        binding.logout.setOnClickListener { logout() }
 
         avatarManager = AvatarManager(this, tokenManager, sharedPreferences)
         binding.profileImage.setOnClickListener { getContent.launch("image/*") }
         loadProfile()
+
+        binding.logout.setOnClickListener { logout() }
+
+        binding.acceptFriends.setOnClickListener { showFriendRequestsDialog() }
+
 
         binding.tests.setOnClickListener {
             resetAll()
@@ -80,26 +79,67 @@ class ProfileActivity : AppCompatActivity() {
         binding.profile.setOnClickListener {}
     }
 
-    private fun loadProfile() {
-        val accessToken = tokenManager.getAccessToken() ?: run {
-            showToast("Access token is missing.")
-            return
-        }
+    private fun showFriendRequestsDialog() {
+        val dialog = BottomSheetDialog(this)
+        dialog.setContentView(R.layout.dialog_add_friend)
 
-        val tokenWithBearer = "Bearer $accessToken"
+        val recyclerView = dialog.findViewById<RecyclerView>(R.id.requestsRecyclerView)
 
+        val adapter = FriendRequestsAdapter(
+            avatarManager = avatarManager,
+            onAccept = { requestId -> updateRequestStatus(requestId, "accept", recyclerView) },
+            onReject = { requestId -> updateRequestStatus(requestId, "reject", recyclerView) }
+        )
+
+        recyclerView?.layoutManager = LinearLayoutManager(this)
+        recyclerView?.adapter = adapter
+
+        loadFriendRequests(adapter)
+        dialog.show()
+    }
+    private fun updateRequestStatus(requestId: UUID, action: String, recyclerView: RecyclerView?) {
         lifecycleScope.launch {
             try {
-                val response = ApiClient.profileService.getProfile(tokenWithBearer)
-                withContext(Dispatchers.Main) {
-                    updateUI(response)
+                val response = ApiClient.relationshipService.updateRelationshipStatus(
+                    "Bearer ${tokenManager.getAccessToken()}",
+                    requestId,
+                    action
+                )
+
+                if (response.isSuccessful) {
+                    showToast("Request updated")
+                    val adapter = (recyclerView?.adapter as? FriendRequestsAdapter)
+                    adapter?.let { loadFriendRequests(it) }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    showToast("Error: ${errorBody ?: "Unknown error"}")
                 }
             } catch (e: Exception) {
-                Log.e("ProfileError", "Error loading profile: ${e.message}")
-                showToast("Error loading profile. Please try again.")
+                showToast("Error updating request: ${e.message}")
             }
         }
     }
+    private fun loadFriendRequests(adapter: FriendRequestsAdapter) {
+        lifecycleScope.launch {
+            try {
+                val response = ApiClient.relationshipService.getIncomingRequests(
+                    "Bearer ${tokenManager.getAccessToken()}"
+                )
+
+                if (response.isSuccessful) {
+                    response.body()?.let { requests ->
+                        adapter.submitList(requests)
+                    }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    showToast("Error: ${errorBody ?: "Unknown error"}")
+                }
+            } catch (e: Exception) {
+                showToast("Error loading requests: ${e.message}")
+            }
+        }
+    }
+
 
     private fun updateUI(response: UserProfileResponse) {
         binding.playerName.text = response.username
@@ -121,6 +161,26 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
+    private fun loadProfile() {
+        val accessToken = tokenManager.getAccessToken() ?: run {
+            showToast("Access token is missing.")
+            return
+        }
+
+        val tokenWithBearer = "Bearer $accessToken"
+
+        lifecycleScope.launch {
+            try {
+                val response = ApiClient.userService.getProfile(tokenWithBearer)
+                withContext(Dispatchers.Main) {
+                    updateUI(response)
+                }
+            } catch (e: Exception) {
+                Log.e("ProfileError", "Error loading profile: ${e.message}")
+                showToast("Error loading profile. Please try again.")
+            }
+        }
+    }
     private fun logout() {
         tokenManager.clearTokens()
 
@@ -129,6 +189,7 @@ class ProfileActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
