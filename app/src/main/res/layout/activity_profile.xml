@@ -7,14 +7,6 @@
     android:background="#0B0B0D">
 
     <!-- Анимация Lottie -->
-    <com.airbnb.lottie.LottieAnimationView
-        android:id="@+id/animationView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Круглая форма для фотографии профиля -->
     <de.hdodenhof.circleimageview.CircleImageView
@@ -78,16 +70,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp"/>
 
-    <!-- Кнопка выхода -->
 
-    <!-- Нижнее меню -->
     <Button
         android:id="@+id/logout"
-        android:layout_width="198dp"
-        android:layout_height="wrap_content"
+        android:layout_width="197dp"
+        android:layout_height="51dp"
         android:layout_marginTop="88dp"
         android:background="@drawable/bg_button_red"
+        app:backgroundTint="@color/red"
         android:text="Выйти из аккаунта"
+        android:textColor="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"

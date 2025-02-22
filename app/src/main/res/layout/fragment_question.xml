@@ -83,5 +83,16 @@
             android:visibility="gone"
             android:text="Correct!"
             android:background="@color/green"/>
+        <TextView
+            android:id="@+id/tvCorrectAnswer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:padding="8dp"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:visibility="gone"
+            android:text="Correct answer: "
+            android:background="@color/gray"/>
     </LinearLayout>
 </ScrollView>

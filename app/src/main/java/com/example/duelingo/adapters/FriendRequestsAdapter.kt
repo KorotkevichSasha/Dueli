@@ -45,10 +45,6 @@ class FriendRequestsAdapter(
         holder.btnReject.setOnClickListener { onReject(item.id) }
     }
 
-    fun submitUpdatedList(list: List<RelationshipResponse>) {
-        submitList(list)
-    }
-
     class DiffCallback : DiffUtil.ItemCallback<RelationshipResponse>() {
         override fun areItemsTheSame(oldItem: RelationshipResponse, newItem: RelationshipResponse): Boolean {
             return oldItem.id == newItem.id

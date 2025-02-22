@@ -54,19 +54,25 @@ class QuestionFragment : Fragment() {
 
     fun showFeedback(isCorrect: Boolean) {
         binding.tvFeedback.visibility = View.VISIBLE
+        binding.tvCorrectAnswer.visibility = if (!isCorrect) View.VISIBLE else View.GONE
+
         if (isCorrect) {
             binding.tvFeedback.text = "Correct!"
             binding.tvFeedback.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.green))
         } else {
             binding.tvFeedback.text = "Incorrect!"
             binding.tvFeedback.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red))
+
+            val formattedAnswer = formatCorrectAnswer(question.correctAnswers.toString())
+            binding.tvCorrectAnswer.text = "Correct answer: $formattedAnswer"
         }
     }
-    fun setFeedbackShown(shown: Boolean) {
-        feedbackShown = shown
-    }
-    fun isFeedbackShown(): Boolean {
-        return feedbackShown
+    private fun formatCorrectAnswer(correctAnswer: String): String {
+        return correctAnswer
+            .removeSurrounding("[", "]")
+            .replace(",", "")
+            .replace("  ", " ")
+            .trim()
     }
 
     private fun setupQuestionUI() {

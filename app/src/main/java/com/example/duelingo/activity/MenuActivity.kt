@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.app.Dialog
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -85,6 +86,7 @@ class MenuActivity : AppCompatActivity() {
 
     private fun showAddFriendDialog() {
         val dialog = Dialog(this)
+        dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog)
         dialog.setContentView(R.layout.dialog_add_friend)
 
         val rootView = dialog.findViewById<ViewGroup>(android.R.id.content)
