@@ -60,7 +60,7 @@ class ProfileActivity : AppCompatActivity() {
 
         binding.tests.setOnClickListener {
             resetAll()
-            startActivity(Intent(this@ProfileActivity, TopicsActivity::class.java))
+            startActivity(Intent(this@ProfileActivity, LearningActivity::class.java))
             changeColorAndIcon(binding.testIcon, binding.testTest, R.drawable.grad)
             playAnimation(binding.testAnimation, binding.testIcon, binding.testTest, "graAnim.json")
         }

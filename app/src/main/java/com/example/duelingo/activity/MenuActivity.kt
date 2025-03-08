@@ -60,7 +60,7 @@ class MenuActivity : AppCompatActivity() {
 
         binding.tests.setOnClickListener {
             resetAll()
-            startActivity(Intent(this@MenuActivity, TopicsActivity::class.java))
+            startActivity(Intent(this@MenuActivity, LearningActivity::class.java))
             changeColorAndIcon(binding.testIcon, binding.testTest, R.drawable.grad)
             playAnimation(binding.testAnimation, binding.testIcon, binding.testTest, "graAnim.json")
         }

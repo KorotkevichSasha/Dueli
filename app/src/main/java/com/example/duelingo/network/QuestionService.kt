@@ -1,8 +1,17 @@
 package com.example.duelingo.network
 
+import com.example.duelingo.dto.request.AudioAnswerRequest
+import com.example.duelingo.dto.response.AudioAnswerResponse
+import com.example.duelingo.dto.response.AudioQuestionResponse
 import com.example.duelingo.dto.response.QuestionDetailedResponse
+import okhttp3.MultipartBody
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Multipart
+import retrofit2.http.POST
+import retrofit2.http.Part
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface QuestionService {
@@ -14,4 +23,18 @@ interface QuestionService {
         @Query("questionDifficulty") difficulty: String?,
         @Query("size") size: Int = 10
     ): List<QuestionDetailedResponse>
+
+    @GET("/questions/audio/random")
+    suspend fun getRandomAudioQuestions(
+        @Header("Authorization") token: String,
+        @Query("size") size: Int = 1
+    ): List<AudioQuestionResponse>
+
+    @Multipart
+    @POST("/questions/{questionId}/verify-answer")
+    suspend fun verifyAnswer(
+        @Header("Authorization") token: String,
+        @Path("questionId") questionId: String,
+        @Part audioFile: MultipartBody.Part
+    ): AudioAnswerResponse
 }

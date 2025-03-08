@@ -1,23 +1,10 @@
-<!-- res/layout/activity_topics.xml -->
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/fon">
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvTopics"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:padding="8dp"
-        android:layout_marginBottom="60dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+    android:background="#0B0B0D"
+    android:padding="8dp">
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/animationView"
@@ -26,17 +13,121 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <!-- CardView для Listening -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/listeningCard"
+        android:layout_width="0dp"
+        android:layout_height="72dp"
+        android:layout_marginTop="8dp"
+        app:cardBackgroundColor="#2B2B2B"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/testsCard">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp">
+
+            <!-- Текст Listening -->
+            <TextView
+                android:id="@+id/tvListeningTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Listening"
+                android:textColor="@color/blue_primary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- CardView для Tests -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/testsCard"
+        android:layout_width="0dp"
+        android:layout_height="72dp"
+        android:layout_marginTop="8dp"
+        app:cardBackgroundColor="#2B2B2B"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp">
+
+            <!-- Текст Tests -->
+            <TextView
+                android:id="@+id/tvTestsTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Tests"
+                android:textColor="@color/blue_primary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- CardView для Vocabulary -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/vocabularyCard"
+        android:layout_width="0dp"
+        android:layout_height="72dp"
+        android:layout_marginTop="8dp"
+        app:cardBackgroundColor="#2B2B2B"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/listeningCard">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp">
+
+            <!-- Текст Listening -->
+            <TextView
+                android:id="@+id/tvVocabularyTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Vocabulary"
+                android:textColor="@color/blue_primary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
 
     <LinearLayout
-        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:layout_alignParentBottom="true"
         android:background="#0B0B0D"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
+        <!-- Тесты -->
         <LinearLayout
             android:id="@+id/tests"
             android:layout_width="0dp"
@@ -120,7 +211,6 @@
             android:gravity="center"
             android:orientation="vertical">
 
-
             <FrameLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
@@ -185,5 +275,4 @@
                 android:textSize="12sp" />
         </LinearLayout>
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
