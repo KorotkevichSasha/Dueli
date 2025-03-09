@@ -1,6 +1,5 @@
 package com.example.duelingo.network
 
-import com.example.duelingo.dto.request.AudioAnswerRequest
 import com.example.duelingo.dto.response.AudioAnswerResponse
 import com.example.duelingo.dto.response.AudioQuestionResponse
 import com.example.duelingo.dto.response.QuestionDetailedResponse

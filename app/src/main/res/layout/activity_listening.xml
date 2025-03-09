@@ -1,10 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
 
+    <!-- Иконка воспроизведения аудио -->
     <ImageView
         android:id="@+id/playAudioIcon"
         android:layout_width="100dp"
@@ -13,10 +14,22 @@
         android:contentDescription="Play Audio"
         android:src="@drawable/record"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- SeekBar для скорости воспроизведения -->
+    <SeekBar
+        android:id="@+id/speedSeekBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:max="200"
+        android:progress="100"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/playAudioIcon" />
+
+    <!-- Текст скорости -->
     <TextView
         android:id="@+id/speedLabel"
         android:layout_width="wrap_content"
@@ -29,29 +42,29 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/speedSeekBar" />
 
-    <SeekBar
-        android:id="@+id/speedSeekBar"
+    <TextView
+        android:id="@+id/recognizedText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:max="200"
-        android:progress="100"
+        android:layout_marginTop="32dp"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/playAudioIcon" />
-
+        app:layout_constraintTop_toBottomOf="@id/speedLabel" />
 
     <ImageView
         android:id="@+id/recordAudioIcon"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginTop="256dp"
+        android:layout_marginTop="144dp"
         android:contentDescription="Record Audio"
         android:src="@drawable/microphone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/playAudioIcon" />
+        app:layout_constraintTop_toBottomOf="@id/recognizedText" />
 
     <Button
         android:id="@+id/submitButton"
@@ -64,6 +77,5 @@
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        />
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
