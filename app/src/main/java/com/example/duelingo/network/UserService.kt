@@ -41,4 +41,19 @@ interface UserService {
         @Query("page") page: Int = 0,
         @Query("size") size: Int = 10
     ): PaginationResponse<FriendResponse>
+
+    @GET("/users/friends")
+    suspend fun getCurrentUserFriends(
+        @Header("Authorization") token: String,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 10
+    ): List<FriendResponse>
+
+    @GET("/users/{userId}/friends")
+    suspend fun getUserFriends(
+        @Header("Authorization") token: String,
+        @Path("userId") userId: String,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 10
+    ): List<FriendResponse>
 }

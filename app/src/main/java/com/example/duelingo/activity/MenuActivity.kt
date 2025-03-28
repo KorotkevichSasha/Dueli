@@ -4,9 +4,9 @@ import android.animation.Animator
 import android.app.Dialog
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -19,16 +19,25 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.example.duelingo.R
+import com.example.duelingo.adapters.FriendsAdapter
 import com.example.duelingo.databinding.ActivityMenuBinding
 import com.example.duelingo.dto.request.RelationshipRequest
 import com.example.duelingo.dto.response.FriendResponse
 import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.network.ApiClient
+import com.example.duelingo.network.UserService
 import com.example.duelingo.storage.TokenManager
+import de.hdodenhof.circleimageview.CircleImageView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.util.UUID
 
 class MenuActivity : AppCompatActivity() {
@@ -39,6 +48,7 @@ class MenuActivity : AppCompatActivity() {
     private var currentText: TextView? = null
     private lateinit var tokenManager: TokenManager
     private lateinit var avatarManager: AvatarManager
+    private lateinit var userService: UserService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +56,15 @@ class MenuActivity : AppCompatActivity() {
         binding = ActivityMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
         avatarManager = AvatarManager(this, tokenManager, getSharedPreferences("user_prefs", MODE_PRIVATE)) // Инициализируем AvatarManager
+
+        val retrofit = RetrofitClient.getClient(tokenManager)
+        userService = retrofit.create(UserService::class.java)
+        binding.friendsContainer.apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(0, 0, 0, 0)
+        }
+        loadFriends()
+
 
         binding.mainIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.mainTest.setTextColor(Color.parseColor("#FF00A5FE"))
@@ -56,6 +75,7 @@ class MenuActivity : AppCompatActivity() {
 
         binding.btnDuel.setOnClickListener {
             showToast("Поиск дуэли...")
+            /*todo*/
         }
 
         binding.tests.setOnClickListener {
@@ -83,6 +103,52 @@ class MenuActivity : AppCompatActivity() {
             )
         }
     }
+
+    private fun createFriendItemView(friend: FriendResponse): View {
+        val inflater = LayoutInflater.from(this)
+        val view = inflater.inflate(R.layout.friend_item, binding.friendsContainer, false)
+
+        val avatar: CircleImageView = view.findViewById(R.id.friendAvatar)
+        val name: TextView = view.findViewById(R.id.friendName)
+        val points: TextView = view.findViewById(R.id.pointsText)
+
+        name.text = friend.username
+        points.text = "${friend.points} очков"
+        Glide.with(this)
+            .load(friend.avatarUrl ?: R.drawable.default_profile)
+            .into(avatar)
+        return view
+    }
+
+    private fun loadFriends() {
+        lifecycleScope.launch(Dispatchers.Main) {
+            try {
+                val friends = userService.getCurrentUserFriends("Bearer ${tokenManager.getAccessToken()}")
+
+                binding.friendsTitle.text = if (friends.isNotEmpty()) {
+                    "Ваши друзья (${friends.size})"
+                } else {
+                    "У вас пока нет друзей"
+                }
+
+                binding.friendsRecyclerView.apply {
+                    layoutManager = LinearLayoutManager(this@MenuActivity)
+                    adapter = FriendsAdapter(friends, avatarManager)
+
+                    addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL).apply {
+                        ContextCompat.getDrawable(context, R.drawable.divider)?.let { drawable ->
+                            setDrawable(drawable)
+                        }
+                    })
+                }
+            } catch (e: Exception) {
+                binding.friendsTitle.text = "Ошибка загрузки друзей"
+                Log.e("MenuActivity", "Error loading friends", e)
+            }
+        }
+    }
+
+    private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 
     private fun showAddFriendDialog() {
         val dialog = Dialog(this)
@@ -266,6 +332,7 @@ class MenuActivity : AppCompatActivity() {
 
         })
     }
+
     private fun resetAll() {
         binding.testTest.setTextColor(Color.parseColor("#7A7A7B"))
         binding.mainTest.setTextColor(Color.parseColor("#7A7A7B"))
@@ -278,5 +345,22 @@ class MenuActivity : AppCompatActivity() {
         binding.mainIcon.setImageResource(R.drawable.swords24)
         binding.cupIcon.setImageResource(R.drawable.trophy24)
         binding.profileIcon.setImageResource(R.drawable.profile24)
+    }
+    object RetrofitClient {
+        fun getClient(tokenManager: TokenManager): Retrofit {
+            return Retrofit.Builder()
+                .baseUrl("http://192.168.0.106:8082")
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(
+                    OkHttpClient.Builder()
+                    .addInterceptor { chain ->
+                        val request = chain.request().newBuilder()
+                            .addHeader("Authorization", "Bearer ${tokenManager.getAccessToken()}")
+                            .build()
+                        chain.proceed(request)
+                    }
+                    .build())
+                .build()
+        }
     }
 }

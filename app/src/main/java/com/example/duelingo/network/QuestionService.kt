@@ -1,5 +1,6 @@
 package com.example.duelingo.network
 
+import com.example.duelingo.dto.request.VerifyAudioRequest
 import com.example.duelingo.dto.response.AudioAnswerResponse
 import com.example.duelingo.dto.response.AudioQuestionResponse
 import com.example.duelingo.dto.response.QuestionDetailedResponse
@@ -30,10 +31,10 @@ interface QuestionService {
     ): List<AudioQuestionResponse>
 
     @Multipart
-    @POST("/questions/{questionId}/verify-answer")
+    @POST("questions/verify-audio-answer")
     suspend fun verifyAnswer(
         @Header("Authorization") token: String,
-        @Path("questionId") questionId: String,
+        @Query("questionId") questionId: String,
         @Part audioFile: MultipartBody.Part
     ): AudioAnswerResponse
 }
