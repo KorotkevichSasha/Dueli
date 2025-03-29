@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,6 +33,8 @@ class ListeningActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private var currentQuestionText: String? = null
     private lateinit var tokenManager: TokenManager
     private var isRecording = false
+    private var lastRecognizedText: String? = null
+    private var isPlaying = false
 
     private val speechListener = object : android.speech.RecognitionListener {
         override fun onReadyForSpeech(params: Bundle?) {}
@@ -49,13 +52,14 @@ class ListeningActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
 
         override fun onResults(results: Bundle) {
-            results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.let {
-                if (it.isNotEmpty()) {
-                    binding.recognizedText.text = it[0]
-                    submitAnswer(it[0])
-                }
+            results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()?.let {
+                binding.recognizedText.text = it
+                lastRecognizedText = it
+                submitAnswer(it, autoCheck = true)
             }
+            resetRecordingState()
         }
+
 
         override fun onPartialResults(partialResults: Bundle) {
             partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.let {
@@ -84,6 +88,41 @@ class ListeningActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         setupSpeedControl()
         setupClickListeners()
         loadAudioQuestion()
+
+        binding.playAudioIcon.setOnClickListener {
+            if (isRecording) {
+                showToast("Please stop recording first")
+                return@setOnClickListener
+            }
+
+            currentQuestionText?.let { text ->
+                if (!isPlaying) {
+                    isPlaying = true
+                    textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "utteranceId").also {
+                        textToSpeech.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                            override fun onStart(utteranceId: String?) {}
+                            override fun onDone(utteranceId: String?) {
+                                runOnUiThread {
+                                    isPlaying = false
+                                }
+                            }
+                            override fun onError(utteranceId: String?) {
+                                runOnUiThread {
+                                    isPlaying = false
+                                }
+                            }
+                        })
+                    }
+                }
+            } ?: showToast("No question loaded")
+        }
+
+        binding.submitButton.setOnClickListener {
+            lastRecognizedText?.let { text ->
+                submitAnswer(text, autoCheck = false)
+            } ?: showToast("Record your answer first")
+        }
+
     }
 
     private fun initSpeechComponents() {
@@ -130,6 +169,11 @@ class ListeningActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     }
 
     private fun toggleRecording() {
+        if (isPlaying) {
+            showToast("Please stop playback first")
+            return
+        }
+
         if (SpeechRecognizer.isRecognitionAvailable(this)) {
             if (isRecording) {
                 stopVoiceRecognition()
@@ -140,7 +184,7 @@ class ListeningActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             }
             isRecording = !isRecording
         } else {
-            Toast.makeText(this, "Speech recognition not available", Toast.LENGTH_SHORT).show()
+            showToast("Speech recognition not available")
         }
     }
 
@@ -202,22 +246,23 @@ class ListeningActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
     }
 
-    private fun submitAnswer(userAnswer: String) {
+    private fun submitAnswer(userAnswer: String, autoCheck: Boolean) {
         if (currentQuestionText == null) {
             showToast("Question not loaded")
             return
         }
 
-        val cleanedQuestion = currentQuestionText!!.replace("[^a-zA-Z ]".toRegex(), "").lowercase()
-        val cleanedAnswer = userAnswer.replace("[^a-zA-Z ]".toRegex(), "").lowercase()
+        val similarity = calculateEnhancedSimilarity(
+            currentQuestionText!!.lowercase(),
+            userAnswer.lowercase()
+        )
 
-        val similarity = calculateEnhancedSimilarity(cleanedQuestion, cleanedAnswer)
         val isCorrect = similarity >= 0.7
         val feedback = generateFeedback(similarity)
 
         showToast(
             if (isCorrect) "✅ Correct! $feedback"
-            else "❌ Incorrect. $feedback"
+            else "❌ Incorrect. $feedback\nSimilarity: ${"%.0f".format(similarity * 100)}%"
         )
     }
 
