@@ -1,5 +1,6 @@
 package com.example.duelingo.activity
 
+
 import android.animation.Animator
 import android.content.Intent
 import android.graphics.Color

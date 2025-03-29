@@ -106,32 +106,19 @@ class MenuActivity : AppCompatActivity() {
         }
     }
 
-    private fun createFriendItemView(friend: FriendResponse): View {
-        val inflater = LayoutInflater.from(this)
-        val view = inflater.inflate(R.layout.friend_item, binding.friendsContainer, false)
-
-        val avatar: CircleImageView = view.findViewById(R.id.friendAvatar)
-        val name: TextView = view.findViewById(R.id.friendName)
-        val points: TextView = view.findViewById(R.id.pointsText)
-
-        name.text = friend.username
-        points.text = "${friend.points} очков"
-        Glide.with(this)
-            .load(friend.avatarUrl ?: R.drawable.default_profile)
-            .into(avatar)
-        return view
-    }
-
     private fun loadFriends() {
         lifecycleScope.launch(Dispatchers.Main) {
             try {
                 val friends = userService.getCurrentUserFriends("Bearer ${tokenManager.getAccessToken()}")
+                    .distinctBy { it.id }
 
                 binding.friendsTitle.text = if (friends.isNotEmpty()) {
                     "Ваши друзья (${friends.size})"
                 } else {
                     "У вас пока нет друзей"
                 }
+
+                Log.d("FriendsDebug", "Received friends: ${friends.map { it.username }}")
 
                 binding.friendsRecyclerView.apply {
                     layoutManager = LinearLayoutManager(this@MenuActivity)
