@@ -32,6 +32,7 @@ import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.network.UserService
 import com.example.duelingo.storage.TokenManager
+import com.example.duelingo.utils.AppConfig
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,6 +40,7 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 class MenuActivity : AppCompatActivity() {
 
@@ -346,20 +348,25 @@ class MenuActivity : AppCompatActivity() {
         binding.cupIcon.setImageResource(R.drawable.trophy24)
         binding.profileIcon.setImageResource(R.drawable.profile24)
     }
+
     object RetrofitClient {
         fun getClient(tokenManager: TokenManager): Retrofit {
+            val okHttpClient = OkHttpClient.Builder()
+                .addInterceptor { chain ->
+                    val request = chain.request().newBuilder()
+                        .addHeader("Authorization", "Bearer ${tokenManager.getAccessToken()}")
+                        .build()
+                    chain.proceed(request)
+                }
+                .connectTimeout(AppConfig.CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(AppConfig.READ_TIMEOUT, TimeUnit.SECONDS)
+                .writeTimeout(AppConfig.WRITE_TIMEOUT, TimeUnit.SECONDS)
+                .build()
+
             return Retrofit.Builder()
-                .baseUrl("http://192.168.0.106:8082")
+                .baseUrl(AppConfig.BASE_URL)
+                .client(okHttpClient)
                 .addConverterFactory(GsonConverterFactory.create())
-                .client(
-                    OkHttpClient.Builder()
-                    .addInterceptor { chain ->
-                        val request = chain.request().newBuilder()
-                            .addHeader("Authorization", "Bearer ${tokenManager.getAccessToken()}")
-                            .build()
-                        chain.proceed(request)
-                    }
-                    .build())
                 .build()
         }
     }
