@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
+
     <!-- Иконка воспроизведения аудио -->
     <ImageView
         android:id="@+id/playAudioIcon"
@@ -41,6 +42,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/speedSeekBar" />
+
 
     <TextView
         android:id="@+id/recognizedText"
