@@ -1,14 +1,22 @@
 package com.example.duelingo.activity
 
 import android.animation.Animator
+import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
 import android.app.Dialog
+import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -26,14 +34,16 @@ import com.bumptech.glide.Glide
 import com.example.duelingo.R
 import com.example.duelingo.adapters.FriendsAdapter
 import com.example.duelingo.databinding.ActivityMenuBinding
+import com.example.duelingo.dto.event.DuelFoundEvent
 import com.example.duelingo.dto.request.RelationshipRequest
 import com.example.duelingo.dto.response.FriendResponse
 import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.network.UserService
+import com.example.duelingo.network.websocket.DuelWebSocketClient
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.utils.AppConfig
-import de.hdodenhof.circleimageview.CircleImageView
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
@@ -51,12 +61,17 @@ class MenuActivity : AppCompatActivity() {
     private lateinit var tokenManager: TokenManager
     private lateinit var avatarManager: AvatarManager
     private lateinit var userService: UserService
+    private lateinit var webSocketClient: DuelWebSocketClient
+    private var loadingDialog: ProgressDialog? = null
+    private lateinit var profileHeader: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         tokenManager = TokenManager(this)
         binding = ActivityMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+
         avatarManager = AvatarManager(this, tokenManager, getSharedPreferences("user_prefs", MODE_PRIVATE)) // Инициализируем AvatarManager
 
         val retrofit = RetrofitClient.getClient(tokenManager)
@@ -71,22 +86,21 @@ class MenuActivity : AppCompatActivity() {
         binding.mainIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.mainTest.setTextColor(Color.parseColor("#FF00A5FE"))
 
+
+        webSocketClient = DuelWebSocketClient(this, tokenManager)
+        setupDuelButton()
+
+        binding.btnCancelSearch.setOnClickListener { cancelDuelSearch() }
+
         binding.addFriendButton.setOnClickListener {
             showAddFriendDialog()
         }
-
-        binding.btnDuel.setOnClickListener {
-            showToast("Поиск дуэли...")
-            /*todo*/
-        }
-
         binding.tests.setOnClickListener {
             resetAll()
             startActivity(Intent(this@MenuActivity, LearningActivity::class.java))
             changeColorAndIcon(binding.testIcon, binding.testTest, R.drawable.grad)
             playAnimation(binding.testAnimation, binding.testIcon, binding.testTest, "graAnim.json")
         }
-        binding.duel.setOnClickListener {}
         binding.leaderboard.setOnClickListener {
             resetAll();
             startActivity(Intent(this@MenuActivity, RankActivity::class.java))
@@ -104,6 +118,121 @@ class MenuActivity : AppCompatActivity() {
                 "profAnim.json"
             )
         }
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.action == MotionEvent.ACTION_MOVE) {
+            return true
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+
+
+    private fun setupDuelButton() {
+        binding.btnDuel.setOnClickListener {
+            startDuelSearch()
+        }
+    }
+
+    private fun startDuelSearch() {
+        binding.btnDuel.text = "CANCEL"
+        showLoading(true)
+
+        window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        )
+
+        if (webSocketClient.isConnected()) {
+            joinMatchmakingQueue()
+        } else {
+            connectToWebSocket()
+        }
+    }
+
+    private fun cancelDuelSearch() {
+
+        binding.btnDuel.text = "DUEL"
+
+        showLoading(false)
+
+        window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
+        window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+
+        webSocketClient.cancelMatchmaking()
+        vibrate(50)
+    }
+
+    private fun showLoading(show: Boolean) {
+        if (show) {
+            binding.searchOverlay.bringToFront()
+            binding.searchOverlay.visibility = View.VISIBLE
+        } else {
+            binding.searchOverlay.visibility = View.GONE
+        }
+    }
+
+    private fun vibrate(durationMs: Long) {
+        (getSystemService(VIBRATOR_SERVICE) as? Vibrator)?.let {
+            if (Build.VERSION.SDK_INT >= 26) {
+                it.vibrate(VibrationEffect.createOneShot(durationMs, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                it.vibrate(durationMs)
+            }
+        }
+    }
+
+    private fun connectToWebSocket() {
+        webSocketClient.connect(
+            onConnected = {
+                runOnUiThread {
+                    joinMatchmakingQueue()
+                }
+            },
+            onError = { error ->
+                runOnUiThread {
+                    loadingDialog?.dismiss()
+                    Toast.makeText(this, "Connection error: ${error.message}", Toast.LENGTH_LONG).show()
+                }
+            },
+            onDuelFound = { duelInfo ->
+                runOnUiThread {
+                    loadingDialog?.dismiss()
+                    startDuelActivity(duelInfo)
+                }
+            }
+        )
+    }
+
+    private fun joinMatchmakingQueue() {
+        webSocketClient.joinMatchmaking()
+        Toast.makeText(this, "Searching for opponent...", Toast.LENGTH_SHORT).show()
+    }
+
+
+    private fun startDuelActivity(duelInfo: DuelFoundEvent) {
+        runOnUiThread {
+            loadingDialog?.dismiss()
+            try {
+                val intent = Intent(this, DuelActivity::class.java).apply {
+                    putExtra("DUEL_INFO", Gson().toJson(duelInfo))
+                }
+                startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this,
+                    "Duel started! (Debug: ${duelInfo.opponentId})",
+                    Toast.LENGTH_LONG
+                ).show()
+                Log.e("MenuActivity", "DuelActivity error", e)
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 
     private fun loadFriends() {
@@ -136,8 +265,6 @@ class MenuActivity : AppCompatActivity() {
             }
         }
     }
-
-    private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 
     private fun showAddFriendDialog() {
         val dialog = Dialog(this)
@@ -226,17 +353,15 @@ class MenuActivity : AppCompatActivity() {
         val view = layoutInflater.inflate(R.layout.item_user, container, false)
 
         val usernameText = view.findViewById<TextView>(R.id.usernameText)
-//        val pointsText = view.findViewById<TextView>(R.id.pointsText)
         val avatarImage = view.findViewById<ImageView>(R.id.avatarImage)
         val btnSendRequest = view.findViewById<Button>(R.id.btnSendRequest)
 
-        if (usernameText == null || /*pointsText == null */  avatarImage == null || btnSendRequest == null) {
+        if (usernameText == null ||  avatarImage == null || btnSendRequest == null) {
             showToast("Error: User item layout is incorrect")
             return
         }
 
         usernameText.text = user.username
-//        pointsText.text = "Points: ${user.points}"
 
         avatarManager.loadAvatar(user.id.toString(), avatarImage)
 
@@ -321,7 +446,6 @@ class MenuActivity : AppCompatActivity() {
 
         })
     }
-
     private fun resetAll() {
         binding.testTest.setTextColor(Color.parseColor("#7A7A7B"))
         binding.mainTest.setTextColor(Color.parseColor("#7A7A7B"))
@@ -335,7 +459,6 @@ class MenuActivity : AppCompatActivity() {
         binding.cupIcon.setImageResource(R.drawable.trophy24)
         binding.profileIcon.setImageResource(R.drawable.profile24)
     }
-
     object RetrofitClient {
         fun getClient(tokenManager: TokenManager): Retrofit {
             val okHttpClient = OkHttpClient.Builder()

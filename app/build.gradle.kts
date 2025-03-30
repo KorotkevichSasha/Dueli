@@ -10,6 +10,7 @@ android {
     namespace = "com.example.duelingo"
     compileSdk = 34
 
+
     defaultConfig {
         applicationId = "com.example.duelingo"
         minSdk = 24
@@ -53,6 +54,7 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
 }
 
 dependencies {
@@ -110,6 +112,7 @@ dependencies {
 
     implementation ("com.squareup.okhttp3:logging-interceptor:4.9.1")
     implementation ("com.squareup.okhttp3:okhttp:4.9.1")
-
     implementation("jakarta.validation:jakarta.validation-api:2.0.2")
+
+    implementation ("org.java-websocket:Java-WebSocket:1.5.3")
 }

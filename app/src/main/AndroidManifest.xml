@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
@@ -23,6 +24,9 @@
             android:exported="false" />
         <activity
             android:name=".activity.VocabularyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.DuelActivity"
             android:exported="false" />
         <activity
             android:name=".activity.WordCardActivity"
