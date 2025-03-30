@@ -1,8 +1,14 @@
 package com.example.duelingo.activity
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +31,8 @@ class WordCardActivity : AppCompatActivity() {
     private lateinit var tokenManager: TokenManager
     private val words = mutableListOf<WordProgressResponse>()
     private var currentIndex = 0
+    private var isFront = true;
+    private var isAnimating = false;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -137,14 +145,55 @@ class WordCardActivity : AppCompatActivity() {
         }
     }
     private fun flipCard() {
-        val rotationY = if (binding.cardFront.visibility == View.VISIBLE) 180f else 0f
-        binding.cardFront.animate()
-            .rotationY(rotationY)
-            .withEndAction {
-                binding.cardFront.visibility = if (rotationY == 0f) View.VISIBLE else View.GONE
-                binding.cardBack.visibility = if (rotationY == 0f) View.GONE else View.VISIBLE
+        if (isAnimating) return
+        isAnimating = true
+
+        val currentWord = words[currentIndex]
+        val outCard = if (isFront) binding.cardFront else binding.cardBack
+        val inCard = if (isFront) binding.cardBack else binding.cardFront
+
+        // Устанавливаем текст перед анимацией
+        if (isFront) {
+            binding.cardBackText.text = currentWord.translation
+        } else {
+            binding.cardFrontText.text = currentWord.term
+        }
+
+        // Настройка "камеры" для 3D-эффекта
+        outCard.cameraDistance = 25000f
+        inCard.cameraDistance = 25000f
+
+        inCard.rotationY = if (isFront) 90f else -90f
+        inCard.visibility = View.VISIBLE
+
+        val outAnim = ObjectAnimator.ofFloat(outCard, "rotationY", 0f, if (isFront) -90f else 90f).apply {
+            duration = 200
+            interpolator = AccelerateInterpolator()
+        }
+
+        val inAnim = ObjectAnimator.ofFloat(inCard, "rotationY", if (isFront) 90f else -90f, 0f).apply {
+            duration = 200
+            interpolator = DecelerateInterpolator()
+            startDelay = 100
+        }
+
+        outAnim.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                outCard.visibility = View.INVISIBLE
             }
-            .start()
+        })
+
+        inAnim.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                isFront = !isFront
+                isAnimating = false
+            }
+        })
+
+        AnimatorSet().apply {
+            playTogether(outAnim, inAnim)
+            start()
+        }
     }
     private fun setupButtons() {
         binding.btnAgain.setOnClickListener { processReview(0) }
@@ -153,9 +202,20 @@ class WordCardActivity : AppCompatActivity() {
         binding.btnEasy.setOnClickListener { processReview(5) }
     }
     private fun showCurrentWord() {
-        binding.cardFrontText.text = words[currentIndex].term
-        binding.cardBackText.text = words[currentIndex].translation
-        binding.cardFront.visibility = View.VISIBLE
-        binding.cardBack.visibility = View.GONE
+        val currentWord = words[currentIndex]
+        binding.cardFrontText.text = currentWord.term
+        binding.cardBackText.text = currentWord.translation
+
+        if (isFront) {
+            binding.cardFront.visibility = View.VISIBLE
+            binding.cardBack.visibility = View.INVISIBLE
+            binding.cardFront.rotationY = 0f
+            binding.cardBack.rotationY = 90f
+        } else {
+            binding.cardFront.visibility = View.INVISIBLE
+            binding.cardBack.visibility = View.VISIBLE
+            binding.cardFront.rotationY = -90f
+            binding.cardBack.rotationY = 0f
+        }
     }
 }

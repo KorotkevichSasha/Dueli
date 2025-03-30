@@ -19,4 +19,8 @@
     <color name="bronze">#CD7F32</color>
     <color name="gray_light">#B3B3B3</color>
     <color name="green_primary">#4CAF50</color>
+
+    <color name="card_front_color">#80DEEA</color>
+    <color name="card_back_color">#D1C4E9</color>
+    <color name="card_text_color">#212121</color>
 </resources>

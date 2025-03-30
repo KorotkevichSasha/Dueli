@@ -1,93 +1,132 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="24dp">
+    android:padding="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:gravity="center">
+
 
         <FrameLayout
             android:id="@+id/cardContainer"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_width="300dp"
+            android:layout_height="200dp"
+            android:layout_marginBottom="24dp">
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardFront"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="8dp">
+                android:layout_width="300dp"
+                android:layout_height="200dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp"
+                app:cardBackgroundColor="@color/card_front_color">
 
                 <TextView
                     android:id="@+id/cardFrontText"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
-                    android:textSize="24sp"/>
+                    android:textSize="20sp"
+                    android:padding="16dp"
+                    android:textColor="@color/card_text_color"
+                    android:textStyle="bold"/>
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardBack"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="8dp"
-                android:visibility="gone">
+                android:layout_width="300dp"
+                android:layout_height="200dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp"
+                app:cardBackgroundColor="@color/card_back_color"
+                android:visibility="invisible">
 
                 <TextView
                     android:id="@+id/cardBackText"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
-                    android:textSize="24sp"/>
+                    android:textSize="20sp"
+                    android:padding="16dp"
+                    android:textColor="@color/card_text_color"
+                    android:textStyle="bold"/>
             </androidx.cardview.widget.CardView>
         </FrameLayout>
 
+        <!-- Дата следующего повторения -->
         <TextView
             android:id="@+id/nextReviewDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:textAlignment="center"
-            android:textSize="14sp"/>
+            android:textSize="14sp"
+            android:layout_marginBottom="16dp"/>
 
+        <!-- Кнопки в два ряда -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="24dp">
+            android:orientation="vertical"
+            android:layout_marginTop="8dp">
 
-            <Button
-                android:id="@+id/btnAgain"
-                android:layout_width="0dp"
+            <!-- Первая строка кнопок -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Again"/>
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
 
-            <Button
-                android:id="@+id/btnHard"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Hard"/>
+                <Button
+                    android:id="@+id/btnAgain"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:text="Again"
+                    android:backgroundTint="#FF5252"
+                    android:textColor="#FFFFFF"/>
 
-            <Button
-                android:id="@+id/btnGood"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Good"/>
+                <Button
+                    android:id="@+id/btnHard"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:text="Hard"
+                    android:backgroundTint="#FF9800"
+                    android:textColor="#FFFFFF"/>
+            </LinearLayout>
 
-            <Button
-                android:id="@+id/btnEasy"
-                android:layout_width="0dp"
+            <!-- Вторая строка кнопок -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Easy"/>
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnGood"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:text="Good"
+                    android:backgroundTint="#4CAF50"
+                    android:textColor="#FFFFFF"/>
+
+                <Button
+                    android:id="@+id/btnEasy"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:text="Easy"
+                    android:backgroundTint="#2196F3"
+                    android:textColor="#FFFFFF"/>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>
