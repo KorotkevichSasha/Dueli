@@ -22,6 +22,12 @@
             android:name=".activity.LearningActivity"
             android:exported="false" />
         <activity
+            android:name=".activity.VocabularyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.WordCardActivity"
+            android:exported="false" />
+        <activity
             android:name=".activity.ListeningActivity"
             android:exported="false" />
         <activity

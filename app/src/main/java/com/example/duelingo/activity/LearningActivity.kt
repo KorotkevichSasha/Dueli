@@ -1,6 +1,4 @@
 package com.example.duelingo.activity
-
-
 import android.animation.Animator
 import android.content.Intent
 import android.graphics.Color
@@ -39,7 +37,10 @@ class LearningActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        binding.tests.setOnClickListener {}
+        binding.vocabularyCard.setOnClickListener {
+            startActivity(Intent(this, VocabularyActivity::class.java))
+        }
+
         binding.duel.setOnClickListener {
             resetAll();
             startActivity(Intent(this@LearningActivity, MenuActivity::class.java))
@@ -51,6 +52,7 @@ class LearningActivity : AppCompatActivity() {
                 "swordAnim.json"
             )
         }
+
         binding.leaderboard.setOnClickListener {
             resetAll();
             startActivity(Intent(this@LearningActivity, RankActivity::class.java))

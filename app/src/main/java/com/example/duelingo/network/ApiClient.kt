@@ -18,4 +18,5 @@ object ApiClient {
     val testService: TestService by lazy { retrofit.create(TestService::class.java) }
     val relationshipService: RelationshipService by lazy { retrofit.create(RelationshipService::class.java) }
     val questionService: QuestionService by lazy { retrofit.create(QuestionService::class.java) }
+    val wordService: WordService by lazy { retrofit.create(WordService::class.java) }
 }

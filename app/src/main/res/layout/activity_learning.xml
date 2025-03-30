@@ -102,7 +102,6 @@
             android:layout_height="match_parent"
             android:padding="16dp">
 
-            <!-- Текст Listening -->
             <TextView
                 android:id="@+id/tvVocabularyTitle"
                 android:layout_width="0dp"
