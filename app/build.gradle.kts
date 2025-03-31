@@ -114,5 +114,12 @@ dependencies {
     implementation ("com.squareup.okhttp3:okhttp:4.9.1")
     implementation("jakarta.validation:jakarta.validation-api:2.0.2")
 
-    implementation ("org.java-websocket:Java-WebSocket:1.5.3")
+
+    implementation("org.java-websocket:Java-WebSocket:1.5.2")
+    implementation("com.google.code.gson:gson:2.8.9")
+
+    implementation("com.github.NaikSoftware:StompProtocolAndroid:1.6.6")
+
+    implementation ("io.reactivex.rxjava2:rxjava:2.2.21")
+    implementation ("io.reactivex.rxjava2:rxandroid:2.1.1")
 }

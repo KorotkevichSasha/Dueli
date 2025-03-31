@@ -41,6 +41,7 @@ import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.network.UserService
 import com.example.duelingo.network.websocket.DuelWebSocketClient
+import com.example.duelingo.network.websocket.StompManager
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.utils.AppConfig
 import com.google.gson.Gson
@@ -48,6 +49,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -67,7 +69,7 @@ class MenuActivity : AppCompatActivity() {
     private lateinit var tokenManager: TokenManager
     private lateinit var avatarManager: AvatarManager
     private lateinit var userService: UserService
-    private lateinit var webSocketClient: DuelWebSocketClient
+    private lateinit var stompManager: StompManager
     private var loadingDialog: ProgressDialog? = null
 
     private val scope = CoroutineScope(Dispatchers.Main + Job())
@@ -75,11 +77,14 @@ class MenuActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         tokenManager = TokenManager(this)
+        Log.d("MenuActivity", "onCreate started")
         binding = ActivityMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        Log.d("MenuActivity", "Initializing AvatarManager")
         avatarManager = AvatarManager(this, tokenManager, getSharedPreferences("user_prefs", MODE_PRIVATE))
 
+        Log.d("MenuActivity", "Creating Retrofit client")
         val retrofit = RetrofitClient.getClient(tokenManager)
         userService = retrofit.create(UserService::class.java)
 
@@ -87,87 +92,86 @@ class MenuActivity : AppCompatActivity() {
             orientation = LinearLayout.VERTICAL
             setPadding(0, 0, 0, 0)
         }
+        Log.d("MenuActivity", "Loading friends list")
         loadFriends()
 
         binding.mainIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.mainTest.setTextColor(Color.parseColor("#FF00A5FE"))
 
-        tokenManager = TokenManager(this)
-        webSocketClient = DuelWebSocketClient(tokenManager)
+
+        Log.d("MenuActivity", "Creating DuelWebSocketClient")
+        stompManager = StompManager(tokenManager)
         setupDuelButton()
 
         binding.btnCancelSearch.setOnClickListener {
+            Log.d("MenuActivity", "Cancel search button clicked")
             scope.launch { cancelDuelSearch() }
         }
 
         binding.addFriendButton.setOnClickListener {
+            Log.d("MenuActivity", "Add friend button clicked")
             showAddFriendDialog()
         }
 
+        Log.d("MenuActivity", "Setting up navigation buttons")
         setupNavigationButtons()
+        Log.d("MenuActivity", "onCreate completed")
     }
 
     override fun onDestroy() {
+        Log.d("MenuActivity", "onDestroy started")
         scope.cancel()
-        webSocketClient.disconnect()
+        Log.d("MenuActivity", "Disconnecting WebSocket")
+        stompManager.disconnect()
         loadingDialog?.dismiss()
         super.onDestroy()
-    }
-
-    private fun setupNavigationButtons() {
-        binding.tests.setOnClickListener {
-            resetAll()
-            startActivity(Intent(this, LearningActivity::class.java))
-            changeColorAndIcon(binding.testIcon, binding.testTest, R.drawable.grad)
-            playAnimation(binding.testAnimation, binding.testIcon, binding.testTest, "graAnim.json")
-        }
-
-        binding.leaderboard.setOnClickListener {
-            resetAll()
-            startActivity(Intent(this, RankActivity::class.java))
-            changeColorAndIcon(binding.cupIcon, binding.cupTest, R.drawable.tro)
-            playAnimation(binding.cupAnimation, binding.cupIcon, binding.cupTest, "cupAnim.json")
-        }
-
-        binding.profile.setOnClickListener {
-            resetAll()
-            startActivity(Intent(this, ProfileActivity::class.java))
-            changeColorAndIcon(binding.profileIcon, binding.profileTest, R.drawable.prof)
-            playAnimation(binding.profAnimation, binding.profileIcon, binding.profileTest, "profAnim.json")
-        }
+        Log.d("MenuActivity", "onDestroy completed")
     }
 
     private fun setupDuelButton() {
+        Log.d("MenuActivity", "setupDuelButton started")
         binding.btnDuel.setOnClickListener {
+            Log.d("MenuActivity", "Duel button clicked, current text: ${binding.btnDuel.text}")
             scope.launch {
                 if (binding.btnDuel.text == "DUEL") {
+                    Log.d("MenuActivity", "Starting duel search")
                     startDuelSearch()
                 } else {
+                    Log.d("MenuActivity", "Canceling duel search")
                     cancelDuelSearch()
                 }
             }
         }
+        Log.d("MenuActivity", "setupDuelButton completed")
     }
+
     private suspend fun startDuelSearch() {
+        Log.d("MenuActivity", "startDuelSearch started")
         withContext(Dispatchers.Main) {
             binding.btnDuel.text = "CANCEL"
+            Log.d("MenuActivity", "Changed duel button text to CANCEL")
             showLoading(true)
         }
 
         try {
-            if (!webSocketClient.isConnected()) {
+            Log.d("MenuActivity", "Checking WebSocket connection")
+            if (!stompManager.isConnected()) {  // Используем isConnected из StompManager
+                Log.d("MenuActivity", "WebSocket not connected, connecting...")
                 connectToWebSocket()
+                delay(1000)
             }
 
-            val success = webSocketClient.joinMatchmaking()
-            if (!success) {
-                throw IllegalStateException("Failed to join matchmaking queue")
+            if (!stompManager.isConnected()) {
+                throw IllegalStateException("WebSocket connection failed")
             }
+            joinMatchmakingQueue()
 
             withContext(Dispatchers.Main) {
+                Log.d("MenuActivity", "Showing searching toast")
                 Toast.makeText(this@MenuActivity, "Searching for opponent...", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
+            Log.e("MenuActivity", "Error in startDuelSearch: ${e.message}", e)
             withContext(Dispatchers.Main) {
                 loadingDialog?.dismiss()
                 Toast.makeText(
@@ -175,41 +179,58 @@ class MenuActivity : AppCompatActivity() {
                     "Error: ${e.message ?: "Failed to start duel"}",
                     Toast.LENGTH_LONG
                 ).show()
+                Log.d("MenuActivity", "Calling cancelDuelSearch after error")
                 cancelDuelSearch()
             }
         }
+        Log.d("MenuActivity", "startDuelSearch completed")
     }
 
+
     private suspend fun cancelDuelSearch() {
+        Log.d("MenuActivity", "cancelDuelSearch started")
         withContext(Dispatchers.Main) {
             binding.btnDuel.text = "DUEL"
+            Log.d("MenuActivity", "Changed duel button text to DUEL")
             showLoading(false)
         }
 
         try {
-            webSocketClient.cancelMatchmaking()
+            Log.d("MenuActivity", "Canceling matchmaking")
+            stompManager.cancelMatchmaking()  // Используем метод cancelMatchmaking из StompManager
+            Log.d("MenuActivity", "Triggering vibration")
             vibrate(50)
         } catch (e: Exception) {
-            Log.e("MenuActivity", "Cancel error", e)
+            Log.e("MenuActivity", "Error in cancelDuelSearch", e)
         } finally {
-            webSocketClient.disconnect()
+            Log.d("MenuActivity", "Disconnecting WebSocket")
+            stompManager.disconnect()
         }
+        Log.d("MenuActivity", "cancelDuelSearch completed")
     }
 
+
     private suspend fun connectToWebSocket() {
+        Log.d("MenuActivity", "connectToWebSocket started")
         try {
+            Log.d("MenuActivity", "Starting WebSocket connection")
             suspendCancellableCoroutine<Unit> { continuation ->
-                webSocketClient.connect(
+                Log.d("MenuActivity", "Calling stompManager.connect")
+                stompManager.connect(
                     onConnected = {
+                        Log.d("MenuActivity", "WebSocket connected successfully")
                         continuation.resume(Unit) { /* обработка отмены */ }
                     },
                     onError = { error ->
+                        Log.e("MenuActivity", "WebSocket connection error", error)
                         continuation.resumeWithException(error)
                     },
                     onDuelFound = { duelInfo ->
+                        Log.d("MenuActivity", "Duel found with opponent: ${duelInfo.opponentId}")
                         scope.launch { startDuelActivity(duelInfo) }
                     },
                     onMatchmakingFailed = { reason ->
+                        Log.d("MenuActivity", "Matchmaking failed: ${reason.reason}")
                         scope.launch {
                             Toast.makeText(
                                 this@MenuActivity,
@@ -222,29 +243,42 @@ class MenuActivity : AppCompatActivity() {
                 )
 
                 continuation.invokeOnCancellation {
-                    webSocketClient.disconnect()
+                    Log.d("MenuActivity", "WebSocket connection cancelled")
+                    stompManager.disconnect()
                 }
             }
         } catch (e: Exception) {
+            Log.e("MenuActivity", "Error in connectToWebSocket", e)
             throw IOException("Failed to establish WebSocket connection", e)
         }
+        Log.d("MenuActivity", "connectToWebSocket completed")
     }
 
     private suspend fun joinMatchmakingQueue() {
+        Log.d("MenuActivity", "joinMatchmakingQueue started")
         try {
-            webSocketClient.joinMatchmaking()
+            Log.d("MenuActivity", "Joining matchmaking queue")
+            if (!stompManager.joinMatchmaking()) {  // Используем метод joinMatchmaking из StompManager
+                throw IllegalStateException("Failed to join matchmaking queue")
+            }
             withContext(Dispatchers.Main) {
+                Log.d("MenuActivity", "Showing searching toast")
                 Toast.makeText(this@MenuActivity, "Searching for opponent...", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
+            Log.e("MenuActivity", "Error in joinMatchmakingQueue", e)
             withContext(Dispatchers.Main) {
                 Toast.makeText(this@MenuActivity, "Matchmaking error: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.d("MenuActivity", "Calling cancelDuelSearch after error")
                 cancelDuelSearch()
             }
         }
+        Log.d("MenuActivity", "joinMatchmakingQueue completed")
     }
 
+
     private fun showLoading(show: Boolean) {
+        Log.d("MenuActivity", "showLoading: $show")
         if (show) {
             binding.searchOverlay.bringToFront()
             binding.searchOverlay.visibility = View.VISIBLE
@@ -252,8 +286,8 @@ class MenuActivity : AppCompatActivity() {
             binding.searchOverlay.visibility = View.GONE
         }
     }
-
     private fun vibrate(durationMs: Long) {
+        Log.d("MenuActivity", "vibrate: $durationMs ms")
         (getSystemService(VIBRATOR_SERVICE) as? Vibrator)?.let {
             if (Build.VERSION.SDK_INT >= 26) {
                 it.vibrate(VibrationEffect.createOneShot(durationMs, VibrationEffect.DEFAULT_AMPLITUDE))
@@ -262,24 +296,27 @@ class MenuActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun startDuelActivity(duelInfo: DuelFoundEvent) {
+        Log.d("MenuActivity", "startDuelActivity started with opponent: ${duelInfo.opponentId}")
         runOnUiThread {
-            loadingDialog?.dismiss()
             try {
+                loadingDialog?.dismiss()
+                Log.d("MenuActivity", "Creating DuelActivity intent")
                 val intent = Intent(this, DuelActivity::class.java).apply {
                     putExtra("DUEL_INFO", Gson().toJson(duelInfo))
                 }
+                Log.d("MenuActivity", "Starting DuelActivity")
                 startActivity(intent)
             } catch (e: Exception) {
+                Log.e("MenuActivity", "Error starting DuelActivity", e)
                 Toast.makeText(
                     this,
                     "Duel started! (Debug: ${duelInfo.opponentId})",
                     Toast.LENGTH_LONG
                 ).show()
-                Log.e("MenuActivity", "DuelActivity error", e)
             }
         }
+        Log.d("MenuActivity", "startDuelActivity completed")
     }
 
 
@@ -313,7 +350,6 @@ class MenuActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun showAddFriendDialog() {
         val dialog = Dialog(this)
         dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog)
@@ -351,7 +387,6 @@ class MenuActivity : AppCompatActivity() {
 
         dialog.show()
     }
-
     private fun searchUser(username: String, progressBar: ProgressBar, container: LinearLayout) {
         if (!::tokenManager.isInitialized) {
             showToast("Error: TokenManager is not initialized")
@@ -396,7 +431,6 @@ class MenuActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun showUserInfo(user: FriendResponse, container: LinearLayout) {
         val view = layoutInflater.inflate(R.layout.item_user, container, false)
 
@@ -446,7 +480,6 @@ class MenuActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
@@ -506,6 +539,33 @@ class MenuActivity : AppCompatActivity() {
         binding.mainIcon.setImageResource(R.drawable.swords24)
         binding.cupIcon.setImageResource(R.drawable.trophy24)
         binding.profileIcon.setImageResource(R.drawable.profile24)
+    }
+    private fun setupNavigationButtons() {
+        Log.d("MenuActivity", "setupNavigationButtons started")
+        binding.tests.setOnClickListener {
+            Log.d("MenuActivity", "Tests button clicked")
+            resetAll()
+            startActivity(Intent(this, LearningActivity::class.java))
+            changeColorAndIcon(binding.testIcon, binding.testTest, R.drawable.grad)
+            playAnimation(binding.testAnimation, binding.testIcon, binding.testTest, "graAnim.json")
+        }
+
+        binding.leaderboard.setOnClickListener {
+            Log.d("MenuActivity", "Leaderboard button clicked")
+            resetAll()
+            startActivity(Intent(this, RankActivity::class.java))
+            changeColorAndIcon(binding.cupIcon, binding.cupTest, R.drawable.tro)
+            playAnimation(binding.cupAnimation, binding.cupIcon, binding.cupTest, "cupAnim.json")
+        }
+
+        binding.profile.setOnClickListener {
+            Log.d("MenuActivity", "Profile button clicked")
+            resetAll()
+            startActivity(Intent(this, ProfileActivity::class.java))
+            changeColorAndIcon(binding.profileIcon, binding.profileTest, R.drawable.prof)
+            playAnimation(binding.profAnimation, binding.profileIcon, binding.profileTest, "profAnim.json")
+        }
+        Log.d("MenuActivity", "setupNavigationButtons completed")
     }
     object RetrofitClient {
         fun getClient(tokenManager: TokenManager): Retrofit {
