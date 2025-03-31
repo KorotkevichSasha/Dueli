@@ -44,16 +44,22 @@ import com.example.duelingo.network.websocket.DuelWebSocketClient
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.utils.AppConfig
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.IOException
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resumeWithException
 
 class MenuActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityMenuBinding
     private var currentAnimationView: LottieAnimationView? = null
     private var currentIcon: ImageView? = null
@@ -63,7 +69,8 @@ class MenuActivity : AppCompatActivity() {
     private lateinit var userService: UserService
     private lateinit var webSocketClient: DuelWebSocketClient
     private var loadingDialog: ProgressDialog? = null
-    private lateinit var profileHeader: View
+
+    private val scope = CoroutineScope(Dispatchers.Main + Job())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,98 +78,170 @@ class MenuActivity : AppCompatActivity() {
         binding = ActivityMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
-        avatarManager = AvatarManager(this, tokenManager, getSharedPreferences("user_prefs", MODE_PRIVATE)) // Инициализируем AvatarManager
+        avatarManager = AvatarManager(this, tokenManager, getSharedPreferences("user_prefs", MODE_PRIVATE))
 
         val retrofit = RetrofitClient.getClient(tokenManager)
         userService = retrofit.create(UserService::class.java)
+
         binding.friendsContainer.apply {
             orientation = LinearLayout.VERTICAL
             setPadding(0, 0, 0, 0)
         }
         loadFriends()
 
-
         binding.mainIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.mainTest.setTextColor(Color.parseColor("#FF00A5FE"))
 
-
-        webSocketClient = DuelWebSocketClient(this, tokenManager)
+        tokenManager = TokenManager(this)
+        webSocketClient = DuelWebSocketClient(tokenManager)
         setupDuelButton()
 
-        binding.btnCancelSearch.setOnClickListener { cancelDuelSearch() }
+        binding.btnCancelSearch.setOnClickListener {
+            scope.launch { cancelDuelSearch() }
+        }
 
         binding.addFriendButton.setOnClickListener {
             showAddFriendDialog()
         }
+
+        setupNavigationButtons()
+    }
+
+    override fun onDestroy() {
+        scope.cancel()
+        webSocketClient.disconnect()
+        loadingDialog?.dismiss()
+        super.onDestroy()
+    }
+
+    private fun setupNavigationButtons() {
         binding.tests.setOnClickListener {
             resetAll()
-            startActivity(Intent(this@MenuActivity, LearningActivity::class.java))
+            startActivity(Intent(this, LearningActivity::class.java))
             changeColorAndIcon(binding.testIcon, binding.testTest, R.drawable.grad)
             playAnimation(binding.testAnimation, binding.testIcon, binding.testTest, "graAnim.json")
         }
+
         binding.leaderboard.setOnClickListener {
-            resetAll();
-            startActivity(Intent(this@MenuActivity, RankActivity::class.java))
+            resetAll()
+            startActivity(Intent(this, RankActivity::class.java))
             changeColorAndIcon(binding.cupIcon, binding.cupTest, R.drawable.tro)
             playAnimation(binding.cupAnimation, binding.cupIcon, binding.cupTest, "cupAnim.json")
         }
+
         binding.profile.setOnClickListener {
-            resetAll();
-            startActivity(Intent(this@MenuActivity, ProfileActivity::class.java))
+            resetAll()
+            startActivity(Intent(this, ProfileActivity::class.java))
             changeColorAndIcon(binding.profileIcon, binding.profileTest, R.drawable.prof)
-            playAnimation(
-                binding.profAnimation,
-                binding.profileIcon,
-                binding.profileTest,
-                "profAnim.json"
-            )
+            playAnimation(binding.profAnimation, binding.profileIcon, binding.profileTest, "profAnim.json")
         }
     }
-
-    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        if (ev.action == MotionEvent.ACTION_MOVE) {
-            return true
-        }
-        return super.dispatchTouchEvent(ev)
-    }
-
-
 
     private fun setupDuelButton() {
         binding.btnDuel.setOnClickListener {
-            startDuelSearch()
+            scope.launch {
+                if (binding.btnDuel.text == "DUEL") {
+                    startDuelSearch()
+                } else {
+                    cancelDuelSearch()
+                }
+            }
+        }
+    }
+    private suspend fun startDuelSearch() {
+        withContext(Dispatchers.Main) {
+            binding.btnDuel.text = "CANCEL"
+            showLoading(true)
+        }
+
+        try {
+            if (!webSocketClient.isConnected()) {
+                connectToWebSocket()
+            }
+
+            val success = webSocketClient.joinMatchmaking()
+            if (!success) {
+                throw IllegalStateException("Failed to join matchmaking queue")
+            }
+
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@MenuActivity, "Searching for opponent...", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                loadingDialog?.dismiss()
+                Toast.makeText(
+                    this@MenuActivity,
+                    "Error: ${e.message ?: "Failed to start duel"}",
+                    Toast.LENGTH_LONG
+                ).show()
+                cancelDuelSearch()
+            }
         }
     }
 
-    private fun startDuelSearch() {
-        binding.btnDuel.text = "CANCEL"
-        showLoading(true)
+    private suspend fun cancelDuelSearch() {
+        withContext(Dispatchers.Main) {
+            binding.btnDuel.text = "DUEL"
+            showLoading(false)
+        }
 
-        window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-        )
-
-        if (webSocketClient.isConnected()) {
-            joinMatchmakingQueue()
-        } else {
-            connectToWebSocket()
+        try {
+            webSocketClient.cancelMatchmaking()
+            vibrate(50)
+        } catch (e: Exception) {
+            Log.e("MenuActivity", "Cancel error", e)
+        } finally {
+            webSocketClient.disconnect()
         }
     }
 
-    private fun cancelDuelSearch() {
+    private suspend fun connectToWebSocket() {
+        try {
+            suspendCancellableCoroutine<Unit> { continuation ->
+                webSocketClient.connect(
+                    onConnected = {
+                        continuation.resume(Unit) { /* обработка отмены */ }
+                    },
+                    onError = { error ->
+                        continuation.resumeWithException(error)
+                    },
+                    onDuelFound = { duelInfo ->
+                        scope.launch { startDuelActivity(duelInfo) }
+                    },
+                    onMatchmakingFailed = { reason ->
+                        scope.launch {
+                            Toast.makeText(
+                                this@MenuActivity,
+                                "Matchmaking failed: ${reason.reason}",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            cancelDuelSearch()
+                        }
+                    }
+                )
 
-        binding.btnDuel.text = "DUEL"
+                continuation.invokeOnCancellation {
+                    webSocketClient.disconnect()
+                }
+            }
+        } catch (e: Exception) {
+            throw IOException("Failed to establish WebSocket connection", e)
+        }
+    }
 
-        showLoading(false)
-
-        window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
-        window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
-
-        webSocketClient.cancelMatchmaking()
-        vibrate(50)
+    private suspend fun joinMatchmakingQueue() {
+        try {
+            webSocketClient.joinMatchmaking()
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@MenuActivity, "Searching for opponent...", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@MenuActivity, "Matchmaking error: ${e.message}", Toast.LENGTH_SHORT).show()
+                cancelDuelSearch()
+            }
+        }
     }
 
     private fun showLoading(show: Boolean) {
@@ -184,34 +263,6 @@ class MenuActivity : AppCompatActivity() {
         }
     }
 
-    private fun connectToWebSocket() {
-        webSocketClient.connect(
-            onConnected = {
-                runOnUiThread {
-                    joinMatchmakingQueue()
-                }
-            },
-            onError = { error ->
-                runOnUiThread {
-                    loadingDialog?.dismiss()
-                    Toast.makeText(this, "Connection error: ${error.message}", Toast.LENGTH_LONG).show()
-                }
-            },
-            onDuelFound = { duelInfo ->
-                runOnUiThread {
-                    loadingDialog?.dismiss()
-                    startDuelActivity(duelInfo)
-                }
-            }
-        )
-    }
-
-    private fun joinMatchmakingQueue() {
-        webSocketClient.joinMatchmaking()
-        Toast.makeText(this, "Searching for opponent...", Toast.LENGTH_SHORT).show()
-    }
-
-
     private fun startDuelActivity(duelInfo: DuelFoundEvent) {
         runOnUiThread {
             loadingDialog?.dismiss()
@@ -231,9 +282,6 @@ class MenuActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
 
     private fun loadFriends() {
         lifecycleScope.launch(Dispatchers.Main) {
