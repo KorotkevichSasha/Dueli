@@ -111,7 +111,7 @@ dependencies {
     implementation ("androidx.media:media:1.6.0")
 
     implementation ("com.squareup.okhttp3:logging-interceptor:4.9.1")
-    implementation ("com.squareup.okhttp3:okhttp:4.9.1")
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("jakarta.validation:jakarta.validation-api:2.0.2")
 
 
@@ -122,4 +122,6 @@ dependencies {
 
     implementation ("io.reactivex.rxjava2:rxjava:2.2.21")
     implementation ("io.reactivex.rxjava2:rxandroid:2.1.1")
+
+
 }
