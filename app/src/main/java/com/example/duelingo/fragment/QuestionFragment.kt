@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.duelingo.R
+import com.example.duelingo.activity.DuelActivity
 import com.example.duelingo.adapters.OptionsAdapter
 import com.example.duelingo.databinding.FragmentQuestionBinding
 import com.example.duelingo.dto.response.QuestionDetailedResponse
@@ -21,6 +22,7 @@ class QuestionFragment : Fragment() {
     private lateinit var question: QuestionDetailedResponse
     private var selectedOption: String? = null
     private var feedbackShown: Boolean = false
+    private var onAnswerListener: ((Boolean) -> Unit)? = null
 
     companion object {
         fun newInstance(question: QuestionDetailedResponse): QuestionFragment {
@@ -50,6 +52,15 @@ class QuestionFragment : Fragment() {
         setupQuestionUI()
     }
 
+    fun setQuestionAnsweredListener(listener: (isCorrect: Boolean) -> Unit) {
+        this.onAnswerListener = listener
+    }
+
+    // В обработчике ответа добавляем:
+    private fun handleAnswer(isCorrect: Boolean) {
+        onAnswerListener?.invoke(isCorrect)
+        (activity as? DuelActivity)?.loadNextQuestion()
+    }
 
 
     fun showFeedback(isCorrect: Boolean) {

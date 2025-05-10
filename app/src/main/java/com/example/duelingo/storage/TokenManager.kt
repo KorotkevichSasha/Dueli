@@ -28,6 +28,9 @@ class TokenManager(context: Context) {
     fun getRefreshToken(): String? {
         return sharedPreferences.getString(KEY_REFRESH_TOKEN, null)
     }
+    fun isLoggedIn(): Boolean {
+        return sharedPreferences.getString(KEY_ACCESS_TOKEN, null)?.isNotEmpty() ?: false
+    }
 
     fun clearTokens() {
         val editor = sharedPreferences.edit()

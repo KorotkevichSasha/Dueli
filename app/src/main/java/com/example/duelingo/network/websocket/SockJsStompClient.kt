@@ -5,14 +5,13 @@ import android.util.Log
 import com.example.duelingo.dto.event.DuelFoundEvent
 import com.example.duelingo.dto.event.MatchmakingFailedEvent
 import com.example.duelingo.storage.TokenManager
+import com.example.duelingo.utils.AppConfig
 import com.google.gson.Gson
 import io.reactivex.disposables.Disposable
-import okhttp3.OkHttpClient
 import ua.naiksoftware.stomp.Stomp
 import ua.naiksoftware.stomp.StompClient
 import ua.naiksoftware.stomp.dto.LifecycleEvent
-import ua.naiksoftware.stomp.provider.OkHttpConnectionProvider
-import java.util.concurrent.TimeUnit
+import java.net.URLEncoder
 
 class StompManager(private val tokenManager: TokenManager) {
 
@@ -20,6 +19,7 @@ class StompManager(private val tokenManager: TokenManager) {
     private var subscriptions: MutableList<Disposable> = mutableListOf()
     private var isConnected = false
 
+    @SuppressLint("CheckResult")
     fun connect(
         onConnected: () -> Unit,
         onError: (Throwable) -> Unit,
@@ -27,32 +27,32 @@ class StompManager(private val tokenManager: TokenManager) {
         onMatchmakingFailed: (MatchmakingFailedEvent) -> Unit
     ) {
         try {
-            val wsUrl = "ws://192.168.0.101:8082/ws"
+            // Исправленный URL
+            val wsUrl = "${AppConfig.BASE_URL.replace("http", "ws")}/ws"
             Log.d("StompManager", "Connecting to: $wsUrl")
 
-            val token = tokenManager.getAccessToken()?.takeIf { it.isNotBlank() }
-                ?: throw IllegalStateException("Token is empty or not available")
+            val token = tokenManager.getAccessToken() ?: throw IllegalStateException("Token is empty")
 
-            val headers = mapOf("Authorization" to "Bearer $token")
+            // Добавлены обязательные заголовки
+            val headers = mapOf(
+                "Authorization" to "Bearer $token",
+                "Accept-Version" to "1.2",
+                "Heart-Beat" to "10000,10000"
+            )
+            stompClient = Stomp.over(
+                Stomp.ConnectionProvider.OKHTTP,
+                "$wsUrl/websocket?token=${URLEncoder.encode(token, "UTF-8")}",
+                headers
+            ).apply {
+                withClientHeartbeat(10000)
+                withServerHeartbeat(10000)
+            }
 
-            stompClient = createStompClient(wsUrl, headers)
             setupConnectionListeners(onConnected, onError, onDuelFound, onMatchmakingFailed)
             stompClient?.connect()
         } catch (e: Exception) {
-            Log.e("StompManager", "Initialization error", e)
+            Log.e("StompManager", "Connection error", e)
             onError(e)
-        }
-    }
-
-
-    private fun createStompClient(url: String, headers: Map<String, String>): StompClient {
-        return Stomp.over(
-            Stomp.ConnectionProvider.OKHTTP,
-            url,
-            headers
-        ).apply {
-            withClientHeartbeat(15000)
-            withServerHeartbeat(15000)
         }
     }
 
@@ -66,7 +66,7 @@ class StompManager(private val tokenManager: TokenManager) {
         stompClient?.lifecycle()?.subscribe { event ->
             when (event.type) {
                 LifecycleEvent.Type.OPENED -> {
-                    Log.d("StompManager", "WebSocket connection established")
+                    Log.d("StompManager", "Connection established. Subscribing to topics...")
                     isConnected = true
                     setupSubscriptions(onDuelFound, onMatchmakingFailed)
                     onConnected()
@@ -101,6 +101,7 @@ class StompManager(private val tokenManager: TokenManager) {
 
 
 
+
     private fun <T> parseAndHandle(payload: String, clazz: Class<T>, handler: (T) -> Unit, logName: String) {
         try {
             val obj = Gson().fromJson(payload, clazz)
@@ -118,12 +119,14 @@ class StompManager(private val tokenManager: TokenManager) {
         }
 
         return try {
-            stompClient?.send("/app/matchmaking/join", "").run {
-                Log.d("StompManager", "Join request sent")
-                true
-            }
+            Log.d("StompManager", "Sending JOIN to /matchmaking/join")
+            stompClient?.send("/matchmaking/join", Gson().toJson(mapOf("type" to "JOIN")))
+                .run {
+                    Log.d("StompManager", "Join request successfully sent")
+                    true
+                }
         } catch (e: Exception) {
-            Log.e("StompManager", "Error joining matchmaking", e)
+            Log.e("StompManager", "Error sending join request", e)
             false
         }
     }

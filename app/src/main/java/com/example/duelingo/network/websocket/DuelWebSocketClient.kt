@@ -153,7 +153,7 @@ class DuelWebSocketClient(
                 if (webSocketClient?.isOpen == true) {
                     val stompMessage = """
                     |SEND
-                    |destination:/app/matchmaking/join
+                    |destination:/matchmaking/join
                     |content-type:application/json
                     |content-length:0
                     |

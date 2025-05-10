@@ -155,15 +155,16 @@ class MenuActivity : AppCompatActivity() {
 
         try {
             Log.d("MenuActivity", "Checking WebSocket connection")
-            if (!stompManager.isConnected()) {  // Используем isConnected из StompManager
+            if (!stompManager.isConnected()) {
                 Log.d("MenuActivity", "WebSocket not connected, connecting...")
                 connectToWebSocket()
-                delay(1000)
+                delay(500)
             }
 
             if (!stompManager.isConnected()) {
                 throw IllegalStateException("WebSocket connection failed")
             }
+            Log.d("MenuActivity", "WebSocket connected: ${stompManager.isConnected()}")
             joinMatchmakingQueue()
 
             withContext(Dispatchers.Main) {
@@ -197,7 +198,7 @@ class MenuActivity : AppCompatActivity() {
 
         try {
             Log.d("MenuActivity", "Canceling matchmaking")
-            stompManager.cancelMatchmaking()  // Используем метод cancelMatchmaking из StompManager
+            stompManager.cancelMatchmaking()
             Log.d("MenuActivity", "Triggering vibration")
             vibrate(50)
         } catch (e: Exception) {
