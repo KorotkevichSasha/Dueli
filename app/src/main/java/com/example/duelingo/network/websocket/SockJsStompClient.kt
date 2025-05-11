@@ -27,18 +27,19 @@ class StompManager(private val tokenManager: TokenManager) {
         onMatchmakingFailed: (MatchmakingFailedEvent) -> Unit
     ) {
         try {
-            // Исправленный URL
-            val wsUrl = "${AppConfig.BASE_URL.replace("http", "ws")}/ws/websocket"
-            Log.d("StompManager", "Connecting to: $wsUrl")
-
             val token = tokenManager.getAccessToken() ?: throw IllegalStateException("Token is empty")
 
-            // Добавлены обязательные заголовки
+            // 1. Формируем URL с токеном в query параметре
+            val encodedToken = URLEncoder.encode(token, "UTF-8")
+            val wsUrl = "${AppConfig.BASE_URL.replace("http", "ws")}/ws/websocket"
+
+            // 2. Добавляем заголовок Authorization
             val headers = mapOf(
                 "Authorization" to "Bearer $token",
                 "Accept-Version" to "1.2",
                 "Heart-Beat" to "10000,10000"
             )
+
             stompClient = Stomp.over(
                 Stomp.ConnectionProvider.OKHTTP,
                 wsUrl,
@@ -90,6 +91,7 @@ class StompManager(private val tokenManager: TokenManager) {
         onDuelFound: (DuelFoundEvent) -> Unit,
         onMatchmakingFailed: (MatchmakingFailedEvent) -> Unit
     ) {
+        // Используем user-specific destinations
         subscriptions.add(stompClient?.topic("/user/queue/duel-found")?.subscribe { message ->
             parseAndHandle(message.payload, DuelFoundEvent::class.java, onDuelFound, "duel info")
         } ?: return)
@@ -98,6 +100,9 @@ class StompManager(private val tokenManager: TokenManager) {
             parseAndHandle(message.payload, MatchmakingFailedEvent::class.java, onMatchmakingFailed, "matchmaking failed")
         } ?: return)
     }
+
+
+
 
     private fun <T> parseAndHandle(payload: String, clazz: Class<T>, handler: (T) -> Unit, logName: String) {
         try {
@@ -116,12 +121,14 @@ class StompManager(private val tokenManager: TokenManager) {
         }
 
         return try {
-            Log.d("StompManager", "Sending JOIN to /matchmaking/join")
-            stompClient?.send("/app/matchmaking/join")
-                .run {
-                    Log.d("StompManager", "Join request successfully sent")
-                    true
-                }
+            Log.d("StompManager", "Sending JOIN to /app/matchmaking/join")
+            stompClient?.send(
+                "/app/matchmaking/join",
+                "\u0000".toByteArray().toString()
+            ).run {
+                Log.d("StompManager", "Join request sent")
+                true
+            }
         } catch (e: Exception) {
             Log.e("StompManager", "Error sending join request", e)
             false

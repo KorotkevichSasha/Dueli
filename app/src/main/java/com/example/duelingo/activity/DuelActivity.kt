@@ -1,6 +1,5 @@
 package com.example.duelingo.activity
 
-
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -9,13 +8,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import com.example.duelingo.R
+import com.example.duelingo.dto.response.QuestionDetailedResponse
 import com.example.duelingo.databinding.ActivityDuelBinding
 import com.example.duelingo.dto.event.DuelFoundEvent
 import com.example.duelingo.dto.event.MatchmakingFailedEvent
 import com.example.duelingo.dto.request.DuelFinishRequest
-import com.example.duelingo.dto.response.QuestionDetailedResponse
 import com.example.duelingo.fragment.QuestionFragment
 import com.example.duelingo.network.ApiClient
+import com.example.duelingo.network.websocket.StompManager
 import com.example.duelingo.storage.TokenManager
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
@@ -31,19 +31,24 @@ class DuelActivity : AppCompatActivity() {
     private lateinit var duelQuestions: List<QuestionDetailedResponse>
     private lateinit var duelId: String
     private lateinit var opponentName: String
-    //private val webSocketClient = SockJsStompClient(TokenManager(this))
+    private lateinit var stompManager: StompManager
+    private lateinit var tokenManager: TokenManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDuelBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (!TokenManager(this).isLoggedIn()) {
+        tokenManager = TokenManager(this)
+        if (!tokenManager.isLoggedIn()) {
             finish()
             return
         }
 
-        // Проверяем наличие данных дуэли
+        // Инициализация StompManager
+        stompManager = StompManager(tokenManager)
+
+        // Проверка данных дуэли
         val duelInfoJson = intent.getStringExtra("DUEL_INFO") ?: run {
             Toast.makeText(this, "Duel data corrupted", Toast.LENGTH_SHORT).show()
             finish()
@@ -53,28 +58,56 @@ class DuelActivity : AppCompatActivity() {
         val duelInfo = Gson().fromJson(duelInfoJson, DuelFoundEvent::class.java)
         duelQuestions = duelInfo.duel.questions
         duelId = duelInfo.duel.id
+        opponentName = duelInfo.opponentId
 
         binding.opponentName.text = "Opponent: $opponentName"
 
         setupTimer()
         loadNextQuestion()
-
-
     }
 
-//    override fun onStart() {
-//        super.onStart()
-//        webSocketClient.connect(
-//            onConnected = { joinMatchmaking() },
-//            onError = { showError(it) },
-//            onDuelFound = { startDuel(it) },
-//            onMatchmakingFailed = { showMatchmakingError(it) }
-//        )
-//    }
+    override fun onStart() {
+        super.onStart()
+        connectToWebSocket()
+    }
 
     override fun onStop() {
         super.onStop()
-        //webSocketClient.disconnect()
+        stompManager.disconnect()
+    }
+
+    private fun connectToWebSocket() {
+        stompManager.connect(
+            onConnected = ::handleWebSocketConnected,
+            onError = ::handleWebSocketError,
+            onDuelFound = ::handleDuelFound,
+            onMatchmakingFailed = ::handleMatchmakingFailed
+        )
+    }
+
+    private fun handleWebSocketConnected() {
+        Log.d("DuelActivity", "WebSocket connected")
+        joinMatchmaking()
+    }
+
+    private fun handleWebSocketError(error: Throwable) {
+        Log.e("DuelActivity", "WebSocket error", error)
+        Toast.makeText(this, "Connection error: ${error.message}", Toast.LENGTH_SHORT).show()
+        finish()
+    }
+
+    private fun handleDuelFound(event: DuelFoundEvent) {
+        runOnUiThread {
+            duelQuestions = event.duel.questions
+            duelId = event.duel.id
+            loadNextQuestion()
+        }
+    }
+
+    private fun handleMatchmakingFailed(event: MatchmakingFailedEvent) {
+        Log.e("DuelActivity", "Matchmaking failed: ${event.reason}")
+        Toast.makeText(this, "Matchmaking failed: ${event.reason}", Toast.LENGTH_LONG).show()
+        finish()
     }
 
     private fun setupTimer() {
@@ -121,7 +154,7 @@ class DuelActivity : AppCompatActivity() {
 
     private fun sendResultsToServer() {
         val request = DuelFinishRequest(
-            duelId = duelId.toString(),
+            duelId = duelId,
             correctAnswers = currentQuestion,
             timeSpent = 5 * 60 * 1000 - timeLeftMillis
         )
@@ -129,7 +162,7 @@ class DuelActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 ApiClient.duelService.finishDuel(
-                    "Bearer ${TokenManager(this@DuelActivity).getAccessToken()}",
+                    "Bearer ${tokenManager.getAccessToken()}",
                     request
                 )
             } catch (e: Exception) {
@@ -138,17 +171,10 @@ class DuelActivity : AppCompatActivity() {
         }
     }
 
-    private fun startDuel(event: DuelFoundEvent) = runOnUiThread {
-        duelQuestions = event.duel.questions
-        duelId = event.duel.id
-        loadNextQuestion()
-    }
-
-    private fun showError(error: Throwable) {
-        Log.e("Duel", "WebSocket Error", error)
-    }
-
-    private fun showMatchmakingError(event: MatchmakingFailedEvent) {
-        Log.e("Duel", "Matchmaking failed: ${event.reason}")
+    private fun joinMatchmaking() {
+        if (!stompManager.joinMatchmaking()) {
+            Toast.makeText(this, "Failed to join matchmaking", Toast.LENGTH_SHORT).show()
+            finish()
+        }
     }
 }

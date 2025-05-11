@@ -1,8 +1,6 @@
 package com.example.duelingo.activity
 
 import android.animation.Animator
-import android.animation.ObjectAnimator
-import android.animation.PropertyValuesHolder
 import android.app.Dialog
 import android.app.ProgressDialog
 import android.content.Intent
@@ -12,11 +10,8 @@ import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -30,7 +25,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.airbnb.lottie.LottieAnimationView
-import com.bumptech.glide.Glide
 import com.example.duelingo.R
 import com.example.duelingo.adapters.FriendsAdapter
 import com.example.duelingo.databinding.ActivityMenuBinding
@@ -134,7 +128,8 @@ class MenuActivity : AppCompatActivity() {
             scope.launch {
                 if (binding.btnDuel.text == "DUEL") {
                     Log.d("MenuActivity", "Starting duel search")
-                    startDuelSearch()
+                    startActivity(Intent(this@MenuActivity, DuelActivity::class.java))
+//                    startDuelSearch() todo
                 } else {
                     Log.d("MenuActivity", "Canceling duel search")
                     cancelDuelSearch()
@@ -213,6 +208,10 @@ class MenuActivity : AppCompatActivity() {
     private suspend fun connectToWebSocket() {
         Log.d("MenuActivity", "connectToWebSocket started")
         try {
+            val token = tokenManager.getAccessToken()
+            if (token.isNullOrEmpty()) {
+                throw IllegalStateException("User not authenticated")
+            }
             Log.d("MenuActivity", "Starting WebSocket connection")
             suspendCancellableCoroutine<Unit> { continuation ->
                 Log.d("MenuActivity", "Calling stompManager.connect")
