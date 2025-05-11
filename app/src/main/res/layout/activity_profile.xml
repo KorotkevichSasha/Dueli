@@ -70,6 +70,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp"/>
 
+    <!-- Достижения -->
+    <Button
+        android:id="@+id/achievementsButton"
+        android:layout_width="198dp"
+        android:layout_height="wrap_content"
+        android:text="Достижения"
+        android:background="@drawable/bg_button"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/acceptFriends"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"/>
 
     <Button
         android:id="@+id/logout"

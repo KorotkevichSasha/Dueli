@@ -28,7 +28,7 @@ class StompManager(private val tokenManager: TokenManager) {
     ) {
         try {
             // Исправленный URL
-            val wsUrl = "${AppConfig.BASE_URL.replace("http", "ws")}/ws"
+            val wsUrl = "${AppConfig.BASE_URL.replace("http", "ws")}/ws/websocket"
             Log.d("StompManager", "Connecting to: $wsUrl")
 
             val token = tokenManager.getAccessToken() ?: throw IllegalStateException("Token is empty")
@@ -41,7 +41,7 @@ class StompManager(private val tokenManager: TokenManager) {
             )
             stompClient = Stomp.over(
                 Stomp.ConnectionProvider.OKHTTP,
-                "$wsUrl/websocket?token=${URLEncoder.encode(token, "UTF-8")}",
+                wsUrl,
                 headers
             ).apply {
                 withClientHeartbeat(10000)
@@ -99,9 +99,6 @@ class StompManager(private val tokenManager: TokenManager) {
         } ?: return)
     }
 
-
-
-
     private fun <T> parseAndHandle(payload: String, clazz: Class<T>, handler: (T) -> Unit, logName: String) {
         try {
             val obj = Gson().fromJson(payload, clazz)
@@ -120,7 +117,7 @@ class StompManager(private val tokenManager: TokenManager) {
 
         return try {
             Log.d("StompManager", "Sending JOIN to /matchmaking/join")
-            stompClient?.send("/matchmaking/join", Gson().toJson(mapOf("type" to "JOIN")))
+            stompClient?.send("/app/matchmaking/join")
                 .run {
                     Log.d("StompManager", "Join request successfully sent")
                     true

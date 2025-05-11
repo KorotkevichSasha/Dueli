@@ -40,7 +40,6 @@ import com.example.duelingo.dto.response.FriendResponse
 import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.network.UserService
-import com.example.duelingo.network.websocket.DuelWebSocketClient
 import com.example.duelingo.network.websocket.StompManager
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.utils.AppConfig

@@ -9,18 +9,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import com.example.duelingo.R
-import com.example.duelingo.dto.response.QuestionDetailedResponse
 import com.example.duelingo.databinding.ActivityDuelBinding
 import com.example.duelingo.dto.event.DuelFoundEvent
 import com.example.duelingo.dto.event.MatchmakingFailedEvent
 import com.example.duelingo.dto.request.DuelFinishRequest
+import com.example.duelingo.dto.response.QuestionDetailedResponse
 import com.example.duelingo.fragment.QuestionFragment
 import com.example.duelingo.network.ApiClient
-import com.example.duelingo.network.websocket.DuelWebSocketClient
 import com.example.duelingo.storage.TokenManager
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
-import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 class DuelActivity : AppCompatActivity() {
@@ -33,7 +31,7 @@ class DuelActivity : AppCompatActivity() {
     private lateinit var duelQuestions: List<QuestionDetailedResponse>
     private lateinit var duelId: String
     private lateinit var opponentName: String
-    private val webSocketClient = DuelWebSocketClient(TokenManager(this))
+    //private val webSocketClient = SockJsStompClient(TokenManager(this))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,19 +62,19 @@ class DuelActivity : AppCompatActivity() {
 
     }
 
-    override fun onStart() {
-        super.onStart()
-        webSocketClient.connect(
-            onConnected = { joinMatchmaking() },
-            onError = { showError(it) },
-            onDuelFound = { startDuel(it) },
-            onMatchmakingFailed = { showMatchmakingError(it) }
-        )
-    }
+//    override fun onStart() {
+//        super.onStart()
+//        webSocketClient.connect(
+//            onConnected = { joinMatchmaking() },
+//            onError = { showError(it) },
+//            onDuelFound = { startDuel(it) },
+//            onMatchmakingFailed = { showMatchmakingError(it) }
+//        )
+//    }
 
     override fun onStop() {
         super.onStop()
-        webSocketClient.disconnect()
+        //webSocketClient.disconnect()
     }
 
     private fun setupTimer() {
@@ -140,8 +138,6 @@ class DuelActivity : AppCompatActivity() {
         }
     }
 
-    private fun joinMatchmaking() = webSocketClient.joinMatchmaking()
-    private fun cancelMatchmaking() = webSocketClient.cancelMatchmaking()
     private fun startDuel(event: DuelFoundEvent) = runOnUiThread {
         duelQuestions = event.duel.questions
         duelId = event.duel.id
