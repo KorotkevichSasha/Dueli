@@ -56,7 +56,7 @@ class ProfileActivity : AppCompatActivity() {
         binding.logout.setOnClickListener { logout() }
 
         binding.acceptFriends.setOnClickListener { showFriendRequestsDialog() }
-
+        binding.achievementsButton.setOnClickListener{ startActivity(Intent(this@ProfileActivity, AchievementActivity::class.java)) }
 
         binding.tests.setOnClickListener {
             resetAll()

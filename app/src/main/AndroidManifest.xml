@@ -20,6 +20,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".activity.AchievementActivity"
+            android:exported="false" />
+        <activity
             android:name=".activity.LearningActivity"
             android:exported="false" />
         <activity
