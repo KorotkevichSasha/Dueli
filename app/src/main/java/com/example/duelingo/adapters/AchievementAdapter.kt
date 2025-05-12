@@ -1,16 +1,20 @@
 package com.example.duelingo.adapters
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.duelingo.R
+import com.example.duelingo.dto.response.AchievementLevel
 import com.example.duelingo.dto.response.UserAchievementResponse
+import androidx.core.graphics.toColorInt
 
 class AchievementsAdapter(
     private var achievements: List<UserAchievementResponse>
@@ -51,14 +55,30 @@ class AchievementsAdapter(
             progressBar.max = achievement.requiredValue
             progressBar.progress = achievement.currentValue
 
+            val bgRes = when (achievement.level) {
+                AchievementLevel.BRONZE -> R.drawable.ic_achievement_bronze
+                AchievementLevel.SILVER -> R.drawable.ic_achievement_silver
+                AchievementLevel.GOLD -> R.drawable.ic_achievement_gold
+            }
+
+            itemView.background = ContextCompat.getDrawable(itemView.context, bgRes)
+
+            if (!achievement.isAchieved) {
+                ivIcon.alpha = 0.3f
+                ivStatus.setImageResource(R.drawable.ic_lock)
+            } else {
+                ivIcon.alpha = 1.0f
+                ivStatus.setImageResource(R.drawable.img)
+            }
+
             Glide.with(ivIcon.context)
                 .load(achievement.iconUrl)
                 .into(ivIcon)
 
-            ivStatus.setImageResource(
-                if (achievement.isAchieved) R.drawable.img
-                else R.drawable.ic_lock
-            )
+//            ivStatus.setImageResource(
+//                if (achievement.isAchieved) R.drawable.img
+//                else R.drawable.ic_lock
+//            )
         }
     }
 }
