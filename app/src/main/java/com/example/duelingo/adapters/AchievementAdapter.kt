@@ -51,15 +51,14 @@ class AchievementsAdapter(
             progressBar.max = achievement.requiredValue
             progressBar.progress = achievement.currentValue
 
-//            Glide.with(ivIcon.context)
-//                .load(achievement.iconUrl)
-//                .placeholder(R.drawable.ic_achievement_placeholder)
-//                .into(ivIcon)
-//
-//            ivStatus.setImageResource(
-//                if (achievement.isAchieved) R.drawable.ic_check
-//                else R.drawable.ic_lock
-//            )
+            Glide.with(ivIcon.context)
+                .load(achievement.iconUrl)
+                .into(ivIcon)
+
+            ivStatus.setImageResource(
+                if (achievement.isAchieved) R.drawable.img
+                else R.drawable.ic_lock
+            )
         }
     }
 }
