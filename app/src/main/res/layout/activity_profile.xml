@@ -6,6 +6,21 @@
     android:layout_height="match_parent"
     android:background="#0B0B0D">
 
+    <!-- Кнопка настроек -->
+    <ImageButton
+        android:id="@+id/settings_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_settings"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="12dp"
+        android:contentDescription="Настройки"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:tint="@color/gray"/>
+
     <!-- Анимация Lottie -->
 
     <!-- Круглая форма для фотографии профиля -->

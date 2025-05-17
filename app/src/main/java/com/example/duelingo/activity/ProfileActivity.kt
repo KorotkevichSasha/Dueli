@@ -1,16 +1,22 @@
 package com.example.duelingo.activity
 import android.animation.Animator
+import android.app.Dialog
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.View
+import android.view.Window
+import android.view.WindowManager
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,6 +28,7 @@ import com.example.duelingo.adapters.FriendRequestsAdapter
 import com.example.duelingo.databinding.ActivityProfileBinding
 import com.example.duelingo.dto.response.UserProfileResponse
 import com.example.duelingo.manager.AvatarManager
+import com.example.duelingo.manager.ThemeManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -77,6 +84,10 @@ class ProfileActivity : AppCompatActivity() {
             playAnimation(binding.cupAnimation, binding.cupIcon, binding.cupTest, "cupAnim.json")
         }
         binding.profile.setOnClickListener {}
+
+        binding.settingsButton.setOnClickListener {
+            showThemeDialog()
+        }
     }
 
     private fun showFriendRequestsDialog() {
@@ -246,5 +257,30 @@ class ProfileActivity : AppCompatActivity() {
         binding.mainIcon.setImageResource(R.drawable.swords24)
         binding.cupIcon.setImageResource(R.drawable.trophy24)
         binding.profileIcon.setImageResource(R.drawable.profile24)
+    }
+
+    private fun showThemeDialog() {
+        val dialog = Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.dialog_theme_settings)
+        
+        dialog.window?.apply {
+            setGravity(Gravity.END or Gravity.TOP)
+            setLayout(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT
+            )
+            attributes?.y = 80
+            setBackgroundDrawableResource(android.R.color.transparent)
+        }
+
+        val themeSwitch = dialog.findViewById<SwitchCompat>(R.id.theme_switch)
+        themeSwitch.isChecked = ThemeManager.isDarkMode(this)
+        
+        themeSwitch.setOnCheckedChangeListener { _, isChecked ->
+            ThemeManager.setDarkMode(this, isChecked)
+        }
+
+        dialog.show()
     }
 }
