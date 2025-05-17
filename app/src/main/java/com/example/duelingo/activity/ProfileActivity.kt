@@ -10,8 +10,10 @@ import android.view.Gravity
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,24 +21,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.example.duelingo.R
 import com.example.duelingo.activity.auth.LoginActivity
-import com.example.duelingo.adapters.FriendRequestsAdapter
 import com.example.duelingo.databinding.ActivityProfileBinding
 import com.example.duelingo.dto.response.UserProfileResponse
 import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.manager.ThemeManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.UUID
-
 
 class ProfileActivity : AppCompatActivity() {
 
@@ -60,9 +56,6 @@ class ProfileActivity : AppCompatActivity() {
         binding.profileImage.setOnClickListener { getContent.launch("image/*") }
         loadProfile()
 
-        binding.logout.setOnClickListener { logout() }
-
-        binding.acceptFriends.setOnClickListener { showFriendRequestsDialog() }
         binding.achievementsButton.setOnClickListener{ startActivity(Intent(this@ProfileActivity, AchievementActivity::class.java)) }
 
         binding.tests.setOnClickListener {
@@ -90,75 +83,43 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun showFriendRequestsDialog() {
-        val dialog = BottomSheetDialog(this)
-        dialog.setContentView(R.layout.dialog_add_friend)
+    private fun showThemeDialog() {
+        val dialog = Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.dialog_theme_settings)
+        
+        dialog.window?.apply {
+            setGravity(Gravity.END or Gravity.TOP)
+            setLayout(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT
+            )
+            attributes?.y = 80
+            setBackgroundDrawableResource(android.R.color.transparent)
+        }
 
-        val recyclerView = dialog.findViewById<RecyclerView>(R.id.requestsRecyclerView)
+        val themeSwitch = dialog.findViewById<SwitchCompat>(R.id.theme_switch)
+        themeSwitch.isChecked = ThemeManager.isDarkMode()
+        
+        themeSwitch.setOnCheckedChangeListener { _, isChecked ->
+            ThemeManager.setDarkMode(isChecked)
+        }
 
-        val adapter = FriendRequestsAdapter(
-            avatarManager = avatarManager,
-            onAccept = { requestId -> updateRequestStatus(requestId, "accept", recyclerView) },
-            onReject = { requestId -> updateRequestStatus(requestId, "reject", recyclerView) }
-        )
+        val logoutButton = dialog.findViewById<LinearLayout>(R.id.logout_button)
+        logoutButton.setOnClickListener {
+            dialog.dismiss()
+            logout()
+        }
 
-        recyclerView?.layoutManager = LinearLayoutManager(this)
-        recyclerView?.adapter = adapter
-
-        loadFriendRequests(adapter)
         dialog.show()
     }
-    private fun updateRequestStatus(requestId: UUID, action: String, recyclerView: RecyclerView?) {
-        lifecycleScope.launch {
-            try {
-                val response = ApiClient.relationshipService.updateRelationshipStatus(
-                    "Bearer ${tokenManager.getAccessToken()}",
-                    requestId,
-                    action
-                )
-
-                if (response.isSuccessful) {
-                    showToast("Request updated")
-                    val adapter = (recyclerView?.adapter as? FriendRequestsAdapter)
-                    adapter?.let { loadFriendRequests(it) }
-                } else {
-                    val errorBody = response.errorBody()?.string()
-                    showToast("Error: ${errorBody ?: "Unknown error"}")
-                }
-            } catch (e: Exception) {
-                showToast("Error updating request: ${e.message}")
-            }
-        }
-    }
-    private fun loadFriendRequests(adapter: FriendRequestsAdapter) {
-        lifecycleScope.launch {
-            try {
-                val response = ApiClient.relationshipService.getIncomingRequests(
-                    "Bearer ${tokenManager.getAccessToken()}"
-                )
-
-                if (response.isSuccessful) {
-                    response.body()?.let { requests ->
-                        adapter.submitList(requests)
-                    }
-                } else {
-                    val errorBody = response.errorBody()?.string()
-                    showToast("Error: ${errorBody ?: "Unknown error"}")
-                }
-            } catch (e: Exception) {
-                showToast("Error loading requests: ${e.message}")
-            }
-        }
-    }
-
 
     private fun updateUI(response: UserProfileResponse) {
         binding.playerName.text = response.username
         binding.playerEmail.text = response.email
         binding.pointCount.text = "Очки: ${response.points}"
-
-        avatarManager.loadAvatar(response.id, binding.profileImage)
     }
+
     private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             avatarManager.uploadImage(it,
@@ -192,9 +153,9 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
     }
+
     private fun logout() {
         tokenManager.clearTokens()
-
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
@@ -204,11 +165,13 @@ class ProfileActivity : AppCompatActivity() {
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
+
     private fun changeColorAndIcon(icon: ImageView, text: TextView, iconRes: Int) {
         text.setTextColor(ContextCompat.getColor(this, R.color.blue_primary))
         icon.setColorFilter(ContextCompat.getColor(this, R.color.blue_primary))
         icon.setImageResource(iconRes)
     }
+
     private fun playAnimation(animationView: LottieAnimationView, icon: ImageView, text: TextView, animationFile: String) {
         currentAnimationView?.apply {
             cancelAnimation()
@@ -245,6 +208,7 @@ class ProfileActivity : AppCompatActivity() {
             override fun onAnimationRepeat(animation: Animator) {}
         })
     }
+
     private fun resetAll() {
         binding.testTest.setTextColor(Color.parseColor("#7A7A7B"))
         binding.mainTest.setTextColor(Color.parseColor("#7A7A7B"))
@@ -257,30 +221,5 @@ class ProfileActivity : AppCompatActivity() {
         binding.mainIcon.setImageResource(R.drawable.swords24)
         binding.cupIcon.setImageResource(R.drawable.trophy24)
         binding.profileIcon.setImageResource(R.drawable.profile24)
-    }
-
-    private fun showThemeDialog() {
-        val dialog = Dialog(this)
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        dialog.setContentView(R.layout.dialog_theme_settings)
-        
-        dialog.window?.apply {
-            setGravity(Gravity.END or Gravity.TOP)
-            setLayout(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT
-            )
-            attributes?.y = 80
-            setBackgroundDrawableResource(android.R.color.transparent)
-        }
-
-        val themeSwitch = dialog.findViewById<SwitchCompat>(R.id.theme_switch)
-        themeSwitch.isChecked = ThemeManager.isDarkMode()
-        
-        themeSwitch.setOnCheckedChangeListener { _, isChecked ->
-            ThemeManager.setDarkMode(isChecked)
-        }
-
-        dialog.show()
     }
 }

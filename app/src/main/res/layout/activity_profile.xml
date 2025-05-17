@@ -73,18 +73,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="8dp"/>
 
-    <!-- Заявки в друзья -->
-    <Button
-        android:id="@+id/acceptFriends"
-        android:layout_width="198dp"
-        android:layout_height="wrap_content"
-        android:text="Заявки в друзья"
-        android:background="@drawable/bg_button"
-        app:layout_constraintTop_toBottomOf="@id/point_count"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
-
     <!-- Достижения -->
     <Button
         android:id="@+id/achievementsButton"
@@ -93,24 +81,10 @@
         android:text="Достижения"
         android:background="@drawable/bg_button"
         android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/acceptFriends"
+        app:layout_constraintTop_toBottomOf="@id/point_count"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp"/>
-
-    <Button
-        android:id="@+id/logout"
-        android:layout_width="197dp"
-        android:layout_height="51dp"
-        android:layout_marginTop="88dp"
-        android:background="@drawable/bg_button_red"
-        app:backgroundTint="@color/red"
-        android:text="Выйти из аккаунта"
-        android:textColor="@color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/acceptFriends" />
 
     <LinearLayout
         android:layout_width="match_parent"

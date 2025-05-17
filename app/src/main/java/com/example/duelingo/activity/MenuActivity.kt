@@ -24,9 +24,11 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.example.duelingo.R
 import com.example.duelingo.adapters.FriendsAdapter
+import com.example.duelingo.adapters.FriendRequestsAdapter
 import com.example.duelingo.databinding.ActivityMenuBinding
 import com.example.duelingo.dto.event.DuelFoundEvent
 import com.example.duelingo.dto.request.RelationshipRequest
@@ -102,8 +104,11 @@ class MenuActivity : AppCompatActivity() {
         }
 
         binding.addFriendButton.setOnClickListener {
-            Log.d("MenuActivity", "Add friend button clicked")
             showAddFriendDialog()
+        }
+
+        binding.friendRequestsButton.setOnClickListener {
+            showFriendRequestsDialog()
         }
 
         Log.d("MenuActivity", "Setting up navigation buttons")
@@ -566,6 +571,71 @@ class MenuActivity : AppCompatActivity() {
         }
         Log.d("MenuActivity", "setupNavigationButtons completed")
     }
+
+    private fun showFriendRequestsDialog() {
+        val dialog = Dialog(this)
+        dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog)
+        dialog.setContentView(R.layout.dialog_add_friend)
+
+        val recyclerView = dialog.findViewById<RecyclerView>(R.id.requestsRecyclerView)
+
+        val adapter = FriendRequestsAdapter(
+            avatarManager = avatarManager,
+            onAccept = { requestId -> updateRequestStatus(requestId, "accept", recyclerView) },
+            onReject = { requestId -> updateRequestStatus(requestId, "reject", recyclerView) }
+        )
+
+        recyclerView?.layoutManager = LinearLayoutManager(this)
+        recyclerView?.adapter = adapter
+
+        loadFriendRequests(adapter)
+        dialog.show()
+    }
+
+    private fun updateRequestStatus(requestId: UUID, action: String, recyclerView: RecyclerView?) {
+        lifecycleScope.launch {
+            try {
+                val response = ApiClient.relationshipService.updateRelationshipStatus(
+                    "Bearer ${tokenManager.getAccessToken()}",
+                    requestId,
+                    action
+                )
+
+                if (response.isSuccessful) {
+                    showToast("Request updated")
+                    val adapter = (recyclerView?.adapter as? FriendRequestsAdapter)
+                    adapter?.let { loadFriendRequests(it) }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    showToast("Error: ${errorBody ?: "Unknown error"}")
+                }
+            } catch (e: Exception) {
+                showToast("Error updating request: ${e.message}")
+            }
+        }
+    }
+
+    private fun loadFriendRequests(adapter: FriendRequestsAdapter) {
+        lifecycleScope.launch {
+            try {
+                val response = ApiClient.relationshipService.getIncomingRequests(
+                    "Bearer ${tokenManager.getAccessToken()}"
+                )
+
+                if (response.isSuccessful) {
+                    response.body()?.let { requests ->
+                        adapter.submitList(requests)
+                    }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    showToast("Error: ${errorBody ?: "Unknown error"}")
+                }
+            } catch (e: Exception) {
+                showToast("Error loading requests: ${e.message}")
+            }
+        }
+    }
+
     object RetrofitClient {
         fun getClient(tokenManager: TokenManager): Retrofit {
             val okHttpClient = OkHttpClient.Builder()
