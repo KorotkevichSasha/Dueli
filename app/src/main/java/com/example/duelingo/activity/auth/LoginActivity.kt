@@ -44,7 +44,7 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        binding.signupRedirect.setOnClickListener {
+        binding.noAccount.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
     }

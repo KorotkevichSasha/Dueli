@@ -21,4 +21,5 @@ object ApiClient {
     val wordService: WordService by lazy { retrofit.create(WordService::class.java) }
     val duelService: DuelService by lazy { retrofit.create(DuelService::class.java) }
     val achievementService: AchievementService by lazy { retrofit.create(AchievementService::class.java)}
+    val duelHistoryService: DuelHistoryService by lazy { retrofit.create(DuelHistoryService::class.java)}
 }

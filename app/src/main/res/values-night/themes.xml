@@ -15,5 +15,6 @@
         <item name="textColor">@color/text_color_dark</item>
         <item name="secondaryTextColor">@color/secondary_text_dark</item>
         <item name="cardBackgroundColor">@color/fon</item>
+        <item name="dividerColor">@color/gray</item>
     </style>
 </resources> 
