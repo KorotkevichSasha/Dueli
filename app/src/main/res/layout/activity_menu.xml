@@ -120,7 +120,7 @@
         android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="#0B0B0D"
+        android:background="?attr/backgroundColor"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent">
 
