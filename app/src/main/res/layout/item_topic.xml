@@ -6,7 +6,7 @@
     android:layout_margin="8dp"
     app:cardCornerRadius="12dp"
     app:cardElevation="4dp"
-    app:cardBackgroundColor="#2B2B2B">
+    app:cardBackgroundColor="?attr/cardBackgroundColor">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -19,7 +19,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Present Simple"
-            android:textColor="@color/blue_primary"
+            android:textColor="?attr/textColor"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -35,6 +35,7 @@
             android:src="@drawable/check"
             android:visibility="gone"
             android:contentDescription="Easy Completed"
+            app:tint="?attr/iconTint"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/ivMediumCheckmark"
             app:layout_constraintTop_toTopOf="parent" />

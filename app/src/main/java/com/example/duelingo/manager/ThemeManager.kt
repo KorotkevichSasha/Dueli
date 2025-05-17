@@ -7,28 +7,27 @@ import androidx.appcompat.app.AppCompatDelegate
 object ThemeManager {
     private const val PREF_NAME = "theme_preferences"
     private const val KEY_IS_DARK_MODE = "is_dark_mode"
-
-    private fun getPreferences(context: Context): SharedPreferences {
-        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    }
-
-    fun isDarkMode(context: Context): Boolean {
-        return getPreferences(context).getBoolean(KEY_IS_DARK_MODE, true)
-    }
-
-    fun setDarkMode(context: Context, isDarkMode: Boolean) {
-        getPreferences(context).edit().putBoolean(KEY_IS_DARK_MODE, isDarkMode).apply()
-        applyTheme(isDarkMode)
-    }
-
-    fun applyTheme(isDarkMode: Boolean) {
-        AppCompatDelegate.setDefaultNightMode(
-            if (isDarkMode) AppCompatDelegate.MODE_NIGHT_YES
-            else AppCompatDelegate.MODE_NIGHT_NO
-        )
-    }
+    private lateinit var preferences: SharedPreferences
 
     fun init(context: Context) {
-        applyTheme(isDarkMode(context))
+        preferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        // Применяем сохраненную тему при запуске
+        applyTheme(isDarkMode())
+    }
+
+    fun isDarkMode(): Boolean {
+        return preferences.getBoolean(KEY_IS_DARK_MODE, true)
+    }
+
+    fun setDarkMode(isDark: Boolean) {
+        preferences.edit().putBoolean(KEY_IS_DARK_MODE, isDark).apply()
+        applyTheme(isDark)
+    }
+
+    private fun applyTheme(isDark: Boolean) {
+        AppCompatDelegate.setDefaultNightMode(
+            if (isDark) AppCompatDelegate.MODE_NIGHT_YES
+            else AppCompatDelegate.MODE_NIGHT_NO
+        )
     }
 } 

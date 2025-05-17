@@ -275,10 +275,10 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         val themeSwitch = dialog.findViewById<SwitchCompat>(R.id.theme_switch)
-        themeSwitch.isChecked = ThemeManager.isDarkMode(this)
+        themeSwitch.isChecked = ThemeManager.isDarkMode()
         
         themeSwitch.setOnCheckedChangeListener { _, isChecked ->
-            ThemeManager.setDarkMode(this, isChecked)
+            ThemeManager.setDarkMode(isChecked)
         }
 
         dialog.show()

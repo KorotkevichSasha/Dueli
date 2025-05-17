@@ -5,7 +5,7 @@
     android:id="@+id/achievementLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212">
+    android:background="?attr/backgroundColor">
 
     <TextView
         android:id="@+id/achievementTitle"
@@ -14,7 +14,7 @@
         android:text="Достижения"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:textColor="@android:color/white"
+        android:textColor="@color/blue_primary"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

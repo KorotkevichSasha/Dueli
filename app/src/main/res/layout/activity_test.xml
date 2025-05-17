@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activity.TestActivity"
-    android:background="#0B0B0D">
+    android:background="?attr/backgroundColor">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTests"
@@ -31,7 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:orientation="horizontal"
-        android:background="#0B0B0D"
+        android:background="?attr/backgroundColor"
         android:layout_alignParentBottom="true"
         app:layout_constraintBottom_toBottomOf="parent">
 
