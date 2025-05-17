@@ -25,9 +25,165 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@id/achievementTitle"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:padding="16dp"/>
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="#0B0B0D"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:id="@+id/tests"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/testIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Тесты"
+                    android:src="@drawable/graduation24" />
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/testAnimation"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/testTest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Обучение"
+                android:textColor="#7A7A7B"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Дуэль -->
+        <LinearLayout
+            android:id="@+id/duel"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/mainIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Дуэль"
+                    android:src="@drawable/swords24" />
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/duelAnimation"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/mainTest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Дуэль"
+                android:textColor="#7A7A7B"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Рейтинг -->
+        <LinearLayout
+            android:id="@+id/leaderboard"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/cupIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Рейтинг"
+                    android:src="@drawable/trophy24" />
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/cupAnimation"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/cupTest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Рейтинг"
+                android:textColor="#7A7A7B"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Профиль -->
+        <LinearLayout
+            android:id="@+id/profile"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/profileIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Профиль"
+                    android:src="@drawable/profile24" />
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/profAnimation"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/profileTest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Профиль"
+                android:textColor="#7A7A7B"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
