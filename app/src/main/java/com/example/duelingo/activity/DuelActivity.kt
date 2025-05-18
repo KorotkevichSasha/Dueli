@@ -25,7 +25,7 @@ class DuelActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDuelBinding
     private lateinit var timer: CountDownTimer
-    private var timeLeftMillis: Long = 5 * 60 * 1000
+    private var timeLeftMillis: Long = 2 * 60 * 1000
     private var currentQuestion = 0
     private val totalQuestions: Int get() = duelQuestions.size
     private lateinit var duelQuestions: List<QuestionDetailedResponse>
@@ -156,7 +156,7 @@ class DuelActivity : AppCompatActivity() {
         val request = DuelFinishRequest(
             duelId = duelId,
             correctAnswers = currentQuestion,
-            timeSpent = 5 * 60 * 1000 - timeLeftMillis
+            timeSpent = 2 * 60 * 1000 - timeLeftMillis
         )
 
         lifecycleScope.launch {
