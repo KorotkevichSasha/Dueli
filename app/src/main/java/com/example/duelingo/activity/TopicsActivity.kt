@@ -135,6 +135,7 @@ class TopicsActivity : AppCompatActivity() {
         )
         binding.rvTopics.adapter = topicsAdapter
     }
+
     private fun loadRandomTest() {
         val tokenManager = TokenManager(this)
         val accessToken = tokenManager.getAccessToken()
