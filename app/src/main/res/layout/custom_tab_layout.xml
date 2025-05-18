@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="8dp">
+
+    <TextView
+        android:id="@+id/tab_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"/>
+
+    <View
+        android:id="@+id/notification_dot"
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:layout_toEndOf="@id/tab_text"
+        android:layout_alignTop="@id/tab_text"
+        android:layout_marginStart="2dp"
+        android:background="@drawable/notification_dot"
+        android:visibility="gone"/>
+
+</RelativeLayout> 

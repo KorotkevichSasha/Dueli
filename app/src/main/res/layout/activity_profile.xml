@@ -85,65 +85,71 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp"/>
 
-    <Button
-        android:id="@+id/add_friend_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/bg_button"
-        android:text="Добавить в друзья"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/achievementsButton" />
-
-    <Button
-        android:id="@+id/friend_requests_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/bg_button"
-        android:text="Заявки в друзья"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/add_friend_button" />
-
-    <TextView
-        android:id="@+id/friendsTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Ваши друзья"
-        android:textColor="@color/blue_primary"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/friend_requests_button"/>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/friendsRecyclerView"
+    <!-- Секция друзей -->
+    <LinearLayout
+        android:id="@+id/friends_section"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:clipToPadding="false"
-        android:paddingBottom="16dp"
-        app:layout_constraintTop_toBottomOf="@id/friendsTitle" />
-
-    <LinearLayout
-        android:id="@+id/friendsContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@id/friendsTitle"/>
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/achievementsButton"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation">
 
+        <!-- Заголовок и кнопка добавления -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp">
+
+            <TextView
+                android:id="@+id/friendsTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Друзья"
+                android:textColor="@color/blue_primary"
+                android:textSize="20sp"
+                android:layout_centerVertical="true"/>
+
+            <ImageButton
+                android:id="@+id/add_friend_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_add_friend"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="12dp"
+                android:layout_alignParentEnd="true"
+                android:contentDescription="Добавить друга"
+                app:tint="@color/blue_primary"/>
+        </RelativeLayout>
+
+        <!-- Табы -->
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/friends_tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:tabTextColor="@color/tab_text_color"
+            app:tabIndicatorColor="@color/blue_primary"
+            app:tabMode="fixed"
+            app:tabGravity="fill"/>
+
+        <!-- ViewPager2 для свайпа между табами -->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/friends_pager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
+    <!-- Нижняя навигация -->
     <LinearLayout
+        android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:orientation="horizontal"
         android:background="?attr/backgroundColor"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <!-- Тесты -->
         <LinearLayout

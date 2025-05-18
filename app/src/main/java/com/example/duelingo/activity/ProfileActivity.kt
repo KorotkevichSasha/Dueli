@@ -16,16 +16,20 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
 import com.airbnb.lottie.LottieAnimationView
 import com.example.duelingo.R
 import com.example.duelingo.activity.auth.LoginActivity
@@ -35,11 +39,15 @@ import com.example.duelingo.databinding.ActivityProfileBinding
 import com.example.duelingo.dto.request.RelationshipRequest
 import com.example.duelingo.dto.response.FriendResponse
 import com.example.duelingo.dto.response.UserProfileResponse
+import com.example.duelingo.fragment.FriendRequestsFragment
+import com.example.duelingo.fragment.FriendsListFragment
 import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.manager.ThemeManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.network.UserService
 import com.example.duelingo.storage.TokenManager
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -80,22 +88,7 @@ class ProfileActivity : AppCompatActivity() {
 
         binding.achievementsButton.setOnClickListener{ startActivity(Intent(this@ProfileActivity, AchievementActivity::class.java)) }
 
-        binding.friendsContainer.apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(0, 0, 0, 0)
-        }
-
-        // Initialize friends list after all necessary services are set up
-        Log.d("ProfileActivity", "Loading friends list")
-        loadFriends()
-
-        binding.addFriendButton.setOnClickListener {
-            showAddFriendDialog()
-        }
-
-        binding.friendRequestsButton.setOnClickListener {
-            showFriendRequestsDialog()
-        }
+        setupFriendsSection()
 
         binding.tests.setOnClickListener {
             resetAll()
@@ -119,6 +112,77 @@ class ProfileActivity : AppCompatActivity() {
 
         binding.settingsButton.setOnClickListener {
             showThemeDialog()
+        }
+    }
+
+    private fun setupFriendsSection() {
+        // Setup ViewPager
+        val pagerAdapter = object : FragmentStateAdapter(this) {
+            override fun getItemCount(): Int = 2
+            override fun createFragment(position: Int): Fragment {
+                return when (position) {
+                    0 -> FriendsListFragment.newInstance()
+                    1 -> FriendRequestsFragment.newInstance()
+                    else -> throw IllegalArgumentException("Invalid position $position")
+                }
+            }
+        }
+        
+        binding.friendsPager.adapter = pagerAdapter
+
+        // Setup TabLayout
+        TabLayoutMediator(binding.friendsTabs, binding.friendsPager) { tab, position ->
+            // Inflate custom tab layout
+            val customTab = layoutInflater.inflate(R.layout.custom_tab_layout, null) as RelativeLayout
+            val tabText = customTab.findViewById<TextView>(R.id.tab_text)
+            val notificationDot = customTab.findViewById<View>(R.id.notification_dot)
+            
+            // Set tab text
+            tabText.text = when (position) {
+                0 -> "Друзья"
+                1 -> "Заявки"
+                else -> ""
+            }
+            
+            // Show notification dot only for requests tab
+            if (position == 1) {
+                checkFriendRequests(notificationDot)
+            }
+            
+            tab.customView = customTab
+        }.attach()
+
+        // Setup add friend button
+        binding.addFriendButton.setOnClickListener {
+            showAddFriendDialog()
+        }
+
+        // Update notification dot when page changes
+        binding.friendsPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                if (position == 1) {
+                    // Hide notification dot when requests tab is selected
+                    binding.friendsTabs.getTabAt(1)?.customView?.findViewById<View>(R.id.notification_dot)?.visibility = View.GONE
+                }
+            }
+        })
+    }
+
+    private fun checkFriendRequests(notificationDot: View) {
+        lifecycleScope.launch {
+            try {
+                val response = ApiClient.relationshipService.getIncomingRequests(
+                    "Bearer ${tokenManager.getAccessToken()}"
+                )
+                if (response.isSuccessful && !response.body().isNullOrEmpty()) {
+                    notificationDot.visibility = View.VISIBLE
+                } else {
+                    notificationDot.visibility = View.GONE
+                }
+            } catch (e: Exception) {
+                notificationDot.visibility = View.GONE
+            }
         }
     }
 
@@ -249,36 +313,6 @@ class ProfileActivity : AppCompatActivity() {
 
     }
 
-    private fun loadFriends() {
-        lifecycleScope.launch(Dispatchers.Main) {
-            try {
-                val friends = userService.getCurrentUserFriends("Bearer ${tokenManager.getAccessToken()}")
-                    .distinctBy { it.id }
-
-                binding.friendsTitle.text = if (friends.isNotEmpty()) {
-                    "Ваши друзья (${friends.size})"
-                } else {
-                    "У вас пока нет друзей"
-                }
-
-                Log.d("FriendsDebug", "Received friends: ${friends.map { it.username }}")
-
-                binding.friendsRecyclerView.apply {
-                    layoutManager = LinearLayoutManager(this@ProfileActivity)
-                    adapter = FriendsAdapter(friends, avatarManager)
-
-                    addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL).apply {
-                        ContextCompat.getDrawable(context, R.drawable.divider)?.let { drawable ->
-                            setDrawable(drawable)
-                        }
-                    })
-                }
-            } catch (e: Exception) {
-                binding.friendsTitle.text = "Ошибка загрузки друзей"
-                Log.e("MenuActivity", "Error loading friends", e)
-            }
-        }
-    }
     private fun showAddFriendDialog() {
         val dialog = Dialog(this)
         dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog)
@@ -294,11 +328,6 @@ class ProfileActivity : AppCompatActivity() {
         val btnSearch = rootView.findViewById<Button>(R.id.btnSearch)
         val progressBar = rootView.findViewById<ProgressBar>(R.id.progressBar)
         val userContainer = rootView.findViewById<LinearLayout>(R.id.userContainer)
-
-        Log.d("DialogDebug", "editUsername: ${editUsername != null}")
-        Log.d("DialogDebug", "btnSearch: ${btnSearch != null}")
-        Log.d("DialogDebug", "progressBar: ${progressBar != null}")
-        Log.d("DialogDebug", "userContainer: ${userContainer != null}")
 
         if (editUsername == null || btnSearch == null || progressBar == null || userContainer == null) {
             showToast("Error: Dialog layout is incorrect")
@@ -316,23 +345,21 @@ class ProfileActivity : AppCompatActivity() {
 
         dialog.show()
     }
+
     private fun searchUser(username: String, progressBar: ProgressBar, container: LinearLayout) {
         if (!::tokenManager.isInitialized) {
             showToast("Error: TokenManager is not initialized")
             return
         }
-        Log.d("MenuActivity", "Starting search for username: $username")
 
         val accessToken = tokenManager.getAccessToken()
         if (accessToken == null) {
-            Log.e("MenuActivity", "Access token is missing")
             showToast("Error: Access token is missing")
             return
         }
 
         lifecycleScope.launch {
             try {
-                Log.d("MenuActivity", "Making API request...")
                 progressBar.visibility = View.VISIBLE
                 container.removeAllViews()
 
@@ -341,25 +368,21 @@ class ProfileActivity : AppCompatActivity() {
                     username
                 )
 
-                Log.d("MenuActivity", "API response received: ${response.content.size} users found")
-
                 if (response.content.isNotEmpty()) {
                     response.content.forEach { user ->
-                        Log.d("MenuActivity", "Showing user: ${user.username}")
                         showUserInfo(user, container)
                     }
                 } else {
-                    Log.d("MenuActivity", "No users found")
                     showToast("No users found")
                 }
             } catch (e: Exception) {
-                Log.e("MenuActivity", "Error during search: ${e.message}", e)
                 showToast("Error: ${e.message}")
             } finally {
                 progressBar.visibility = View.GONE
             }
         }
     }
+
     private fun showUserInfo(user: FriendResponse, container: LinearLayout) {
         val view = layoutInflater.inflate(R.layout.item_user, container, false)
 
@@ -367,13 +390,12 @@ class ProfileActivity : AppCompatActivity() {
         val avatarImage = view.findViewById<ImageView>(R.id.avatarImage)
         val btnSendRequest = view.findViewById<Button>(R.id.btnSendRequest)
 
-        if (usernameText == null ||  avatarImage == null || btnSendRequest == null) {
+        if (usernameText == null || avatarImage == null || btnSendRequest == null) {
             showToast("Error: User item layout is incorrect")
             return
         }
 
         usernameText.text = user.username
-
         avatarManager.loadAvatar(user.id.toString(), avatarImage)
 
         btnSendRequest.setOnClickListener {
@@ -382,6 +404,7 @@ class ProfileActivity : AppCompatActivity() {
 
         container.addView(view)
     }
+
     private fun sendFriendRequest(toUserId: UUID) {
         val accessToken = tokenManager.getAccessToken()
         if (accessToken == null) {
@@ -392,7 +415,6 @@ class ProfileActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val request = RelationshipRequest(toUserId = toUserId)
-
                 val response = ApiClient.relationshipService.sendFriendRequest(
                     "Bearer $accessToken",
                     request
@@ -406,70 +428,6 @@ class ProfileActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 showToast("Error sending request: ${e.message}")
-            }
-        }
-    }
-
-    private fun showFriendRequestsDialog() {
-        val dialog = Dialog(this)
-        dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog)
-        dialog.setContentView(R.layout.dialog_add_friend)
-
-        val recyclerView = dialog.findViewById<RecyclerView>(R.id.requestsRecyclerView)
-
-        val adapter = FriendRequestsAdapter(
-            avatarManager = avatarManager,
-            onAccept = { requestId -> updateRequestStatus(requestId, "accept", recyclerView) },
-            onReject = { requestId -> updateRequestStatus(requestId, "reject", recyclerView) }
-        )
-
-        recyclerView?.layoutManager = LinearLayoutManager(this)
-        recyclerView?.adapter = adapter
-
-        loadFriendRequests(adapter)
-        dialog.show()
-    }
-
-    private fun updateRequestStatus(requestId: UUID, action: String, recyclerView: RecyclerView?) {
-        lifecycleScope.launch {
-            try {
-                val response = ApiClient.relationshipService.updateRelationshipStatus(
-                    "Bearer ${tokenManager.getAccessToken()}",
-                    requestId,
-                    action
-                )
-
-                if (response.isSuccessful) {
-                    showToast("Request updated")
-                    val adapter = (recyclerView?.adapter as? FriendRequestsAdapter)
-                    adapter?.let { loadFriendRequests(it) }
-                } else {
-                    val errorBody = response.errorBody()?.string()
-                    showToast("Error: ${errorBody ?: "Unknown error"}")
-                }
-            } catch (e: Exception) {
-                showToast("Error updating request: ${e.message}")
-            }
-        }
-    }
-
-    private fun loadFriendRequests(adapter: FriendRequestsAdapter) {
-        lifecycleScope.launch {
-            try {
-                val response = ApiClient.relationshipService.getIncomingRequests(
-                    "Bearer ${tokenManager.getAccessToken()}"
-                )
-
-                if (response.isSuccessful) {
-                    response.body()?.let { requests ->
-                        adapter.submitList(requests)
-                    }
-                } else {
-                    val errorBody = response.errorBody()?.string()
-                    showToast("Error: ${errorBody ?: "Unknown error"}")
-                }
-            } catch (e: Exception) {
-                showToast("Error loading requests: ${e.message}")
             }
         }
     }
