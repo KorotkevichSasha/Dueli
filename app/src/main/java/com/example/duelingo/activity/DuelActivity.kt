@@ -69,7 +69,6 @@ class DuelActivity : AppCompatActivity() {
         binding.opponentName.text = "Opponent: $opponentName"
 
         setupTimer()
-        loadNextQuestion()
     }
 
     override fun onStart() {
@@ -106,6 +105,7 @@ class DuelActivity : AppCompatActivity() {
         runOnUiThread {
             duelQuestions = event.duel.questions
             duelId = event.duel.id
+            currentQuestion = 0
             loadNextQuestion()
         }
     }
