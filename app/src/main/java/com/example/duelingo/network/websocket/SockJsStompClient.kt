@@ -30,7 +30,6 @@ class StompManager(private val tokenManager: TokenManager) {
             val token = tokenManager.getAccessToken() ?: throw IllegalStateException("Token is empty")
 
             // 1. Формируем URL с токеном в query параметре
-            val encodedToken = URLEncoder.encode(token, "UTF-8")
             val wsUrl = "${AppConfig.BASE_URL.replace("http", "ws")}/ws/websocket"
 
             // 2. Добавляем заголовок Authorization
@@ -114,6 +113,7 @@ class StompManager(private val tokenManager: TokenManager) {
         }
     }
 
+    @SuppressLint("CheckResult")
     fun joinMatchmaking(): Boolean {
         if (!isConnected) {
             Log.e("StompManager", "Not connected")
@@ -122,13 +122,12 @@ class StompManager(private val tokenManager: TokenManager) {
 
         return try {
             Log.d("StompManager", "Sending JOIN to /app/matchmaking/join")
-            stompClient?.send(
-                "/app/matchmaking/join",
-                "\u0000".toByteArray().toString()
-            ).run {
-                Log.d("StompManager", "Join request sent")
-                true
-            }
+            stompClient?.send("/app/matchmaking/join", "")
+                ?.subscribe(
+                    { Log.d("StompManager", "Join request sent successfully") },
+                    { error -> Log.e("StompManager", "Error sending join request", error) }
+                )
+            true
         } catch (e: Exception) {
             Log.e("StompManager", "Error sending join request", e)
             false

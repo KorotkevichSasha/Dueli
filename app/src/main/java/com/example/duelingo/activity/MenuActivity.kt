@@ -102,8 +102,8 @@ class MenuActivity : AppCompatActivity() {
             scope.launch {
                 if (binding.btnDuel.text == "DUEL") {
                     Log.d("MenuActivity", "Starting duel search")
-                    startActivity(Intent(this@MenuActivity, DuelActivity::class.java))
-//                    startDuelSearch() todo
+//                    startActivity(Intent(this@MenuActivity, DuelActivity::class.java))
+                    startDuelSearch()
                 } else {
                     Log.d("MenuActivity", "Canceling duel search")
                     cancelDuelSearch()
