@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -11,7 +12,6 @@
         android:gravity="center"
         android:layout_gravity="center">
 
-        <!-- Текст вопроса -->
         <TextView
             android:id="@+id/tvQuestionText"
             android:layout_width="match_parent"
@@ -19,41 +19,18 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:gravity="center"
+            android:textColor="@color/white"
             android:layout_gravity="center"/>
 
-        <!-- Место для вставки выбранного слова -->
         <TextView
             android:id="@+id/tvSelectedWord"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:textColor="@color/blue_primary"
+            android:textColor="@color/white"
             android:visibility="gone"
             android:layout_marginTop="16dp"/>
 
-        <!-- Контейнер для выбранных слов (под предложением) -->
-        <com.google.android.flexbox.FlexboxLayout
-            android:id="@+id/containerSelectedWords"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:flexWrap="wrap"
-            app:alignItems="stretch"
-            app:justifyContent="flex_start"
-            android:layout_marginTop="16dp"
-            android:visibility="gone"/>
-
-        <!-- Контейнер для слов, которые ещё не выбраны -->
-        <com.google.android.flexbox.FlexboxLayout
-            android:id="@+id/containerWordBank"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:flexWrap="wrap"
-            app:alignItems="stretch"
-            app:justifyContent="flex_start"
-            android:layout_marginTop="16dp"
-            android:visibility="gone"/>
-
-        <!-- RecyclerView для отображения вариантов ответа -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvOptions"
             android:layout_width="match_parent"
@@ -62,37 +39,48 @@
             android:orientation="horizontal"
             android:layout_gravity="center_horizontal"/>
 
-        <!-- Поле для ввода текста (для других типов вопросов) -->
         <EditText
             android:id="@+id/editTextAnswer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
             android:layout_marginTop="16dp"
-            android:textColor="@color/blue_primary"
-            android:hint="Type your answer"/>
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/containerWordBank"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/containerSelectedWords"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/tvFeedback"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:padding="8dp"
             android:gravity="center"
-            android:textSize="16sp"
-            android:visibility="gone"
-            android:text="Correct!"
-            android:background="@color/green"/>
+            android:padding="8dp"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:visibility="gone"/>
+
         <TextView
             android:id="@+id/tvCorrectAnswer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:padding="8dp"
             android:gravity="center"
+            android:padding="8dp"
+            android:textColor="@color/white"
             android:textSize="16sp"
-            android:visibility="gone"
-            android:text="Correct answer: "
-            android:background="@color/gray"/>
+            android:visibility="gone"/>
+
     </LinearLayout>
 </ScrollView>

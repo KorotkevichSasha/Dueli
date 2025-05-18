@@ -33,6 +33,8 @@ class DuelActivity : AppCompatActivity() {
     private lateinit var duelId: String
     private lateinit var stompManager: StompManager
     private lateinit var tokenManager: TokenManager
+    private var isQuestionLoaded = false
+    private var userId: String? = null
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,10 +48,10 @@ class DuelActivity : AppCompatActivity() {
             return
         }
 
-        // Инициализация StompManager
+        // Initialize StompManager
         stompManager = StompManager(tokenManager)
 
-        // Проверка данных дуэли
+        // Check duel data
         val duelInfoJson = intent.getStringExtra("DUEL_INFO") ?: run {
             Toast.makeText(this, "Duel data corrupted", Toast.LENGTH_SHORT).show()
             finish()
@@ -57,23 +59,42 @@ class DuelActivity : AppCompatActivity() {
         }
 
         val duelInfo = Gson().fromJson(duelInfoJson, DuelFoundEvent::class.java)
+        initializeDuel(duelInfo)
+        setupTimer()
+        setupNextButton()
+        loadFirstQuestion()
+    }
+
+    private fun initializeDuel(duelInfo: DuelFoundEvent) {
+        if (isQuestionLoaded) {
+            return // Prevent re-initialization if questions are already loaded
+        }
+
         duelQuestions = duelInfo.duel.questions
         duelId = duelInfo.duel.id
 
-        val opponentName = if (duelInfo.opponentId.equals(duelInfo.duel.player1.userId)) {
-            duelInfo.duel.player1.username
+        val opponent = if (duelInfo.opponentId.equals(duelInfo.duel.player1.userId)) {
+            duelInfo.duel.player1
         } else {
-            duelInfo.duel.player2.username
+            duelInfo.duel.player2
         }
 
-        binding.opponentName.text = "Opponent: $opponentName"
+        binding.opponentName.text = "Opponent: ${opponent.username}"
+    }
 
-        setupTimer()
+    private fun loadFirstQuestion() {
+        if (!isQuestionLoaded && duelQuestions.isNotEmpty()) {
+            isQuestionLoaded = true
+            currentQuestion = 0
+            loadNextQuestion()
+        }
     }
 
     override fun onStart() {
         super.onStart()
-        connectToWebSocket()
+        if (!isQuestionLoaded) {
+            connectToWebSocket()
+        }
     }
 
     override fun onStop() {
@@ -92,7 +113,9 @@ class DuelActivity : AppCompatActivity() {
 
     private fun handleWebSocketConnected() {
         Log.d("DuelActivity", "WebSocket connected")
-        joinMatchmaking()
+        if (!isQuestionLoaded) {
+            joinMatchmaking()
+        }
     }
 
     private fun handleWebSocketError(error: Throwable) {
@@ -102,12 +125,8 @@ class DuelActivity : AppCompatActivity() {
     }
 
     private fun handleDuelFound(event: DuelFoundEvent) {
-        runOnUiThread {
-            duelQuestions = event.duel.questions
-            duelId = event.duel.id
-            currentQuestion = 0
-            loadNextQuestion()
-        }
+        // We don't need to handle questions here since they're already initialized in onCreate
+        Log.d("DuelActivity", "Additional duel found event received - ignoring")
     }
 
     private fun handleMatchmakingFailed(event: MatchmakingFailedEvent) {
@@ -134,7 +153,41 @@ class DuelActivity : AppCompatActivity() {
     }
 
     private fun updateQuestionCounter() {
-        binding.tvQuestionCounter.text = "Question: ${currentQuestion + 1}/$totalQuestions"
+        binding.tvQuestionCounter.text = "${currentQuestion + 1}/$totalQuestions"
+    }
+
+    private fun setupNextButton() {
+        binding.btnNext.setOnClickListener {
+            val currentFragment = supportFragmentManager.findFragmentById(R.id.questionContainer) as? QuestionFragment
+            if (currentFragment != null) {
+                if (binding.btnNext.text == "Check Answer") {
+                    val answer = currentFragment.getAnswer()
+                    if (answer.isNotEmpty()) {
+                        val isCorrect = when (currentFragment.getQuestion().type) {
+                            "FILL_IN_CHOICE", "FILL_IN_INPUT" -> 
+                                currentFragment.getQuestion().correctAnswers.contains(answer)
+                            "SENTENCE_CONSTRUCTION" -> {
+                                val correctAnswer = currentFragment.getQuestion().correctAnswers.firstOrNull()?.lowercase()?.trim() ?: ""
+                                answer.lowercase().trim() == correctAnswer
+                            }
+                            else -> false
+                        }
+                        currentFragment.showFeedback(isCorrect)
+                        binding.btnNext.text = "Next Question"
+                    } else {
+                        Toast.makeText(this, "Please select an answer", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    binding.btnNext.text = "Check Answer"
+                    moveToNextQuestion()
+                }
+            }
+        }
+    }
+
+    fun moveToNextQuestion() {
+        currentQuestion++
+        loadNextQuestion()
     }
 
     fun loadNextQuestion() {
@@ -144,7 +197,6 @@ class DuelActivity : AppCompatActivity() {
         }
 
         val question = duelQuestions[currentQuestion]
-        currentQuestion++
         updateQuestionCounter()
 
         supportFragmentManager.commit {

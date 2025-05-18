@@ -171,6 +171,10 @@ class QuestionFragment : Fragment() {
         binding.rvOptions.adapter?.notifyDataSetChanged()
     }
 
+    fun getQuestion(): QuestionDetailedResponse {
+        return question
+    }
+
     fun getAnswer(): String {
         return when (question.type) {
             "FILL_IN_CHOICE" -> selectedOption ?: ""
