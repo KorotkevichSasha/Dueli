@@ -221,6 +221,7 @@ class ProfileActivity : AppCompatActivity() {
         binding.playerName.text = response.username
         binding.playerEmail.text = response.email
         binding.pointCount.text = "Очки: ${response.points}"
+        avatarManager.loadAvatar(response.id, binding.profileImage)
     }
 
     private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->

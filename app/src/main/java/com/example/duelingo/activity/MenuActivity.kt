@@ -15,11 +15,15 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.airbnb.lottie.LottieAnimationView
+import com.bumptech.glide.Glide
 import com.example.duelingo.R
+import com.example.duelingo.adapters.DuelHistoryAdapter
 import com.example.duelingo.databinding.ActivityMenuBinding
 import com.example.duelingo.dto.event.DuelFoundEvent
 import com.example.duelingo.manager.AvatarManager
+import com.example.duelingo.network.DuelHistoryService
 import com.example.duelingo.network.UserService
 import com.example.duelingo.network.websocket.StompManager
 import com.example.duelingo.storage.TokenManager
@@ -48,6 +52,7 @@ class MenuActivity : AppCompatActivity() {
     private lateinit var tokenManager: TokenManager
     private lateinit var avatarManager: AvatarManager
     private lateinit var userService: UserService
+    private lateinit var duelHistoryService: DuelHistoryService
     private lateinit var stompManager: StompManager
     private var loadingDialog: ProgressDialog? = null
 
@@ -66,6 +71,7 @@ class MenuActivity : AppCompatActivity() {
         Log.d("MenuActivity", "Creating Retrofit client")
         val retrofit = RetrofitClient.getClient(tokenManager)
         userService = retrofit.create(UserService::class.java)
+        duelHistoryService = retrofit.create(DuelHistoryService::class.java)
 
         binding.mainIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.mainTest.setTextColor(Color.parseColor("#FF00A5FE"))
@@ -82,6 +88,7 @@ class MenuActivity : AppCompatActivity() {
 
         Log.d("MenuActivity", "Setting up navigation buttons")
         setupNavigationButtons()
+        loadDuelHistory()
         Log.d("MenuActivity", "onCreate completed")
     }
 
@@ -102,7 +109,6 @@ class MenuActivity : AppCompatActivity() {
             scope.launch {
                 if (binding.btnDuel.text == "DUEL") {
                     Log.d("MenuActivity", "Starting duel search")
-//                    startActivity(Intent(this@MenuActivity, DuelActivity::class.java))
                     startDuelSearch()
                 } else {
                     Log.d("MenuActivity", "Canceling duel search")
@@ -375,6 +381,22 @@ class MenuActivity : AppCompatActivity() {
             playAnimation(binding.profAnimation, binding.profileIcon, binding.profileTest, "profAnim.json")
         }
         Log.d("MenuActivity", "setupNavigationButtons completed")
+    }
+
+    private fun loadDuelHistory() {
+        scope.launch {
+            try {
+                val history = duelHistoryService.getUserDuelHistory()
+                Log.d("MenuActivity", "Loaded " + history.size + " duels" )
+                withContext(Dispatchers.Main) {
+                    val adapter = DuelHistoryAdapter(history, avatarManager)
+                    binding.duelHistoryRecyclerView.adapter = adapter
+                    binding.duelHistoryRecyclerView.layoutManager = LinearLayoutManager(this@MenuActivity)
+                }
+            } catch (e: Exception) {
+                Log.e("MenuActivity", "Error loading duel history", e)
+            }
+        }
     }
 
     object RetrofitClient {

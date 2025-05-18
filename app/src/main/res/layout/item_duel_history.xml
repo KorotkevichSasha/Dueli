@@ -32,7 +32,7 @@
                     android:id="@+id/player1Avatar"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:src="@drawable/profile24"/>
+                    android:src="@drawable/default_profile"/>
 
                 <TextView
                     android:id="@+id/player1Name"
@@ -76,7 +76,7 @@
                     android:id="@+id/player2Avatar"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:src="@drawable/profile24"/>
+                    android:src="@drawable/default_profile"/>
 
                 <TextView
                     android:id="@+id/player2Name"

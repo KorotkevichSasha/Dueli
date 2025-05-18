@@ -1,5 +1,6 @@
 package com.example.duelingo.activity
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -30,10 +31,10 @@ class DuelActivity : AppCompatActivity() {
     private val totalQuestions: Int get() = duelQuestions.size
     private lateinit var duelQuestions: List<QuestionDetailedResponse>
     private lateinit var duelId: String
-    private lateinit var opponentName: String
     private lateinit var stompManager: StompManager
     private lateinit var tokenManager: TokenManager
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDuelBinding.inflate(layoutInflater)
@@ -58,7 +59,12 @@ class DuelActivity : AppCompatActivity() {
         val duelInfo = Gson().fromJson(duelInfoJson, DuelFoundEvent::class.java)
         duelQuestions = duelInfo.duel.questions
         duelId = duelInfo.duel.id
-        opponentName = duelInfo.opponentId
+
+        val opponentName = if (duelInfo.opponentId.equals(duelInfo.duel.player1.userId)) {
+            duelInfo.duel.player1.username
+        } else {
+            duelInfo.duel.player2.username
+        }
 
         binding.opponentName.text = "Opponent: $opponentName"
 
