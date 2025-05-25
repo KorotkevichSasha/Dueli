@@ -1,6 +1,7 @@
 package com.example.duelingo.activity
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -12,6 +13,7 @@ import com.example.duelingo.R
 import com.example.duelingo.dto.response.QuestionDetailedResponse
 import com.example.duelingo.databinding.ActivityDuelBinding
 import com.example.duelingo.dto.event.DuelFoundEvent
+import com.example.duelingo.dto.event.DuelResultEvent
 import com.example.duelingo.dto.event.MatchmakingFailedEvent
 import com.example.duelingo.dto.request.DuelFinishRequest
 import com.example.duelingo.fragment.QuestionFragment
@@ -21,6 +23,8 @@ import com.example.duelingo.storage.TokenManager
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class DuelActivity : AppCompatActivity() {
 
@@ -34,7 +38,8 @@ class DuelActivity : AppCompatActivity() {
     private lateinit var stompManager: StompManager
     private lateinit var tokenManager: TokenManager
     private var isQuestionLoaded = false
-    private var userId: String? = null
+    private var correctAnswers = 0
+    private var opponentName: String = "Unknown"
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,7 +84,8 @@ class DuelActivity : AppCompatActivity() {
             duelInfo.duel.player2
         }
 
-        binding.opponentName.text = "Opponent: ${opponent.username}"
+        opponentName = opponent.username
+        binding.opponentName.text = "Opponent: $opponentName"
     }
 
     private fun loadFirstQuestion() {
@@ -107,7 +113,8 @@ class DuelActivity : AppCompatActivity() {
             onConnected = ::handleWebSocketConnected,
             onError = ::handleWebSocketError,
             onDuelFound = ::handleDuelFound,
-            onMatchmakingFailed = ::handleMatchmakingFailed
+            onMatchmakingFailed = ::handleMatchmakingFailed,
+            onDuelResult = ::handleDuelResult
         )
     }
 
@@ -133,6 +140,23 @@ class DuelActivity : AppCompatActivity() {
         Log.e("DuelActivity", "Matchmaking failed: ${event.reason}")
         Toast.makeText(this, "Matchmaking failed: ${event.reason}", Toast.LENGTH_LONG).show()
         finish()
+    }
+
+    private fun handleDuelResult(event: DuelResultEvent) {
+        Log.d("DuelActivity", "Received duel result: $event")
+        // Only handle the result if we haven't finished yet
+        if (!isFinishing) {
+            val intent = Intent(this, DuelResultsActivity::class.java).apply {
+                putExtra("opponent_name", opponentName)
+                putExtra("correct_answers", correctAnswers)
+                putExtra("total_questions", totalQuestions)
+                putExtra("time_spent", 2 * 60 * 1000 - timeLeftMillis)
+                putExtra("opponent_score", if (event.player1Points == correctAnswers) event.player2Points else event.player1Points)
+                putExtra("is_winner", event.winner != opponentName)
+            }
+            startActivity(intent)
+            finish()
+        }
     }
 
     private fun setupTimer() {
@@ -172,6 +196,7 @@ class DuelActivity : AppCompatActivity() {
                             }
                             else -> false
                         }
+                        if (isCorrect) correctAnswers++
                         currentFragment.showFeedback(isCorrect)
                         binding.btnNext.text = "Next Question"
                     } else {
@@ -206,26 +231,44 @@ class DuelActivity : AppCompatActivity() {
 
     private fun finishDuel() {
         timer.cancel()
-        sendResultsToServer()
-        finish()
-    }
-
-    private fun sendResultsToServer() {
-        val request = DuelFinishRequest(
-            duelId = duelId,
-            correctAnswers = currentQuestion,
-            timeSpent = 2 * 60 * 1000 - timeLeftMillis
-        )
-
+        val timeSpent = 2 * 60 * 1000 - timeLeftMillis
+        
+        Log.d("DuelActivity", "Finishing duel - sending results via REST API")
+        
+        // Send results via REST API
         lifecycleScope.launch {
             try {
-                ApiClient.duelService.finishDuel(
-                    "Bearer ${tokenManager.getAccessToken()}",
-                    request
-                )
+                val request = DuelFinishRequest(duelId, correctAnswers, timeSpent)
+                Log.d("DuelActivity", "Sending finish request: $request")
+                
+                val response = withContext(Dispatchers.IO) {
+                    ApiClient.duelService.finishDuel(
+                        request,
+                        "Bearer ${tokenManager.getAccessToken()}"
+                    )
+                }
+                
+                Log.d("DuelActivity", "Finish request sent successfully")
+                showResults(true) // Show results after successful submission
             } catch (e: Exception) {
-                Log.e("Duel", "Results submission failed", e)
+                Log.e("DuelActivity", "Failed to send results", e)
+                showResults(false) // Show results even if submission failed
             }
+        }
+    }
+
+    private fun showResults(resultsSent: Boolean) {
+        if (!isFinishing) {
+            val intent = Intent(this, DuelResultsActivity::class.java).apply {
+                putExtra("opponent_name", opponentName)
+                putExtra("correct_answers", correctAnswers)
+                putExtra("total_questions", totalQuestions)
+                putExtra("time_spent", 2 * 60 * 1000 - timeLeftMillis)
+                putExtra("opponent_score", 0) // We don't know the opponent's score yet
+                putExtra("is_winner", false) // We'll update this when opponent finishes
+            }
+            startActivity(intent)
+            finish()
         }
     }
 

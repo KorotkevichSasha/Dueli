@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.util.Log
 import com.example.duelingo.dto.event.DuelFoundEvent
 import com.example.duelingo.dto.event.MatchmakingFailedEvent
+import com.example.duelingo.dto.event.DuelResultEvent
+import com.example.duelingo.dto.request.DuelFinishRequest
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.utils.AppConfig
 import com.google.gson.Gson
@@ -24,7 +26,8 @@ class StompManager(private val tokenManager: TokenManager) {
         onConnected: () -> Unit,
         onError: (Throwable) -> Unit,
         onDuelFound: (DuelFoundEvent) -> Unit,
-        onMatchmakingFailed: (MatchmakingFailedEvent) -> Unit
+        onMatchmakingFailed: (MatchmakingFailedEvent) -> Unit,
+        onDuelResult: (DuelResultEvent) -> Unit
     ) {
         try {
             val token = tokenManager.getAccessToken() ?: throw IllegalStateException("Token is empty")
@@ -48,7 +51,7 @@ class StompManager(private val tokenManager: TokenManager) {
                 withServerHeartbeat(10000)
             }
 
-            setupConnectionListeners(onConnected, onError, onDuelFound, onMatchmakingFailed)
+            setupConnectionListeners(onConnected, onError, onDuelFound, onMatchmakingFailed, onDuelResult)
             stompClient?.connect()
         } catch (e: Exception) {
             Log.e("StompManager", "Connection error", e)
@@ -61,14 +64,15 @@ class StompManager(private val tokenManager: TokenManager) {
         onConnected: () -> Unit,
         onError: (Throwable) -> Unit,
         onDuelFound: (DuelFoundEvent) -> Unit,
-        onMatchmakingFailed: (MatchmakingFailedEvent) -> Unit
+        onMatchmakingFailed: (MatchmakingFailedEvent) -> Unit,
+        onDuelResult: (DuelResultEvent) -> Unit
     ) {
         stompClient?.lifecycle()?.subscribe { event ->
             when (event.type) {
                 LifecycleEvent.Type.OPENED -> {
                     Log.d("StompManager", "Connection established. Subscribing to topics...")
                     isConnected = true
-                    setupSubscriptions(onDuelFound, onMatchmakingFailed)
+                    setupSubscriptions(onDuelFound, onMatchmakingFailed, onDuelResult)
                     onConnected()
                 }
                 LifecycleEvent.Type.ERROR -> {
@@ -88,7 +92,8 @@ class StompManager(private val tokenManager: TokenManager) {
     }
     private fun setupSubscriptions(
         onDuelFound: (DuelFoundEvent) -> Unit,
-        onMatchmakingFailed: (MatchmakingFailedEvent) -> Unit
+        onMatchmakingFailed: (MatchmakingFailedEvent) -> Unit,
+        onDuelResult: (DuelResultEvent) -> Unit
     ) {
         // Используем user-specific destinations
         subscriptions.add(stompClient?.topic("/user/queue/duel-found")?.subscribe { message ->
@@ -98,10 +103,12 @@ class StompManager(private val tokenManager: TokenManager) {
         subscriptions.add(stompClient?.topic("/user/queue/matchmaking-failed")?.subscribe { message ->
             parseAndHandle(message.payload, MatchmakingFailedEvent::class.java, onMatchmakingFailed, "matchmaking failed")
         } ?: return)
+
+        subscriptions.add(stompClient?.topic("/user/queue/duel-result")?.subscribe { message ->
+            Log.d("StompManager", "Received duel result: ${message.payload}")
+            parseAndHandle(message.payload, DuelResultEvent::class.java, onDuelResult, "duel result")
+        } ?: return)
     }
-
-
-
 
     private fun <T> parseAndHandle(payload: String, clazz: Class<T>, handler: (T) -> Unit, logName: String) {
         try {
@@ -184,4 +191,26 @@ class StompManager(private val tokenManager: TokenManager) {
     }
 
     fun isConnected(): Boolean = isConnected
+
+    @SuppressLint("CheckResult")
+    fun finishDuel(duelId: String, correctAnswers: Int, timeSpent: Long): Boolean {
+        if (!isConnected) {
+            Log.e("StompManager", "Not connected")
+            return false
+        }
+
+        return try {
+            val request = DuelFinishRequest(duelId, correctAnswers, timeSpent)
+            Log.d("StompManager", "Sending duel finish request: $request")
+            stompClient?.send("/app/duel/finish", Gson().toJson(request))
+                ?.subscribe(
+                    { Log.d("StompManager", "Duel finish request sent successfully") },
+                    { error -> Log.e("StompManager", "Error sending duel finish request", error) }
+                )
+            true
+        } catch (e: Exception) {
+            Log.e("StompManager", "Error sending duel finish request", e)
+            false
+        }
+    }
 }

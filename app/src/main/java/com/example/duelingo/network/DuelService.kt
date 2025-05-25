@@ -7,9 +7,7 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 
 interface DuelService {
-    @POST("/duel/finish")
-    suspend fun finishDuel(
-        @Header("Authorization") token: String,
-        @Body request: DuelFinishRequest
-    ): Response<Unit>
+
+    @POST("duels/finish")
+    suspend fun finishDuel(@Body request: DuelFinishRequest, @Header("Authorization") token: String): Response<Unit>
 }

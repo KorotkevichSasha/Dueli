@@ -32,7 +32,8 @@
             android:exported="false" />
         <activity
             android:name=".activity.DuelActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".activity.WordCardActivity"
             android:exported="false" />
@@ -64,6 +65,10 @@
         <activity
             android:name=".activity.TestDetailsActivity"
             android:exported="true" />
+        <activity
+            android:name=".activity.DuelResultsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".activity.MainActivity"
             android:exported="true">

@@ -13,9 +13,9 @@ import de.hdodenhof.circleimageview.CircleImageView
 import java.util.concurrent.TimeUnit
 
 class DuelHistoryAdapter(
-    private val duelsList: List<DuelInHistoryResponse>, private val avatarManager: AvatarManager
-) :
-    RecyclerView.Adapter<DuelHistoryAdapter.DuelHistoryViewHolder>() {
+    private val duelsList: MutableList<DuelInHistoryResponse>,
+    private val avatarManager: AvatarManager
+) : RecyclerView.Adapter<DuelHistoryAdapter.DuelHistoryViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DuelHistoryViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -29,6 +29,12 @@ class DuelHistoryAdapter(
     }
 
     override fun getItemCount(): Int = duelsList.size
+
+    fun addItems(newItems: List<DuelInHistoryResponse>) {
+        val startPosition = duelsList.size
+        duelsList.addAll(newItems)
+        notifyItemRangeInserted(startPosition, newItems.size)
+    }
 
     class DuelHistoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val player1Avatar: CircleImageView = itemView.findViewById(R.id.player1Avatar)

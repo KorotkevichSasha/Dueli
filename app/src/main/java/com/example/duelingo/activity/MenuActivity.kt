@@ -16,12 +16,15 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.example.duelingo.R
 import com.example.duelingo.adapters.DuelHistoryAdapter
 import com.example.duelingo.databinding.ActivityMenuBinding
 import com.example.duelingo.dto.event.DuelFoundEvent
+import com.example.duelingo.dto.event.DuelResultEvent
+import com.example.duelingo.dto.event.MatchmakingFailedEvent
 import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.network.DuelHistoryService
 import com.example.duelingo.network.UserService
@@ -55,6 +58,10 @@ class MenuActivity : AppCompatActivity() {
     private lateinit var duelHistoryService: DuelHistoryService
     private lateinit var stompManager: StompManager
     private var loadingDialog: ProgressDialog? = null
+    private var currentPage = 0
+    private var isLoading = false
+    private var hasMorePages = true
+    private val pageSize = 5
 
     private val scope = CoroutineScope(Dispatchers.Main + Job())
 
@@ -76,7 +83,6 @@ class MenuActivity : AppCompatActivity() {
         binding.mainIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.mainTest.setTextColor(Color.parseColor("#FF00A5FE"))
 
-
         Log.d("MenuActivity", "Creating DuelWebSocketClient")
         stompManager = StompManager(tokenManager)
         setupDuelButton()
@@ -88,6 +94,7 @@ class MenuActivity : AppCompatActivity() {
 
         Log.d("MenuActivity", "Setting up navigation buttons")
         setupNavigationButtons()
+        setupRecyclerView()
         loadDuelHistory()
         Log.d("MenuActivity", "onCreate completed")
     }
@@ -218,6 +225,9 @@ class MenuActivity : AppCompatActivity() {
                             ).show()
                             cancelDuelSearch()
                         }
+                    },
+                    onDuelResult = { result ->
+                        Log.d("MenuActivity", "Received duel result in menu (unexpected): $result")
                     }
                 )
 
@@ -383,18 +393,56 @@ class MenuActivity : AppCompatActivity() {
         Log.d("MenuActivity", "setupNavigationButtons completed")
     }
 
+    private fun setupRecyclerView() {
+        binding.duelHistoryRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.duelHistoryRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val visibleItemCount = layoutManager.childCount
+                val totalItemCount = layoutManager.itemCount
+                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+                if (!isLoading && hasMorePages) {
+                    if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                        && firstVisibleItemPosition >= 0
+                    ) {
+                        loadDuelHistory()
+                    }
+                }
+            }
+        })
+    }
+
     private fun loadDuelHistory() {
+        if (isLoading || !hasMorePages) return
+        
+        isLoading = true
         scope.launch {
             try {
-                val history = duelHistoryService.getUserDuelHistory()
-                Log.d("MenuActivity", "Loaded " + history.size + " duels" )
+                val response = duelHistoryService.getUserDuelHistory(currentPage, pageSize)
+                Log.d("MenuActivity", "Loaded page $currentPage with ${response.content.size} duels")
+                
                 withContext(Dispatchers.Main) {
-                    val adapter = DuelHistoryAdapter(history, avatarManager)
-                    binding.duelHistoryRecyclerView.adapter = adapter
-                    binding.duelHistoryRecyclerView.layoutManager = LinearLayoutManager(this@MenuActivity)
+                    if (currentPage == 0) {
+                        // First page - create new adapter
+                        val adapter = DuelHistoryAdapter(response.content.toMutableList(), avatarManager)
+                        binding.duelHistoryRecyclerView.adapter = adapter
+                        binding.duelHistoryRecyclerView.layoutManager = LinearLayoutManager(this@MenuActivity)
+                    } else {
+                        // Append to existing adapter
+                        (binding.duelHistoryRecyclerView.adapter as? DuelHistoryAdapter)?.let { adapter ->
+                            adapter.addItems(response.content)
+                        }
+                    }
+                    
+                    hasMorePages = currentPage < response.totalPages - 1
+                    currentPage = response.currentPage + 1
                 }
             } catch (e: Exception) {
                 Log.e("MenuActivity", "Error loading duel history", e)
+            } finally {
+                isLoading = false
             }
         }
     }
