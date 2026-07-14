@@ -33,7 +33,7 @@ class StompManager(private val tokenManager: TokenManager) {
             val token = tokenManager.getAccessToken() ?: throw IllegalStateException("Token is empty")
 
             // 1. Формируем URL с токеном в query параметре
-            val wsUrl = "${AppConfig.BASE_URL.replace("http", "ws")}/ws/websocket"
+            val wsUrl = "${AppConfig.BASE_URL.trimEnd('/').replaceFirst("https", "wss").replaceFirst("http", "ws")}/ws/websocket"
 
             // 2. Добавляем заголовок Authorization
             val headers = mapOf(

@@ -6,6 +6,10 @@ plugins {
     id("kotlin-parcelize")
 }
 
+val apiBaseUrl = providers.gradleProperty("API_BASE_URL")
+    .orElse(System.getenv("API_BASE_URL") ?: "https://api.example.com")
+    .get()
+
 android {
     namespace = "com.example.duelingo"
     compileSdk = 34
@@ -17,6 +21,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+        buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -42,6 +47,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig = true
         compose = true
         viewBinding = true
         dataBinding = true

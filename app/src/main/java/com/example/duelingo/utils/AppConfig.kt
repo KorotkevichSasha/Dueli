@@ -1,7 +1,9 @@
 package com.example.duelingo.utils
 
+import com.example.duelingo.BuildConfig
+
 object AppConfig {
-    const val BASE_URL = "http://192.168.100.11:8082"
+    val BASE_URL: String = BuildConfig.API_BASE_URL.trimEnd('/') + "/"
 
     const val CONNECT_TIMEOUT = 15L
     const val READ_TIMEOUT = 15L
