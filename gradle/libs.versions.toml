@@ -1,6 +1,6 @@
 [versions]
 agp = "8.4.0"  # AGP 8.4.0
-converterGson = "2.9.0"
+converterGson = "3.0.0"
 gson = "2.10.1"
 kotlin = "1.9.0"  # Совместимая версия Kotlin
 coreKtx = "1.12.0"
