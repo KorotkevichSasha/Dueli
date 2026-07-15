@@ -20,7 +20,7 @@ firebaseAuth = "23.1.0"
 firebaseDatabase = "21.0.0"
 appcompat = "1.6.1"
 activity = "1.8.0"
-constraintlayout = "2.1.4"
+constraintlayout = "2.2.1"
 databindingRuntime = "8.8.0"
 swiperefreshlayout = "1.1.0"
 
