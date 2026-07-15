@@ -122,7 +122,7 @@ dependencies {
     implementation("jakarta.validation:jakarta.validation-api:2.0.2")
 
 
-    implementation("org.java-websocket:Java-WebSocket:1.5.2")
+    implementation("org.java-websocket:Java-WebSocket:1.6.0")
     implementation("com.google.code.gson:gson:2.8.9")
 
     implementation("com.github.NaikSoftware:StompProtocolAndroid:1.6.6")
