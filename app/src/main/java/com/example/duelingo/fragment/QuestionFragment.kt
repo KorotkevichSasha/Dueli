@@ -1,20 +1,28 @@
 package com.example.duelingo.fragment
 
 import android.os.Bundle
+import android.content.Context
+import android.content.ClipData
 import android.util.Log
+import android.view.DragEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import com.example.duelingo.R
 import com.example.duelingo.activity.DuelActivity
 import com.example.duelingo.adapters.OptionsAdapter
 import com.example.duelingo.databinding.FragmentQuestionBinding
 import com.example.duelingo.dto.response.QuestionDetailedResponse
+import com.example.duelingo.utils.QuestionPromptParser
+import com.google.android.material.chip.Chip
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 
 class QuestionFragment : Fragment() {
 
@@ -22,9 +30,12 @@ class QuestionFragment : Fragment() {
     private lateinit var question: QuestionDetailedResponse
     private var selectedOption: String? = null
     private var feedbackShown: Boolean = false
+    private var hintVisible: Boolean = false
     private var onAnswerListener: ((Boolean) -> Unit)? = null
 
     companion object {
+        private const val STATE_HINT_VISIBLE = "question_hint_visible"
+
         fun newInstance(question: QuestionDetailedResponse): QuestionFragment {
             return QuestionFragment().apply {
                 arguments = Bundle().apply {
@@ -46,8 +57,14 @@ class QuestionFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         question = arguments?.getParcelable<QuestionDetailedResponse>("question") ?: return
+        hintVisible = savedInstanceState?.getBoolean(STATE_HINT_VISIBLE) ?: false
 
         setupQuestionUI()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(STATE_HINT_VISIBLE, hintVisible)
     }
 
     fun setQuestionAnsweredListener(listener: (isCorrect: Boolean) -> Unit) {
@@ -62,18 +79,27 @@ class QuestionFragment : Fragment() {
 
 
     fun showFeedback(isCorrect: Boolean) {
+        binding.editTextAnswer.clearFocus()
+        (requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+            .hideSoftInputFromWindow(binding.root.windowToken, 0)
+
         binding.tvFeedback.visibility = View.VISIBLE
         binding.tvCorrectAnswer.visibility = if (!isCorrect) View.VISIBLE else View.GONE
 
         if (isCorrect) {
-            binding.tvFeedback.text = "Correct!"
-            binding.tvFeedback.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.green))
+            binding.tvFeedback.text = getString(R.string.correct_answer)
+            binding.tvFeedback.setBackgroundResource(R.drawable.bg_feedback_correct)
         } else {
-            binding.tvFeedback.text = "Incorrect!"
-            binding.tvFeedback.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red))
+            binding.tvFeedback.text = getString(R.string.incorrect_answer)
+            binding.tvFeedback.setBackgroundResource(R.drawable.bg_feedback_incorrect)
 
-            val formattedAnswer = formatCorrectAnswer(question.correctAnswers.toString())
-            binding.tvCorrectAnswer.text = "Correct answer: $formattedAnswer"
+            val formattedAnswer = question.correctAnswers.joinToString(" ")
+            binding.tvCorrectAnswer.text = getString(R.string.correct_answer_format, formattedAnswer)
+        }
+
+        binding.root.post {
+            val target = if (isCorrect) binding.tvFeedback else binding.tvCorrectAnswer
+            binding.root.smoothScrollTo(0, target.bottom)
         }
     }
     private fun formatCorrectAnswer(correctAnswer: String): String {
@@ -85,7 +111,9 @@ class QuestionFragment : Fragment() {
     }
 
     private fun setupQuestionUI() {
-        binding.tvQuestionText.text = question.questionText
+        val prompt = QuestionPromptParser.parse(question.questionText)
+        binding.tvQuestionText.text = prompt.text
+        setupHint(prompt.hint)
 
         when (question.type) {
             "FILL_IN_CHOICE" -> setupChoiceQuestion()
@@ -98,7 +126,7 @@ class QuestionFragment : Fragment() {
         val optionsAdapter = OptionsAdapter(question.options) { option ->
             onOptionSelected(option)
         }
-        binding.rvOptions.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.rvOptions.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.rvOptions.adapter = optionsAdapter
     }
 
@@ -107,55 +135,173 @@ class QuestionFragment : Fragment() {
     }
 
     private fun setupSentenceConstruction() {
+        binding.tvQuestionInstruction.visibility = View.VISIBLE
+        binding.tvSentenceDraftLabel.visibility = View.VISIBLE
         binding.containerWordBank.visibility = View.VISIBLE
         binding.containerSelectedWords.visibility = View.VISIBLE
 
         binding.containerWordBank.removeAllViews()
         binding.containerSelectedWords.removeAllViews()
+        enableDropZone(binding.containerWordBank)
+        enableDropZone(binding.containerSelectedWords)
 
         question.options.shuffled().forEach { word ->
-            val button = Button(requireContext()).apply {
-                text = word
-                setOnClickListener {
-                    moveWordToSelected(word)
-                }
-                setPadding(16, 8, 16, 8)
-                textSize = 14f
-                background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_option)
-            }
-            binding.containerWordBank.addView(button)
+            binding.containerWordBank.addView(createWordChip(word))
         }
     }
 
-    private fun moveWordToSelected(word: String) {
-        val sourceContainer = if (isWordInBank(word)) binding.containerWordBank else binding.containerSelectedWords
-        val targetContainer = if (isWordInBank(word)) binding.containerSelectedWords else binding.containerWordBank
-
-        for (i in 0 until sourceContainer.childCount) {
-            val view = sourceContainer.getChildAt(i)
-            if (view is Button && view.text == word) {
-                sourceContainer.removeView(view)
-                break
-            }
+    private fun setupHint(hint: String?) {
+        if (hint.isNullOrBlank()) {
+            binding.tapHintLabel.visibility = View.GONE
+            binding.cardHint.visibility = View.GONE
+            binding.questionCard.isClickable = false
+            return
         }
 
-        val button = Button(requireContext()).apply {
+        binding.tvHint.text = hint
+        binding.tvHintBack.text = hint
+        val inDuel = activity is DuelActivity
+        if (inDuel) {
+            hintVisible = true
+            binding.tapHintLabel.visibility = View.GONE
+            binding.cardHint.visibility = View.VISIBLE
+            binding.questionFront.visibility = View.VISIBLE
+            binding.questionBack.visibility = View.GONE
+            binding.questionCard.isClickable = false
+            binding.questionCard.contentDescription = getString(R.string.question_with_visible_hint)
+        } else {
+            binding.cardHint.visibility = View.GONE
+            binding.tapHintLabel.visibility = View.VISIBLE
+            binding.questionCard.isClickable = true
+            applyHintSide(showHint = hintVisible, animate = false)
+            binding.questionCard.setOnClickListener {
+                applyHintSide(showHint = !hintVisible, animate = true)
+            }
+        }
+    }
+
+    private fun applyHintSide(showHint: Boolean, animate: Boolean) {
+        val current = if (hintVisible) binding.questionBack else binding.questionFront
+        val next = if (showHint) binding.questionBack else binding.questionFront
+        hintVisible = showHint
+        binding.questionCard.contentDescription = getString(
+            if (showHint) R.string.hint_visible_description else R.string.show_hint_description
+        )
+
+        if (!animate) {
+            binding.questionFront.visibility = if (showHint) View.GONE else View.VISIBLE
+            binding.questionBack.visibility = if (showHint) View.VISIBLE else View.GONE
+            binding.questionFront.rotationY = 0f
+            binding.questionBack.rotationY = 0f
+            return
+        }
+
+        binding.questionCard.isClickable = false
+        val distance = 10_000f * resources.displayMetrics.density
+        current.cameraDistance = distance
+        next.cameraDistance = distance
+        current.animate()
+            .rotationY(90f)
+            .setDuration(150L)
+            .setInterpolator(AccelerateInterpolator())
+            .withEndAction {
+                current.visibility = View.GONE
+                current.rotationY = 0f
+                next.rotationY = -90f
+                next.visibility = View.VISIBLE
+                next.animate()
+                    .rotationY(0f)
+                    .setDuration(190L)
+                    .setInterpolator(DecelerateInterpolator())
+                    .withEndAction { binding.questionCard.isClickable = true }
+                    .start()
+            }
+            .start()
+    }
+
+    private fun createWordChip(word: String): Chip {
+        return Chip(requireContext()).apply {
             text = word
-            setOnClickListener {
-                moveWordToSelected(word)
+            isCheckable = false
+            isClickable = true
+            setEnsureMinTouchTargetSize(false)
+            chipBackgroundColor = ContextCompat.getColorStateList(requireContext(), R.color.word_chip_background)
+            setTextColor(ContextCompat.getColor(requireContext(), R.color.word_chip_text))
+            chipStrokeWidth = resources.displayMetrics.density
+            chipStrokeColor = ContextCompat.getColorStateList(requireContext(), R.color.word_chip_stroke)
+            chipCornerRadius = 14f * resources.displayMetrics.density
+            textSize = 16f
+            gravity = android.view.Gravity.CENTER
+            textAlignment = View.TEXT_ALIGNMENT_CENTER
+            chipStartPadding = 14f * resources.displayMetrics.density
+            chipEndPadding = 14f * resources.displayMetrics.density
+            textStartPadding = 0f
+            textEndPadding = 0f
+            minHeight = (44 * resources.displayMetrics.density).toInt()
+            includeFontPadding = false
+            setOnClickListener { moveWordChip(this) }
+            setOnLongClickListener {
+                val clip = ClipData.newPlainText("duelrush-word", word)
+                startDragAndDrop(clip, View.DragShadowBuilder(this), this, 0)
+                true
             }
         }
-        targetContainer.addView(button)
     }
 
-    private fun isWordInBank(word: String): Boolean {
-        for (i in 0 until binding.containerWordBank.childCount) {
-            val view = binding.containerWordBank.getChildAt(i)
-            if (view is Button && view.text == word) {
-                return true
+    private fun enableDropZone(destination: ViewGroup) {
+        destination.setOnDragListener { view, event ->
+            val group = view as ViewGroup
+            when (event.action) {
+                DragEvent.ACTION_DRAG_STARTED -> event.localState is Chip
+                DragEvent.ACTION_DRAG_ENTERED -> {
+                    group.animate().alpha(0.72f).setDuration(100).start()
+                    true
+                }
+                DragEvent.ACTION_DRAG_EXITED -> {
+                    group.animate().alpha(1f).setDuration(100).start()
+                    true
+                }
+                DragEvent.ACTION_DROP -> {
+                    group.alpha = 1f
+                    val source = event.localState as? Chip ?: return@setOnDragListener false
+                    val word = source.text.toString()
+                    (source.parent as? ViewGroup)?.removeView(source)
+                    group.addView(createWordChip(word), dropIndex(group, event.x, event.y))
+                    true
+                }
+                DragEvent.ACTION_DRAG_ENDED -> {
+                    group.animate().alpha(1f).setDuration(100).start()
+                    true
+                }
+                else -> true
             }
         }
-        return false
+    }
+
+    private fun dropIndex(group: ViewGroup, x: Float, y: Float): Int {
+        for (index in 0 until group.childCount) {
+            val child = group.getChildAt(index)
+            if (y < child.bottom && (y < child.top || x < child.left + child.width / 2f)) {
+                return index
+            }
+        }
+        return group.childCount
+    }
+
+    private fun moveWordChip(chip: Chip) {
+        val isInWordBank = chip.parent === binding.containerWordBank
+        val word = chip.text.toString()
+        (chip.parent as? ViewGroup)?.removeView(chip)
+        val destination = if (isInWordBank) {
+            binding.containerSelectedWords
+        } else {
+            binding.containerWordBank
+        }
+
+        // ChipGroup can keep a clicked CompoundButton attached until the click
+        // dispatch finishes. Adding that same instance immediately then crashes
+        // with "child already has a parent", so move the word as a fresh chip.
+        destination.addView(createWordChip(word))
     }
 
     private fun onOptionSelected(option: String) {
@@ -192,7 +338,7 @@ class QuestionFragment : Fragment() {
         val words = mutableListOf<String>()
         for (i in 0 until binding.containerSelectedWords.childCount) {
             val view = binding.containerSelectedWords.getChildAt(i)
-            if (view is Button) {
+            if (view is Chip) {
                 words.add(view.text.toString())
             }
         }

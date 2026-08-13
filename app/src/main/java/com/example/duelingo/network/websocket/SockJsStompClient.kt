@@ -5,20 +5,26 @@ import android.util.Log
 import com.example.duelingo.dto.event.DuelFoundEvent
 import com.example.duelingo.dto.event.MatchmakingFailedEvent
 import com.example.duelingo.dto.event.DuelResultEvent
+import com.example.duelingo.dto.event.DuelChallengeEvent
 import com.example.duelingo.dto.request.DuelFinishRequest
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.utils.AppConfig
 import com.google.gson.Gson
+import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import ua.naiksoftware.stomp.Stomp
 import ua.naiksoftware.stomp.StompClient
 import ua.naiksoftware.stomp.dto.LifecycleEvent
+import ua.naiksoftware.stomp.dto.StompHeader
 import java.net.URLEncoder
+import java.util.concurrent.TimeUnit
 
 class StompManager(private val tokenManager: TokenManager) {
 
     private var stompClient: StompClient? = null
     private var subscriptions: MutableList<Disposable> = mutableListOf()
+    private var lifecycleDisposable: Disposable? = null
+    private var connectionReadyDisposable: Disposable? = null
     private var isConnected = false
 
     @SuppressLint("CheckResult")
@@ -27,7 +33,8 @@ class StompManager(private val tokenManager: TokenManager) {
         onError: (Throwable) -> Unit,
         onDuelFound: (DuelFoundEvent) -> Unit,
         onMatchmakingFailed: (MatchmakingFailedEvent) -> Unit,
-        onDuelResult: (DuelResultEvent) -> Unit
+        onDuelResult: (DuelResultEvent) -> Unit,
+        onDuelChallenge: (DuelChallengeEvent) -> Unit = {}
     ) {
         try {
             val token = tokenManager.getAccessToken() ?: throw IllegalStateException("Token is empty")
@@ -36,23 +43,21 @@ class StompManager(private val tokenManager: TokenManager) {
             val wsUrl = "${AppConfig.BASE_URL.trimEnd('/').replaceFirst("https", "wss").replaceFirst("http", "ws")}/ws/websocket"
 
             // 2. Добавляем заголовок Authorization
-            val headers = mapOf(
-                "Authorization" to "Bearer $token",
-                "Accept-Version" to "1.2",
-                "Heart-Beat" to "10000,10000"
-            )
+            val authorization = "Bearer $token"
+            val httpHeaders = mapOf("Authorization" to authorization)
+            val stompHeaders = listOf(StompHeader("Authorization", authorization))
 
             stompClient = Stomp.over(
                 Stomp.ConnectionProvider.OKHTTP,
                 wsUrl,
-                headers
+                httpHeaders
             ).apply {
                 withClientHeartbeat(10000)
                 withServerHeartbeat(10000)
             }
 
-            setupConnectionListeners(onConnected, onError, onDuelFound, onMatchmakingFailed, onDuelResult)
-            stompClient?.connect()
+            setupConnectionListeners(onConnected, onError, onDuelFound, onMatchmakingFailed, onDuelResult, onDuelChallenge)
+            stompClient?.connect(stompHeaders)
         } catch (e: Exception) {
             Log.e("StompManager", "Connection error", e)
             onError(e)
@@ -65,15 +70,21 @@ class StompManager(private val tokenManager: TokenManager) {
         onError: (Throwable) -> Unit,
         onDuelFound: (DuelFoundEvent) -> Unit,
         onMatchmakingFailed: (MatchmakingFailedEvent) -> Unit,
-        onDuelResult: (DuelResultEvent) -> Unit
+        onDuelResult: (DuelResultEvent) -> Unit,
+        onDuelChallenge: (DuelChallengeEvent) -> Unit
     ) {
-        stompClient?.lifecycle()?.subscribe { event ->
+        lifecycleDisposable = stompClient?.lifecycle()?.subscribe({ event ->
             when (event.type) {
                 LifecycleEvent.Type.OPENED -> {
-                    Log.d("StompManager", "Connection established. Subscribing to topics...")
-                    isConnected = true
-                    setupSubscriptions(onDuelFound, onMatchmakingFailed, onDuelResult)
-                    onConnected()
+                    Log.d("StompManager", "WebSocket opened. Waiting for STOMP CONNECTED...")
+                    waitForStompConnection(
+                        onConnected,
+                        onError,
+                        onDuelFound,
+                        onMatchmakingFailed,
+                        onDuelResult,
+                        onDuelChallenge
+                    )
                 }
                 LifecycleEvent.Type.ERROR -> {
                     Log.e("StompManager", "Connection error", event.exception)
@@ -83,31 +94,74 @@ class StompManager(private val tokenManager: TokenManager) {
                 LifecycleEvent.Type.CLOSED -> {
                     Log.d("StompManager", "Disconnected")
                     isConnected = false
+                    connectionReadyDisposable?.dispose()
                     subscriptions.forEach { it.dispose() }
                     subscriptions.clear()
                 }
                 else -> {}
             }
-        }
+        }, { error ->
+            Log.e("StompManager", "Lifecycle stream error", error)
+            isConnected = false
+            onError(error)
+        })
+    }
+
+    private fun waitForStompConnection(
+        onConnected: () -> Unit,
+        onError: (Throwable) -> Unit,
+        onDuelFound: (DuelFoundEvent) -> Unit,
+        onMatchmakingFailed: (MatchmakingFailedEvent) -> Unit,
+        onDuelResult: (DuelResultEvent) -> Unit,
+        onDuelChallenge: (DuelChallengeEvent) -> Unit
+    ) {
+        val client = stompClient ?: return
+        connectionReadyDisposable?.dispose()
+        connectionReadyDisposable = Observable.interval(0, 50, TimeUnit.MILLISECONDS)
+            .filter { client.isConnected }
+            .firstOrError()
+            .timeout(10, TimeUnit.SECONDS)
+            .subscribe({
+                if (stompClient !== client) return@subscribe
+                Log.d("StompManager", "STOMP connected. Subscribing to topics...")
+                isConnected = true
+                setupSubscriptions(onDuelFound, onMatchmakingFailed, onDuelResult, onDuelChallenge)
+                onConnected()
+            }, { error ->
+                Log.e("StompManager", "STOMP connection was not established", error)
+                isConnected = false
+                onError(error)
+            })
     }
     private fun setupSubscriptions(
         onDuelFound: (DuelFoundEvent) -> Unit,
         onMatchmakingFailed: (MatchmakingFailedEvent) -> Unit,
-        onDuelResult: (DuelResultEvent) -> Unit
+        onDuelResult: (DuelResultEvent) -> Unit,
+        onDuelChallenge: (DuelChallengeEvent) -> Unit
     ) {
         // Используем user-specific destinations
-        subscriptions.add(stompClient?.topic("/user/queue/duel-found")?.subscribe { message ->
-            parseAndHandle(message.payload, DuelFoundEvent::class.java, onDuelFound, "duel info")
-        } ?: return)
+        subscriptions.add(stompClient?.topic("/user/queue/duel-found")?.subscribe(
+            { message -> parseAndHandle(message.payload, DuelFoundEvent::class.java, onDuelFound, "duel info") },
+            { error -> Log.e("StompManager", "Duel subscription failed", error) }
+        ) ?: return)
 
-        subscriptions.add(stompClient?.topic("/user/queue/matchmaking-failed")?.subscribe { message ->
-            parseAndHandle(message.payload, MatchmakingFailedEvent::class.java, onMatchmakingFailed, "matchmaking failed")
-        } ?: return)
+        subscriptions.add(stompClient?.topic("/user/queue/matchmaking-failed")?.subscribe(
+            { message -> parseAndHandle(message.payload, MatchmakingFailedEvent::class.java, onMatchmakingFailed, "matchmaking failed") },
+            { error -> Log.e("StompManager", "Matchmaking subscription failed", error) }
+        ) ?: return)
 
-        subscriptions.add(stompClient?.topic("/user/queue/duel-result")?.subscribe { message ->
-            Log.d("StompManager", "Received duel result: ${message.payload}")
-            parseAndHandle(message.payload, DuelResultEvent::class.java, onDuelResult, "duel result")
-        } ?: return)
+        subscriptions.add(stompClient?.topic("/user/queue/duel-result")?.subscribe(
+            { message ->
+                Log.d("StompManager", "Received duel result: ${message.payload}")
+                parseAndHandle(message.payload, DuelResultEvent::class.java, onDuelResult, "duel result")
+            },
+            { error -> Log.e("StompManager", "Duel result subscription failed", error) }
+        ) ?: return)
+
+        subscriptions.add(stompClient?.topic("/user/queue/duel-challenge")?.subscribe(
+            { message -> parseAndHandle(message.payload, DuelChallengeEvent::class.java, onDuelChallenge, "duel challenge") },
+            { error -> Log.e("StompManager", "Challenge subscription failed", error) }
+        ) ?: return)
     }
 
     private fun <T> parseAndHandle(payload: String, clazz: Class<T>, handler: (T) -> Unit, logName: String) {
@@ -121,7 +175,7 @@ class StompManager(private val tokenManager: TokenManager) {
     }
 
     @SuppressLint("CheckResult")
-    fun joinMatchmaking(): Boolean {
+    fun joinMatchmaking(difficulty: String = "MEDIUM"): Boolean {
         if (!isConnected) {
             Log.e("StompManager", "Not connected")
             return false
@@ -129,7 +183,7 @@ class StompManager(private val tokenManager: TokenManager) {
 
         return try {
             Log.d("StompManager", "Sending JOIN to /app/matchmaking/join")
-            stompClient?.send("/app/matchmaking/join", "")
+            stompClient?.send("/app/matchmaking/join", Gson().toJson(mapOf("difficulty" to difficulty)))
                 ?.subscribe(
                     { Log.d("StompManager", "Join request sent successfully") },
                     { error -> Log.e("StompManager", "Error sending join request", error) }
@@ -166,6 +220,10 @@ class StompManager(private val tokenManager: TokenManager) {
                 }
             }
             subscriptions.clear()
+            connectionReadyDisposable?.dispose()
+            connectionReadyDisposable = null
+            lifecycleDisposable?.dispose()
+            lifecycleDisposable = null
 
             stompClient?.let { client ->
                 try {
@@ -200,7 +258,7 @@ class StompManager(private val tokenManager: TokenManager) {
         }
 
         return try {
-            val request = DuelFinishRequest(duelId, correctAnswers, timeSpent)
+            val request = DuelFinishRequest(duelId, correctAnswers, timeSpent, emptyList())
             Log.d("StompManager", "Sending duel finish request: $request")
             stompClient?.send("/app/duel/finish", Gson().toJson(request))
                 ?.subscribe(

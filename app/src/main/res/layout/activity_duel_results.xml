@@ -1,97 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/fon"
-    android:padding="16dp">
+    android:background="?attr/backgroundColor"
+    android:fillViewport="true">
 
-    <TextView
-        android:id="@+id/tvResultsTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Duel Results"
-        android:textColor="@color/white"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <androidx.cardview.widget.CardView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp"
-        app:cardBackgroundColor="#30FFFFFF"
-        app:layout_constraintTop_toBottomOf="@id/tvResultsTitle">
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="24dp">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/tvResultIcon"
+            android:layout_width="104dp"
+            android:layout_height="104dp"
+            android:gravity="center"
+            android:textSize="64sp" />
+
+        <TextView
+            android:id="@+id/tvResultsTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:gravity="center"
+            android:textColor="?attr/textColor"
+            android:textSize="30sp"
+            android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/tvOpponentName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:textSize="18sp"
-                android:layout_marginBottom="16dp"/>
+        <TextView
+            android:id="@+id/tvResultMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:textColor="?attr/secondaryTextColor"
+            android:textSize="16sp" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Your Score: "
-                    android:textColor="#80FFFFFF"
-                    android:textSize="16sp"/>
-
-                <TextView
-                    android:id="@+id/tvYourScore"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/white"
-                    android:textSize="16sp"
-                    android:textStyle="bold"/>
-            </LinearLayout>
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            app:cardBackgroundColor="?attr/cardBackgroundColor"
+            app:cardCornerRadius="24dp"
+            app:strokeColor="@color/word_chip_stroke"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
+                android:orientation="vertical"
+                android:padding="22dp">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/tvOpponentName"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Time Spent: "
-                    android:textColor="#80FFFFFF"
-                    android:textSize="16sp"/>
+                    android:gravity="center"
+                    android:textColor="?attr/textColor"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="22dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/your_score" android:textColor="?attr/secondaryTextColor" android:textSize="13sp" />
+                        <TextView android:id="@+id/tvYourScore" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="@color/blue_primary" android:textSize="28sp" android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/opponent_score" android:textColor="?attr/secondaryTextColor" android:textSize="13sp" />
+                        <TextView android:id="@+id/tvOpponentScore" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="?attr/textColor" android:textSize="28sp" android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tvTimeSpent"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/white"
-                    android:textSize="16sp"
-                    android:textStyle="bold"/>
+                    android:layout_marginTop="20dp"
+                    android:gravity="center"
+                    android:textColor="?attr/secondaryTextColor"
+                    android:textSize="15sp" />
             </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-            <Button
-                android:id="@+id/btnFinish"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Back to Menu"
-                android:layout_marginTop="24dp"/>
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
-
-</androidx.constraintlayout.widget.ConstraintLayout> 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFinish"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="24dp"
+            android:text="@string/back_to_menu"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            app:cornerRadius="18dp" />
+    </LinearLayout>
+</ScrollView>

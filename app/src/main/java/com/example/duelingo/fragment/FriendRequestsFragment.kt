@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.duelingo.R
@@ -14,6 +16,9 @@ import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import com.example.duelingo.utils.RefreshEvents
 import java.util.UUID
 
 class FriendRequestsFragment : Fragment() {
@@ -21,6 +26,8 @@ class FriendRequestsFragment : Fragment() {
     private lateinit var tokenManager: TokenManager
     private lateinit var avatarManager: AvatarManager
     private lateinit var adapter: FriendRequestsAdapter
+    private lateinit var emptyState: View
+    private var loading = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_friends_list, container, false)
@@ -30,7 +37,10 @@ class FriendRequestsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         recyclerView = view.findViewById(R.id.friends_recycler_view)
+        emptyState = view.findViewById(R.id.friends_empty_state)
         recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.setHasFixedSize(true)
+        recyclerView.itemAnimator = null
         
         tokenManager = TokenManager(requireContext())
         avatarManager = AvatarManager(requireContext(), tokenManager, requireContext().getSharedPreferences("user_prefs", 0))
@@ -43,9 +53,20 @@ class FriendRequestsFragment : Fragment() {
         
         recyclerView.adapter = adapter
         loadRequests()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (isActive) {
+                    delay(30_000)
+                    loadRequests()
+                }
+            }
+        }
     }
 
     private fun loadRequests() {
+        if (loading) return
+        loading = true
         lifecycleScope.launch {
             try {
                 val response = ApiClient.relationshipService.getIncomingRequests(
@@ -54,10 +75,14 @@ class FriendRequestsFragment : Fragment() {
                 if (response.isSuccessful) {
                     response.body()?.let { requests ->
                         adapter.submitList(requests)
+                        recyclerView.visibility = if (requests.isEmpty()) View.GONE else View.VISIBLE
+                        emptyState.visibility = if (requests.isEmpty()) View.VISIBLE else View.GONE
                     }
                 }
             } catch (e: Exception) {
                 // Handle error
+            } finally {
+                loading = false
             }
         }
     }
@@ -72,6 +97,7 @@ class FriendRequestsFragment : Fragment() {
                 )
                 if (response.isSuccessful) {
                     loadRequests() // Reload the list after update
+                    RefreshEvents.notifyChanged(RefreshEvents.DataSet.FRIENDS)
                 }
             } catch (e: Exception) {
                 // Handle error
@@ -82,4 +108,4 @@ class FriendRequestsFragment : Fragment() {
     companion object {
         fun newInstance() = FriendRequestsFragment()
     }
-} 
+}

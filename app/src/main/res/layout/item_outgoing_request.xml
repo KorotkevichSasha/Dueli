@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp" android:layout_marginVertical="5dp"
+    app:cardBackgroundColor="?attr/cardBackgroundColor" app:cardCornerRadius="18dp" app:strokeColor="?attr/dividerColor" app:strokeWidth="1dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal" android:padding="14dp">
+        <de.hdodenhof.circleimageview.CircleImageView android:id="@+id/avatarImage" android:layout_width="46dp" android:layout_height="46dp" android:src="@drawable/default_profile" />
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:layout_weight="1" android:orientation="vertical">
+            <TextView android:id="@+id/usernameText" android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1" android:textColor="?attr/textColor" android:textSize="16sp" android:textStyle="bold" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="@string/request_waiting" android:textColor="?attr/secondaryTextColor" android:textSize="14sp" />
+        </LinearLayout>
+        <com.google.android.material.button.MaterialButton android:id="@+id/cancelButton" style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content" android:layout_height="50dp" android:minWidth="90dp" android:text="@string/cancel_request" android:textAllCaps="false" android:textSize="15sp" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

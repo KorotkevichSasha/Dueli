@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="16sp"
+        android:textColor="?attr/textColor"
         android:textStyle="bold"/>
 
     <TextView
@@ -19,22 +20,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Слова для составления: "
+        android:text="@string/sentence_word_bank"
+        android:textColor="?attr/secondaryTextColor"
         android:gravity="center"
         android:layout_gravity="center"/>
 
-    <LinearLayout
+    <com.google.android.material.chip.ChipGroup
         android:id="@+id/containerSelectedWords"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp"/>
+        android:minHeight="56dp"
+        android:padding="8dp"
+        android:background="@drawable/bg_selected_words"
+        android:animateLayoutChanges="true"/>
 
-    <LinearLayout
+    <com.google.android.material.chip.ChipGroup
         android:id="@+id/containerWordBank"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp"/>
+        android:padding="8dp"
+        android:animateLayoutChanges="true"/>
 
 </LinearLayout>

@@ -12,7 +12,7 @@ class UserAchievementResponse(
     val requiredValue: Int,
     val currentValue: Int,
     val isAchieved: Boolean,
-    val iconUrl: String
+    val iconUrl: String?
 ) {
     val type: AchievementType = type
     val level: AchievementLevel = level

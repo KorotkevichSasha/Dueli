@@ -21,18 +21,48 @@
         android:layout_marginEnd="16dp"
         app:tint="?attr/textColor"/>
 
+    <ImageButton
+        android:id="@+id/share_profile_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/share_profile"
+        android:padding="12dp"
+        android:src="@drawable/ic_share"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="?attr/textColor" />
+
     <!-- Анимация Lottie -->
 
     <!-- Круглая форма для фотографии профиля -->
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/profile_image"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_width="104dp"
+        android:layout_height="104dp"
         android:src="@drawable/default_profile"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="20dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/upload_photo_button"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginTop="4dp"
+        android:text="@string/upload_profile_photo"
+        android:textAllCaps="false"
+        android:textColor="@color/blue_primary"
+        android:textSize="16sp"
+        app:icon="@drawable/ic_camera"
+        app:iconTint="@color/blue_primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/profile_image" />
 
     <!-- Имя игрока -->
     <TextView
@@ -42,10 +72,10 @@
         android:text="Имя игрока"
         android:textColor="?attr/textColor"
         android:textSize="24sp"
-        app:layout_constraintTop_toBottomOf="@id/profile_image"
+        app:layout_constraintTop_toBottomOf="@id/upload_photo_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="2dp"/>
 
     <!-- Почта игрока -->
     <TextView
@@ -65,25 +95,74 @@
         android:id="@+id/point_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Очки: 0"
+        android:text="@string/learning_points_zero"
         android:textColor="?attr/textColor"
         android:textSize="18sp"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/player_email"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="8dp"/>
 
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/profileProgressCard"
+        android:layout_width="0dp"
+        android:layout_height="72dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="10dp"
+        app:cardBackgroundColor="?attr/cardBackgroundColor"
+        app:cardCornerRadius="18dp"
+        app:cardElevation="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/player_email">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp">
+
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+                <TextView android:id="@+id/profilePointsValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/blue_primary" android:textSize="20sp" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/points_stat" android:textColor="?attr/secondaryTextColor" android:textSize="12sp" />
+            </LinearLayout>
+
+            <View android:layout_width="1dp" android:layout_height="36dp" android:background="?attr/dividerColor" />
+
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+                <TextView android:id="@+id/profileRankValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="—" android:textColor="?attr/textColor" android:textSize="20sp" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/rank_stat" android:textColor="?attr/secondaryTextColor" android:textSize="12sp" />
+            </LinearLayout>
+
+            <View android:layout_width="1dp" android:layout_height="36dp" android:background="?attr/dividerColor" />
+
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1.25" android:gravity="center" android:orientation="vertical">
+                <TextView android:id="@+id/profileGoalValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="100" android:textColor="@color/green_primary" android:textSize="20sp" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center" android:text="@string/profile_goal" android:textColor="?attr/secondaryTextColor" android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
     <!-- Достижения -->
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/achievementsButton"
-        android:layout_width="198dp"
-        android:layout_height="wrap_content"
-        android:text="Достижения"
-        android:background="@drawable/bg_button"
-        app:layout_constraintTop_toBottomOf="@id/point_count"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginHorizontal="20dp"
+        android:text="@string/achievements"
+        android:textColor="@color/white"
+        app:backgroundTint="@color/blue_primary"
+        app:cornerRadius="16dp"
+        app:icon="@drawable/ic_achievements"
+        app:iconGravity="textStart"
+        app:iconPadding="10dp"
+        app:iconTint="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/profileProgressCard"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="10dp"/>
 
     <!-- Секция друзей -->
     <LinearLayout
@@ -91,7 +170,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="vertical"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="10dp"
         app:layout_constraintTop_toBottomOf="@id/achievementsButton"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation">
 
@@ -105,7 +184,7 @@
                 android:id="@+id/friendsTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Друзья"
+                android:text="@string/friends"
                 android:textColor="@color/blue_primary"
                 android:textSize="20sp"
                 android:layout_centerVertical="true"/>
@@ -183,7 +262,7 @@
                 android:id="@+id/testTest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Обучение"
+                android:text="@string/nav_learning"
                 android:textColor="#7A7A7B"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -220,7 +299,7 @@
                 android:id="@+id/mainTest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Дуэль"
+                android:text="@string/nav_duel"
                 android:textColor="#7A7A7B"
                 android:textSize="12sp"/>
         </LinearLayout>
@@ -257,7 +336,7 @@
                 android:id="@+id/cupTest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Рейтинг"
+                android:text="@string/nav_rank"
                 android:textColor="#7A7A7B"
                 android:textSize="12sp"/>
         </LinearLayout>
@@ -294,7 +373,7 @@
                 android:id="@+id/profileTest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Профиль"
+                android:text="@string/nav_profile"
                 android:textColor="#7A7A7B"
                 android:textSize="12sp"/>
         </LinearLayout>

@@ -19,6 +19,7 @@ import com.example.duelingo.adapters.TopicsAdapter
 import com.example.duelingo.databinding.ActivityTopicsBinding
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
+import com.example.duelingo.utils.UserMessage
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -37,12 +38,12 @@ class TopicsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTopicsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.backButton.setOnClickListener { finish() }
 
         binding.testIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.testTest.setTextColor(Color.parseColor("#FF00A5FE"))
 
         setupRecyclerView()
-        loadTopics()
 
         binding.tests.setOnClickListener {}
         binding.duel.setOnClickListener {
@@ -75,6 +76,11 @@ class TopicsActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        loadTopics()
+    }
+
 
     private fun loadTopics() {
         val tokenManager = TokenManager(this)
@@ -104,11 +110,11 @@ class TopicsActivity : AppCompatActivity() {
 
                     topicsAdapter.updateData(updatedTopics, completionStatus)
                 } catch (e: Exception) {
-                    showToast("Error loading topics: ${e.message}")
+                    showToast(UserMessage.from(this@TopicsActivity, e))
                 }
             }
         } else {
-            showToast("Authentication error")
+            showToast(getString(R.string.session_expired))
         }
     }
 
@@ -159,14 +165,14 @@ class TopicsActivity : AppCompatActivity() {
                         }
                         startActivity(intent)
                     } else {
-                        showToast("No random questions available")
+                        showToast(getString(R.string.no_questions_available))
                     }
                 } catch (e: Exception) {
-                    showToast("Error loading random test: ${e.message}")
+                    showToast(UserMessage.from(this@TopicsActivity, e))
                 }
             }
         } else {
-            showToast("Authentication error")
+            showToast(getString(R.string.session_expired))
         }
     }
     private fun showToast(message: String) {

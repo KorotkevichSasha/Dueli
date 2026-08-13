@@ -1,7 +1,7 @@
 package com.example.duelingo.adapters
 
 import android.annotation.SuppressLint
-import android.graphics.Color
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,12 +9,14 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
+import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.example.duelingo.R
 import com.example.duelingo.dto.response.AchievementLevel
+import com.example.duelingo.dto.response.AchievementType
 import com.example.duelingo.dto.response.UserAchievementResponse
-import androidx.core.graphics.toColorInt
+import com.google.android.material.card.MaterialCardView
 
 class AchievementsAdapter(
     private var achievements: List<UserAchievementResponse>
@@ -45,6 +47,7 @@ class AchievementsAdapter(
         private val ivIcon: ImageView = itemView.findViewById(R.id.achievementIcon)
         private val ivStatus: ImageView = itemView.findViewById(R.id.achievementStatus)
         private val progressBar: ProgressBar = itemView.findViewById(R.id.achievementProgressBar)
+        private val card: MaterialCardView = itemView.findViewById(R.id.achievementCard)
 
         @SuppressLint("SetTextI18n")
         fun bind(achievement: UserAchievementResponse) {
@@ -52,33 +55,41 @@ class AchievementsAdapter(
             tvDescription.text = achievement.description
             tvProgressText.text = "${achievement.currentValue} / ${achievement.requiredValue}"
 
-            progressBar.max = achievement.requiredValue
-            progressBar.progress = achievement.currentValue
+            progressBar.max = achievement.requiredValue.coerceAtLeast(1)
+            progressBar.progress = achievement.currentValue.coerceIn(0, progressBar.max)
 
-            val bgRes = when (achievement.level) {
-                AchievementLevel.BRONZE -> R.drawable.ic_achievement_bronze
-                AchievementLevel.SILVER -> R.drawable.ic_achievement_silver
-                AchievementLevel.GOLD -> R.drawable.ic_achievement_gold
-            }
+            val accentColor = ContextCompat.getColor(itemView.context, when (achievement.level) {
+                AchievementLevel.BRONZE -> R.color.bronze
+                AchievementLevel.SILVER -> R.color.silver
+                AchievementLevel.GOLD -> R.color.gold
+            })
+            card.strokeColor = ColorUtils.setAlphaComponent(
+                accentColor,
+                if (achievement.isAchieved) 210 else 90
+            )
+            card.strokeWidth = if (achievement.isAchieved) 2 else 1
+            progressBar.progressTintList = ColorStateList.valueOf(accentColor)
 
-            itemView.background = ContextCompat.getDrawable(itemView.context, bgRes)
+            ivIcon.setImageResource(when (achievement.type) {
+                AchievementType.DUELS -> R.drawable.swords24
+                AchievementType.FRIENDS -> R.drawable.ic_add_friend
+                AchievementType.TESTS -> R.drawable.graduation24
+                AchievementType.WORDS -> R.drawable.add
+            })
+            ImageViewCompat.setImageTintList(ivIcon, ColorStateList.valueOf(accentColor))
 
-            if (!achievement.isAchieved) {
-                ivIcon.alpha = 0.3f
-                ivStatus.setImageResource(R.drawable.ic_lock)
-            } else {
-                ivIcon.alpha = 1.0f
+            if (achievement.isAchieved) {
+                ivIcon.alpha = 1f
                 ivStatus.setImageResource(R.drawable.img)
+                ImageViewCompat.setImageTintList(ivStatus, null)
+            } else {
+                ivIcon.alpha = 0.45f
+                ivStatus.setImageResource(R.drawable.ic_lock)
+                ImageViewCompat.setImageTintList(
+                    ivStatus,
+                    ColorStateList.valueOf(ContextCompat.getColor(itemView.context, R.color.gray))
+                )
             }
-
-            Glide.with(ivIcon.context)
-                .load(achievement.iconUrl)
-                .into(ivIcon)
-
-//            ivStatus.setImageResource(
-//                if (achievement.isAchieved) R.drawable.img
-//                else R.drawable.ic_lock
-//            )
         }
     }
 }

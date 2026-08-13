@@ -30,10 +30,10 @@ interface QuestionService {
     ): List<AudioQuestionResponse>
 
     @Multipart
-    @POST("questions/verify-audio-answer")
+    @POST("questions/{questionId}/verify-answer")
     suspend fun verifyAnswer(
         @Header("Authorization") token: String,
-        @Query("questionId") questionId: String,
+        @Path("questionId") questionId: String,
         @Part audioFile: MultipartBody.Part
     ): AudioAnswerResponse
 }

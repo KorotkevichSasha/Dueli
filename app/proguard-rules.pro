@@ -19,3 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+# DTOs are serialized by Gson through reflection.
+-keepattributes Signature
+-keepattributes *Annotation*
+-keep class com.example.duelingo.dto.** { *; }
+-keep class com.example.duelingo.model.** { *; }

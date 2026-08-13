@@ -1,84 +1,295 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:background="?attr/backgroundColor">
+    android:background="?attr/backgroundColor"
+    android:paddingHorizontal="16dp">
 
-
-    <!-- Иконка воспроизведения аудио -->
-    <ImageView
-        android:id="@+id/playAudioIcon"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="52dp"
-        android:contentDescription="Play Audio"
-        android:src="@drawable/record"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- SeekBar для скорости воспроизведения -->
-    <SeekBar
-        android:id="@+id/speedSeekBar"
+    <LinearLayout
+        android:id="@+id/listeningHeader"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:max="200"
-        android:progress="100"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/playAudioIcon" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <!-- Текст скорости -->
-    <TextView
-        android:id="@+id/speedLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Speed: 100%"
-        android:layout_marginTop="8dp"
-        android:textSize="20dp"
-        android:textColor="@color/blue_primary"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/backButton"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/back"
+            app:icon="@drawable/ic_arrow_back"
+            app:iconTint="?attr/textColor" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="@string/listening_screen_title"
+            android:textColor="?attr/textColor"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/listeningContent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:paddingBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@id/listeningActions"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/speedSeekBar" />
+        app:layout_constraintTop_toBottomOf="@id/listeningHeader">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingTop="8dp">
 
-    <TextView
-        android:id="@+id/recognizedText"
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/listening_instruction"
+                android:textColor="?attr/secondaryTextColor"
+                android:textSize="16sp" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                app:cardBackgroundColor="?attr/cardBackgroundColor"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#251687F8"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <ImageButton
+                        android:id="@+id/playAudioIcon"
+                        android:layout_width="88dp"
+                        android:layout_height="88dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/listening_play_sentence"
+                        android:padding="6dp"
+                        android:src="@drawable/record" />
+
+                    <ProgressBar
+                        android:id="@+id/questionLoading"
+                        style="?android:attr/progressBarStyle"
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:layout_marginTop="8dp"
+                        android:contentDescription="@string/listening_loading"
+                        android:indeterminateTint="@color/blue_primary" />
+
+                    <TextView
+                        android:id="@+id/playbackStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"
+                        android:text="@string/listening_loading"
+                        android:textColor="?attr/textColor"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/speedLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:text="@string/speed_default"
+                        android:textColor="@color/blue_primary"
+                        android:textSize="15sp" />
+
+                    <SeekBar
+                        android:id="@+id/speedSeekBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/listening_speed_description"
+                        android:max="100"
+                        android:progress="50" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                app:cardBackgroundColor="?attr/cardBackgroundColor"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#251687F8"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <ImageButton
+                        android:id="@+id/recordAudioIcon"
+                        android:layout_width="88dp"
+                        android:layout_height="88dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/listening_record_voice"
+                        android:padding="6dp"
+                        android:src="@drawable/microphone" />
+
+                    <TextView
+                        android:id="@+id/recordingStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"
+                        android:text="@string/listening_tap_microphone"
+                        android:textColor="?attr/textColor"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:text="@string/listening_recognized_label"
+                        android:textColor="?attr/secondaryTextColor"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/recognizedText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:gravity="center"
+                        android:minHeight="48dp"
+                        android:text="@string/listening_nothing_recorded"
+                        android:textColor="@color/blue_primary"
+                        android:textSize="18sp" />
+
+                    <LinearLayout
+                        android:id="@+id/listeningResultCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:background="@drawable/bg_listening_result"
+                        android:orientation="vertical"
+                        android:padding="16dp"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:id="@+id/feedbackText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:textColor="?attr/textColor"
+                            android:textSize="17sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="14dp"
+                            android:text="@string/listening_your_answer_label"
+                            android:textColor="?attr/secondaryTextColor"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/submittedAnswerText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="?attr/textColor"
+                            android:textSize="16sp" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginVertical="14dp"
+                            android:background="@color/hint_stroke" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/listening_correct_phrase_label"
+                            android:textColor="@color/green_primary"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/correctAnswerText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:textColor="?attr/textColor"
+                            android:textIsSelectable="true"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/replayCorrectAnswerButton"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:layout_marginTop="13dp"
+                            android:text="@string/listening_replay_correct"
+                            android:textAllCaps="false"
+                            app:cornerRadius="15dp"
+                            app:icon="@drawable/record"
+                            app:iconTint="@color/blue_primary"
+                            app:strokeColor="@color/blue_primary" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <LinearLayout
+        android:id="@+id/listeningActions"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:textSize="18sp"
-        android:gravity="center"
-        android:textColor="@color/blue_primary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/speedLabel" />
-
-    <ImageView
-        android:id="@+id/recordAudioIcon"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="144dp"
-        android:contentDescription="Record Audio"
-        android:src="@drawable/microphone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/recognizedText" />
-
-    <Button
-        android:id="@+id/submitButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="50dp"
-        android:backgroundTint="@color/blue_primary"
-        android:text="Submit"
-        android:textColor="@color/white"
-        android:textSize="18sp"
+        android:orientation="vertical"
+        android:paddingBottom="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/submitButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="@string/submit_answer" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/nextListeningButton"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:textSize="16sp"
+            android:textAllCaps="false"
+            android:layout_marginTop="6dp"
+            android:text="@string/listening_next_sentence"
+            android:visibility="gone" />
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

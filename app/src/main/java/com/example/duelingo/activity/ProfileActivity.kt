@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -19,8 +20,11 @@ import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.GridLayout
+import androidx.core.widget.NestedScrollView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -32,20 +36,27 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.airbnb.lottie.LottieAnimationView
 import com.example.duelingo.R
+import com.example.duelingo.BuildConfig
 import com.example.duelingo.activity.auth.LoginActivity
 import com.example.duelingo.adapters.FriendRequestsAdapter
 import com.example.duelingo.adapters.FriendsAdapter
 import com.example.duelingo.databinding.ActivityProfileBinding
+import com.example.duelingo.databinding.DialogAvatarPickerBinding
 import com.example.duelingo.dto.request.RelationshipRequest
 import com.example.duelingo.dto.response.FriendResponse
 import com.example.duelingo.dto.response.UserProfileResponse
 import com.example.duelingo.fragment.FriendRequestsFragment
 import com.example.duelingo.fragment.FriendsListFragment
+import com.example.duelingo.fragment.OutgoingRequestsFragment
 import com.example.duelingo.manager.AvatarManager
+import com.example.duelingo.utils.KeyboardInsets
+import com.example.duelingo.manager.LocaleManager
 import com.example.duelingo.manager.ThemeManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.network.UserService
 import com.example.duelingo.storage.TokenManager
+import com.example.duelingo.utils.RefreshEvents
+import com.example.duelingo.utils.UserMessage
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.Dispatchers
@@ -62,6 +73,9 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var tokenManager: TokenManager
     private lateinit var userService: UserService
     private lateinit var avatarManager: AvatarManager
+    private var currentProfilePoints: Int = 0
+    private var currentProfileUsername: String = ""
+    private var currentProfileId: UUID? = null
     private val sharedPreferences by lazy { getSharedPreferences("user_prefs", MODE_PRIVATE) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,7 +97,9 @@ class ProfileActivity : AppCompatActivity() {
         binding.profileTest.setTextColor(Color.parseColor("#FF00A5FE"))
 
         avatarManager = AvatarManager(this, tokenManager, sharedPreferences)
-        binding.profileImage.setOnClickListener { getContent.launch("image/*") }
+        binding.profileImage.setOnClickListener { showAvatarPicker() }
+        binding.uploadPhotoButton.setOnClickListener { showAvatarPicker() }
+        binding.shareProfileButton.setOnClickListener { shareProfile() }
         loadProfile()
 
         binding.achievementsButton.setOnClickListener{ startActivity(Intent(this@ProfileActivity, AchievementActivity::class.java)) }
@@ -118,11 +134,12 @@ class ProfileActivity : AppCompatActivity() {
     private fun setupFriendsSection() {
         // Setup ViewPager
         val pagerAdapter = object : FragmentStateAdapter(this) {
-            override fun getItemCount(): Int = 2
+            override fun getItemCount(): Int = 3
             override fun createFragment(position: Int): Fragment {
                 return when (position) {
                     0 -> FriendsListFragment.newInstance()
                     1 -> FriendRequestsFragment.newInstance()
+                    2 -> OutgoingRequestsFragment.newInstance()
                     else -> throw IllegalArgumentException("Invalid position $position")
                 }
             }
@@ -140,7 +157,8 @@ class ProfileActivity : AppCompatActivity() {
             // Set tab text
             tabText.text = when (position) {
                 0 -> "Друзья"
-                1 -> "Заявки"
+                1 -> getString(R.string.incoming_requests_tab)
+                2 -> getString(R.string.outgoing_requests_tab)
                 else -> ""
             }
             
@@ -208,20 +226,97 @@ class ProfileActivity : AppCompatActivity() {
             ThemeManager.setDarkMode(isChecked)
         }
 
+        val languageValue = dialog.findViewById<TextView>(R.id.language_value)
+        languageValue.text = if (LocaleManager.getLanguage(this) == "en") {
+            getString(R.string.language_english)
+        } else {
+            getString(R.string.language_russian)
+        }
+        dialog.findViewById<LinearLayout>(R.id.language_button).setOnClickListener {
+            val current = if (LocaleManager.getLanguage(this) == "en") 1 else 0
+            AlertDialog.Builder(this)
+                .setTitle(R.string.language_title)
+                .setSingleChoiceItems(
+                    arrayOf(
+                        getString(R.string.language_russian),
+                        getString(R.string.language_english)
+                    ),
+                    current
+                ) { picker, selected ->
+                    dialog.dismiss()
+                    picker.dismiss()
+                    LocaleManager.setLanguage(this, if (selected == 1) "en" else "ru")
+                }
+                .show()
+        }
+
         val logoutButton = dialog.findViewById<LinearLayout>(R.id.logout_button)
         logoutButton.setOnClickListener {
             dialog.dismiss()
             logout()
         }
 
+        dialog.findViewById<LinearLayout>(R.id.delete_account_button).setOnClickListener {
+            dialog.dismiss()
+            confirmAccountDeletion()
+        }
+        dialog.findViewById<LinearLayout>(R.id.privacy_button).setOnClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(BuildConfig.PRIVACY_POLICY_URL)))
+        }
+
         dialog.show()
     }
 
     private fun updateUI(response: UserProfileResponse) {
+        currentProfilePoints = response.points
+        currentProfileUsername = response.username
+        currentProfileId = runCatching { UUID.fromString(response.id) }.getOrNull()
         binding.playerName.text = response.username
         binding.playerEmail.text = response.email
-        binding.pointCount.text = "Очки: ${response.points}"
-        avatarManager.loadAvatar(response.id, binding.profileImage)
+        binding.pointCount.text = getString(R.string.profile_points_format, response.points)
+        binding.profilePointsValue.text = response.points.toString()
+        binding.profileGoalValue.text = (100 - (response.points % 100)).toString()
+        avatarManager.loadAvatar(response.id, binding.profileImage, response.avatarUrl)
+    }
+
+    private fun showAvatarPicker() {
+        val content = DialogAvatarPickerBinding.inflate(layoutInflater)
+        val dialog = Dialog(this).apply {
+            requestWindowFeature(Window.FEATURE_NO_TITLE)
+            setContentView(content.root)
+            window?.setBackgroundDrawableResource(android.R.color.transparent)
+            setOnShowListener {
+                val width = (resources.displayMetrics.widthPixels - 24 * resources.displayMetrics.density).toInt()
+                    .coerceAtMost((520 * resources.displayMetrics.density).toInt())
+                window?.setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT)
+            }
+        }
+        val avatarSize = (44 * resources.displayMetrics.density).toInt()
+        (1..10).forEach { index ->
+            val image = de.hdodenhof.circleimageview.CircleImageView(this).apply {
+                layoutParams = GridLayout.LayoutParams().apply {
+                    width = avatarSize; height = avatarSize
+                    columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                }
+                setImageResource(avatarManager.avatarResource(index))
+                contentDescription = getString(R.string.default_avatar_number, index)
+                isClickable = true
+                isFocusable = true
+                foreground = ContextCompat.getDrawable(this@ProfileActivity, android.R.drawable.list_selector_background)
+                setOnClickListener {
+                    avatarManager.selectDefaultAvatar(index, { profile ->
+                        updateUI(profile); dialog.dismiss()
+                    }, ::showToast)
+                }
+            }
+            content.avatarGrid.addView(image)
+        }
+        content.closeButton.setOnClickListener { dialog.dismiss() }
+        content.contentPolicyCheck.setOnCheckedChangeListener { _, checked ->
+            content.uploadButton.isEnabled = checked
+        }
+        content.uploadButton.setOnClickListener { dialog.dismiss(); getContent.launch("image/*") }
+        dialog.show()
     }
 
     private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -239,7 +334,7 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun loadProfile() {
         val accessToken = tokenManager.getAccessToken() ?: run {
-            showToast("Access token is missing.")
+            showToast(getString(R.string.session_expired))
             return
         }
 
@@ -251,9 +346,10 @@ class ProfileActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     updateUI(response)
                 }
+                loadProfileRank(tokenWithBearer)
             } catch (e: Exception) {
                 Log.e("ProfileError", "Error loading profile: ${e.message}")
-                showToast("Error loading profile. Please try again.")
+                showToast(UserMessage.from(this@ProfileActivity, e))
             }
         }
     }
@@ -264,6 +360,51 @@ class ProfileActivity : AppCompatActivity() {
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
+    }
+
+    private suspend fun loadProfileRank(authHeader: String) {
+        runCatching { ApiClient.leaderboardService.getLeaderboard(authHeader) }
+            .onSuccess { leaderboard ->
+                binding.profileRankValue.text = "#${leaderboard.currentUser.rank}"
+            }
+            .onFailure { Log.w("ProfileActivity", "Could not load profile rank", it) }
+    }
+
+    private fun shareProfile() {
+        val text = getString(R.string.share_profile_text, currentProfilePoints)
+        startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, currentProfileUsername.ifBlank { getString(R.string.app_name) })
+            putExtra(Intent.EXTRA_TEXT, text)
+        }, getString(R.string.share_profile)))
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (::binding.isInitialized) loadProfile()
+    }
+
+    private fun confirmAccountDeletion() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.delete_account)
+            .setMessage(R.string.delete_account_confirmation)
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(R.string.delete) { _, _ -> deleteAccount() }
+            .show()
+    }
+
+    private fun deleteAccount() {
+        val accessToken = tokenManager.getAccessToken() ?: return logout()
+        lifecycleScope.launch {
+            try {
+                userService.deleteAccount("Bearer $accessToken")
+                sharedPreferences.edit().clear().apply()
+                logout()
+            } catch (e: Exception) {
+                Log.e("ProfileActivity", "Account deletion failed", e)
+                showToast(getString(R.string.delete_account_failed))
+            }
+        }
     }
 
     private fun showToast(message: String) {
@@ -317,11 +458,13 @@ class ProfileActivity : AppCompatActivity() {
     private fun showAddFriendDialog() {
         val dialog = Dialog(this)
         dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog)
+        dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         dialog.setContentView(R.layout.dialog_add_friend)
 
         val rootView = dialog.findViewById<ViewGroup>(android.R.id.content)
         if (rootView == null) {
-            showToast("Error: Failed to load dialog layout")
+            Log.e("ProfileActivity", "Failed to load add-friend dialog layout")
+            showToast(getString(R.string.error_generic))
             return
         }
 
@@ -329,33 +472,49 @@ class ProfileActivity : AppCompatActivity() {
         val btnSearch = rootView.findViewById<Button>(R.id.btnSearch)
         val progressBar = rootView.findViewById<ProgressBar>(R.id.progressBar)
         val userContainer = rootView.findViewById<LinearLayout>(R.id.userContainer)
+        val resultsScroll = rootView.findViewById<NestedScrollView>(R.id.resultsScroll)
+        rootView.findViewById<View>(R.id.closeButton)?.setOnClickListener { dialog.dismiss() }
 
         if (editUsername == null || btnSearch == null || progressBar == null || userContainer == null) {
-            showToast("Error: Dialog layout is incorrect")
+            Log.e("ProfileActivity", "Add-friend dialog has missing required views")
+            showToast(getString(R.string.error_generic))
             return
         }
 
         btnSearch.setOnClickListener {
             val username = editUsername.text.toString()
             if (username.isNotEmpty()) {
-                searchUser(username, progressBar, userContainer)
+                searchUser(username, progressBar, userContainer, resultsScroll)
             } else {
-                showToast("Please enter username")
+                showToast(getString(R.string.error_username_required))
             }
         }
 
+        dialog.setOnShowListener {
+            dialog.findViewById<View>(android.R.id.content)?.let(KeyboardInsets::apply)
+            val width = (resources.displayMetrics.widthPixels - 32 * resources.displayMetrics.density).toInt()
+                .coerceAtMost((560 * resources.displayMetrics.density).toInt())
+            dialog.window?.setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT)
+        }
+        editUsername.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                btnSearch.performClick()
+                true
+            } else false
+        }
         dialog.show()
     }
 
-    private fun searchUser(username: String, progressBar: ProgressBar, container: LinearLayout) {
+    private fun searchUser(username: String, progressBar: ProgressBar, container: LinearLayout, resultsScroll: View) {
         if (!::tokenManager.isInitialized) {
-            showToast("Error: TokenManager is not initialized")
+            Log.e("ProfileActivity", "Token manager is not initialized")
+            showToast(getString(R.string.session_expired))
             return
         }
 
         val accessToken = tokenManager.getAccessToken()
         if (accessToken == null) {
-            showToast("Error: Access token is missing")
+            showToast(getString(R.string.session_expired))
             return
         }
 
@@ -363,21 +522,25 @@ class ProfileActivity : AppCompatActivity() {
             try {
                 progressBar.visibility = View.VISIBLE
                 container.removeAllViews()
+                resultsScroll.visibility = View.GONE
 
                 val response = ApiClient.userService.searchUsers(
                     "Bearer $accessToken",
                     username
                 )
 
-                if (response.content.isNotEmpty()) {
-                    response.content.forEach { user ->
+                val users = response.content.filterNot { it.id == currentProfileId }
+                if (users.isNotEmpty()) {
+                    users.forEach { user ->
                         showUserInfo(user, container)
                     }
+                    resultsScroll.visibility = View.VISIBLE
                 } else {
-                    showToast("No users found")
+                    showToast(getString(R.string.no_users_found))
                 }
             } catch (e: Exception) {
-                showToast("Error: ${e.message}")
+                Log.e("ProfileActivity", "Friend search failed", e)
+                showToast(UserMessage.from(this@ProfileActivity, e))
             } finally {
                 progressBar.visibility = View.GONE
             }
@@ -390,26 +553,33 @@ class ProfileActivity : AppCompatActivity() {
         val usernameText = view.findViewById<TextView>(R.id.usernameText)
         val avatarImage = view.findViewById<ImageView>(R.id.avatarImage)
         val btnSendRequest = view.findViewById<Button>(R.id.btnSendRequest)
+        val pointsText = view.findViewById<TextView>(R.id.pointsText)
 
         if (usernameText == null || avatarImage == null || btnSendRequest == null) {
-            showToast("Error: User item layout is incorrect")
+            Log.e("ProfileActivity", "Friend search result has missing required views")
+            showToast(getString(R.string.error_generic))
             return
         }
 
         usernameText.text = user.username
-        avatarManager.loadAvatar(user.id.toString(), avatarImage)
+        pointsText.text = getString(R.string.profile_points_format, user.points)
+        avatarManager.loadAvatar(user.id.toString(), avatarImage, user.avatarUrl)
 
         btnSendRequest.setOnClickListener {
-            sendFriendRequest(user.id)
+            sendFriendRequest(user.id, btnSendRequest)
         }
 
         container.addView(view)
     }
 
-    private fun sendFriendRequest(toUserId: UUID) {
+    private fun sendFriendRequest(toUserId: UUID, button: Button) {
+        if (toUserId == currentProfileId) {
+            showToast(getString(R.string.cannot_add_yourself))
+            return
+        }
         val accessToken = tokenManager.getAccessToken()
         if (accessToken == null) {
-            showToast("Error: Access token is missing")
+            showToast(getString(R.string.session_expired))
             return
         }
 
@@ -422,13 +592,17 @@ class ProfileActivity : AppCompatActivity() {
                 )
 
                 if (response.isSuccessful) {
-                    showToast("Friend request sent!")
+                    showToast(getString(R.string.friend_request_sent))
+                    button.isEnabled = false
+                    button.text = getString(R.string.request_sent)
+                    RefreshEvents.notifyChanged(RefreshEvents.DataSet.FRIENDS)
                 } else {
                     val errorBody = response.errorBody()?.string()
-                    showToast("Error: ${errorBody ?: "Unknown error"}")
+                    showToast(UserMessage.fromServerText(this@ProfileActivity, errorBody))
                 }
             } catch (e: Exception) {
-                showToast("Error sending request: ${e.message}")
+                Log.e("ProfileActivity", "Friend request failed", e)
+                showToast(UserMessage.from(this@ProfileActivity, e))
             }
         }
     }

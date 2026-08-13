@@ -11,7 +11,7 @@
         android:id="@+id/tvQuestionText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/blue_primary"
+        android:textColor="?attr/textColor"
         android:textSize="16sp"
         android:textStyle="bold"
         android:gravity="center"
@@ -19,11 +19,16 @@
 
     <EditText
         android:id="@+id/etUserAnswer"
-        android:layout_width="259dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="8dp"
         android:gravity="center"
-        android:hint="Введите ответ" />
+        android:hint="@string/enter_answer"
+        android:imeOptions="actionDone"
+        android:inputType="text"
+        android:maxLines="1"
+        android:textColor="?attr/textColor"
+        android:textColorHint="?attr/secondaryTextColor" />
 
 </LinearLayout>

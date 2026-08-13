@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/fon">
+    android:background="?attr/backgroundColor">
 
     <!-- Top panel with timer and counter -->
     <androidx.cardview.widget.CardView
@@ -15,7 +15,7 @@
         android:layout_margin="16dp"
         app:cardCornerRadius="12dp"
         app:cardElevation="4dp"
-        app:cardBackgroundColor="#30FFFFFF"
+        app:cardBackgroundColor="@color/blue_primary"
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
@@ -24,14 +24,36 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <TextView
-                android:id="@+id/opponentName"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="@color/white"
-                android:layout_marginBottom="8dp"/>
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/opponentName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:maxLines="2"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnExitDuel"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:contentDescription="@string/leave_duel"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    app:backgroundTint="@android:color/transparent"
+                    app:icon="@drawable/ic_close"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
+                    app:iconTint="@color/white" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -49,8 +71,8 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Time Left"
-                        android:textColor="#80FFFFFF"
+                        android:text="@string/time_left"
+                        android:textColor="@color/white"
                         android:textSize="14sp"/>
 
                     <TextView
@@ -79,8 +101,8 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Progress"
-                        android:textColor="#80FFFFFF"
+                        android:text="@string/progress"
+                        android:textColor="@color/white"
                         android:textSize="14sp"/>
 
                     <TextView
@@ -110,7 +132,7 @@
         android:id="@+id/btnNext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Check Answer"
+        android:text="@string/check_answer"
         android:layout_margin="16dp"
         app:layout_constraintBottom_toBottomOf="parent"/>
 

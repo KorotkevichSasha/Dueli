@@ -4,6 +4,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class QuestionDetailedResponse(
+    val id: String,
     val difficulty: String,
     val type: String,
     val questionText: String,

@@ -2,13 +2,18 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:paddingHorizontal="8dp">
+    android:paddingHorizontal="2dp">
 
     <TextView
         android:id="@+id/tab_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAlignment="center"/>
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:textColor="@color/tab_text_color"
+        android:textSize="14sp"
+        android:textStyle="bold"/>
 
     <View
         android:id="@+id/notification_dot"
@@ -20,4 +25,4 @@
         android:background="@drawable/notification_dot"
         android:visibility="gone"/>
 
-</RelativeLayout> 
+</RelativeLayout>

@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
-    <!-- The Android emulator reaches the local development API over HTTP. -->
     <application
         android:usesCleartextTraffic="true"
-        tools:replace="android:usesCleartextTraffic" />
-
+        tools:replace="android:usesCleartextTraffic">
+        <!-- Debug-only entry points used by device layout checks. -->
+        <activity
+            android:name=".activity.auth.RegisterActivity"
+            android:exported="true"
+            tools:replace="android:exported" />
+        <activity
+            android:name=".activity.auth.LoginActivity"
+            android:exported="true"
+            tools:replace="android:exported" />
+    </application>
 </manifest>

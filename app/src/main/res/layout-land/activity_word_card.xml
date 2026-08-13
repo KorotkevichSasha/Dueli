@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/backgroundColor"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:baselineAligned="false"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="48dp">
+
+        <FrameLayout
+            android:id="@+id/cardContainer"
+            android:layout_width="0dp"
+            android:layout_height="220dp"
+            android:layout_marginEnd="32dp"
+            android:layout_weight="1">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardFront"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:cardBackgroundColor="@color/card_front_color"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp">
+                <TextView
+                    android:id="@+id/cardFrontText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:textColor="@color/card_text_color"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardBack"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="invisible"
+                app:cardBackgroundColor="@color/card_back_color"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp">
+                <TextView
+                    android:id="@+id/cardBackText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:textColor="@color/card_text_color"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+            </androidx.cardview.widget.CardView>
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/nextReviewDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:gravity="center"
+                android:textColor="?attr/secondaryTextColor"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btnAgain"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:backgroundTint="#FF5252"
+                android:text="@string/again"
+                android:textColor="#FFFFFF" />
+            <Button
+                android:id="@+id/btnHard"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="6dp"
+                android:backgroundTint="#FF9800"
+                android:text="@string/hard"
+                android:textColor="#FFFFFF" />
+            <Button
+                android:id="@+id/btnGood"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="6dp"
+                android:backgroundTint="#4CAF50"
+                android:text="@string/good"
+                android:textColor="#FFFFFF" />
+            <Button
+                android:id="@+id/btnEasy"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="6dp"
+                android:backgroundTint="#2196F3"
+                android:text="@string/easy"
+                android:textColor="#FFFFFF" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/backButton"
+        style="@style/Widget.Material3.Button.IconButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="start|top"
+        android:contentDescription="@string/back"
+        app:icon="@drawable/ic_arrow_back"
+        app:iconTint="?attr/textColor" />
+</FrameLayout>

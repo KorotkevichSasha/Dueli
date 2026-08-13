@@ -7,14 +7,17 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
+import android.util.LruCache
 import android.widget.ImageView
 import com.example.duelingo.dto.response.UserProfileResponse
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
+import com.example.duelingo.utils.UserMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.SupervisorJob
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -28,10 +31,30 @@ class AvatarManager(
     private val tokenManager: TokenManager,
     private val sharedPreferences: SharedPreferences
 ) {
+    companion object {
+        private val memoryCache = object : LruCache<String, Bitmap>(12 * 1024) {
+            override fun sizeOf(key: String, value: Bitmap) = value.byteCount / 1024
+        }
+        private val avatarScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    }
 
     private val apiClient = ApiClient.userService
 
-    fun loadAvatar(userId: String, imageView: ImageView) {
+    fun loadAvatar(userId: String, imageView: ImageView, avatarUrl: String? = null) {
+        imageView.tag = "avatar:$userId"
+        val selectedDefault = avatarUrl?.takeIf { it.startsWith("default:") }
+            ?.substringAfter(':')?.toIntOrNull()
+        if (selectedDefault in 1..10) {
+            imageView.setImageResource(avatarResources[selectedDefault!! - 1])
+            return
+        }
+        memoryCache.get(userId)?.let {
+            imageView.setImageBitmap(it)
+            return
+        }
+        with(imageView) {
+            setImageResource(defaultAvatarFor(userId))
+        }
         val accessToken = tokenManager.getAccessToken() ?: return
         val tokenWithBearer = "Bearer $accessToken"
         val savedETag = sharedPreferences.getString("avatar_etag_$userId", null)
@@ -47,15 +70,58 @@ class AvatarManager(
                 }
 
                 response.body()?.let { body ->
-                    val bitmap = BitmapFactory.decodeStream(body.byteStream())
+                    val bitmap = decodeScaled(body.bytes(), 320)
+                    memoryCache.put(userId, bitmap)
                     saveAvatarToCache(userId, bitmap, response.headers()["ETag"])
                     withContext(Dispatchers.Main) {
-                        imageView.setImageBitmap(bitmap)
+                        if (imageView.tag == "avatar:$userId") imageView.setImageBitmap(bitmap)
                     }
                 }
             } catch (e: Exception) {
                 Log.e("Avatar", "Error loading avatar: ${e.message}")
                 loadCachedAvatar(userId, imageView)
+            }
+        }
+    }
+
+    private fun decodeScaled(bytes: ByteArray, target: Int): Bitmap {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
+        var sample = 1
+        while (bounds.outWidth / (sample * 2) >= target && bounds.outHeight / (sample * 2) >= target) sample *= 2
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = sample })
+    }
+
+    private fun defaultAvatarFor(userId: String): Int {
+        return avatarResources[Math.floorMod(userId.hashCode(), avatarResources.size)]
+    }
+
+    private val avatarResources = intArrayOf(
+            com.example.duelingo.R.drawable.avatar_01,
+            com.example.duelingo.R.drawable.avatar_02,
+            com.example.duelingo.R.drawable.avatar_03,
+            com.example.duelingo.R.drawable.avatar_04,
+            com.example.duelingo.R.drawable.avatar_05,
+            com.example.duelingo.R.drawable.avatar_06,
+            com.example.duelingo.R.drawable.avatar_07,
+            com.example.duelingo.R.drawable.avatar_08,
+            com.example.duelingo.R.drawable.avatar_09,
+            com.example.duelingo.R.drawable.avatar_10
+        )
+
+    fun avatarResource(index: Int): Int = avatarResources[(index - 1).coerceIn(0, 9)]
+
+    fun selectDefaultAvatar(index: Int, onSuccess: (UserProfileResponse) -> Unit, onError: (String) -> Unit) {
+        val accessToken = tokenManager.getAccessToken()
+            ?: return onError(context.getString(com.example.duelingo.R.string.session_expired))
+        avatarScope.launch {
+            try {
+                val profile = apiClient.selectDefaultAvatar("Bearer $accessToken", index)
+                File(context.cacheDir, "avatar_${profile.id}.jpg").delete()
+                withContext(Dispatchers.Main) { onSuccess(profile) }
+            } catch (e: Exception) {
+                Log.e("Avatar", "Default avatar selection failed", e)
+                withContext(Dispatchers.Main) { onError(UserMessage.from(context, e)) }
             }
         }
     }
@@ -80,8 +146,9 @@ class AvatarManager(
 
         if (file.exists()) {
             val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+            memoryCache.put(userId, bitmap)
             withContext(Dispatchers.Main) {
-                imageView.setImageBitmap(bitmap)
+                if (imageView.tag == "avatar:$userId") imageView.setImageBitmap(bitmap)
             }
         } else {
             Log.d("AvatarCache", "No cached avatar found for user $userId")
@@ -91,18 +158,18 @@ class AvatarManager(
     fun uploadImage(uri: Uri, onSuccess: (UserProfileResponse) -> Unit, onError: (String) -> Unit) {
         val mimeType = context.contentResolver.getType(uri) ?: "image/*"
         val accessToken = tokenManager.getAccessToken() ?: run {
-            onError("Access token is missing.")
+            onError(context.getString(com.example.duelingo.R.string.session_expired))
             return
         }
 
         val tokenWithBearer = "Bearer $accessToken"
         val file = createTempFileFromUri(uri) ?: run {
-            onError("Failed to create file from URI")
+            onError(context.getString(com.example.duelingo.R.string.error_image_invalid))
             return
         }
 
         if (file.length() > 2 * 1024 * 1024) {
-            onError("File is too large")
+            onError(context.getString(com.example.duelingo.R.string.error_image_too_large))
             file.delete()
             return
         }
@@ -120,10 +187,10 @@ class AvatarManager(
             } catch (e: HttpException) {
                 val errorBody = e.response()?.errorBody()?.string()
                 Log.e("UploadError", "HTTP ${e.code()}: $errorBody")
-                onError("Error uploading image: ${e.message()}")
+                onError(UserMessage.from(context, e))
             } catch (e: Exception) {
                 Log.e("UploadError", "Unexpected error: ${e.message}")
-                onError("Unexpected error: ${e.message}")
+                onError(UserMessage.from(context, e))
             } finally {
                 file.delete()
             }

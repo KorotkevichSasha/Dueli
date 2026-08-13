@@ -1,55 +1,53 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="?attr/backgroundColor">
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:background="?attr/backgroundColor" android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+            <com.google.android.material.button.MaterialButton android:id="@+id/backButton" style="@style/Widget.Material3.Button.IconButton" android:layout_width="48dp" android:layout_height="48dp" android:contentDescription="@string/back" app:icon="@drawable/ic_arrow_back" app:iconTint="?attr/textColor" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:layout_weight="1" android:text="@string/learning_vocabulary_title" android:textColor="?attr/textColor" android:textSize="26sp" android:textStyle="bold" />
+        </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/reviewWordsLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="?selectableItemBackground"
-        android:padding="16dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/vocabulary_intro" android:textColor="?attr/secondaryTextColor" android:textSize="16sp" />
 
-        <TextView
-            android:id="@+id/tvWordCount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:text="0 слов для повторения"/>
+        <com.google.android.material.card.MaterialCardView android:id="@+id/reviewWordsLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground" app:cardBackgroundColor="@color/blue_primary" app:cardCornerRadius="24dp" app:cardElevation="4dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal" android:padding="22dp">
+                <TextView android:layout_width="58dp" android:layout_height="58dp" android:gravity="center" android:text="🧠" android:textSize="34sp" />
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="14dp" android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/review_words_title" android:textColor="@color/white" android:textSize="20sp" android:textStyle="bold" />
+                    <TextView android:id="@+id/tvWordCount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="@string/words_to_review_zero" android:textColor="#DCEEFF" android:textSize="14sp" />
+                </LinearLayout>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="›" android:textColor="@color/white" android:textSize="36sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
+        <com.google.android.material.card.MaterialCardView android:id="@+id/allWordsLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground" app:cardBackgroundColor="?attr/cardBackgroundColor" app:cardCornerRadius="22dp" app:strokeColor="@color/word_chip_stroke" app:strokeWidth="1dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal" android:padding="20dp">
+                <ImageView android:layout_width="48dp" android:layout_height="48dp" android:contentDescription="@string/all_words_title" android:padding="11dp" android:src="@drawable/ic_book" app:tint="?attr/textColor" />
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/all_words_title" android:textColor="?attr/textColor" android:textSize="18sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="@string/all_words_description" android:textColor="?attr/secondaryTextColor" android:textSize="14sp" />
+                </LinearLayout>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="›" android:textColor="?attr/secondaryTextColor" android:textSize="32sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView android:id="@+id/addWordLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground" app:cardBackgroundColor="?attr/cardBackgroundColor" app:cardCornerRadius="22dp" app:strokeColor="@color/word_chip_stroke" app:strokeWidth="1dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal" android:padding="20dp">
+                <FrameLayout android:layout_width="54dp" android:layout_height="54dp" android:background="@drawable/bg_feedback_correct">
+                    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:contentDescription="@string/add_word" android:src="@drawable/ic_add_word" />
+                </FrameLayout>
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/add_word" android:textColor="?attr/textColor" android:textSize="18sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="@string/add_word_description" android:textColor="?attr/secondaryTextColor" android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" app:cardBackgroundColor="?attr/cardBackgroundColor" app:cardCornerRadius="20dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/how_vocabulary_works" android:textColor="?attr/textColor" android:textSize="18sp" android:textStyle="bold" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:lineSpacingExtra="4dp" android:text="@string/vocabulary_method_description" android:textColor="?attr/secondaryTextColor" android:textSize="14sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#33000000"
-        android:layout_marginVertical="8dp"/>
-
-    <LinearLayout
-        android:id="@+id/addWordLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="?selectableItemBackground"
-        android:padding="16dp"
-        android:gravity="center_vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Добавить слово"
-            android:textSize="18sp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="+"
-            android:textSize="24sp"
-            android:layout_marginStart="8dp"/>
-    </LinearLayout>
-
-</LinearLayout>
+</ScrollView>

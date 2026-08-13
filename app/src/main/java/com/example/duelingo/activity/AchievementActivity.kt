@@ -17,6 +17,7 @@ import com.example.duelingo.adapters.AchievementsAdapter
 import com.example.duelingo.databinding.ActivityAchievementsBinding
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
+import com.example.duelingo.utils.UserMessage
 import kotlinx.coroutines.launch
 
 class AchievementActivity : AppCompatActivity() {
@@ -31,10 +32,15 @@ class AchievementActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityAchievementsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.backButton.setOnClickListener { finish() }
 
         setupRecyclerView()
-        loadAchievements()
         setupNavigationButtons()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadAchievements()
     }
 
     private fun setupRecyclerView() {
@@ -53,12 +59,18 @@ class AchievementActivity : AppCompatActivity() {
                 try {
                     val achievements = ApiClient.achievementService.getUserAchievements(bearerToken)
                     adapter.updateData(achievements)
+                    val unlocked = achievements.count { it.isAchieved }
+                    binding.achievementSummaryValue.text = getString(
+                        R.string.achievements_summary_format,
+                        unlocked,
+                        achievements.size
+                    )
                 } catch (e: Exception) {
-                    showToast("Ошибка загрузки: ${e.localizedMessage}")
+                    showToast(UserMessage.from(this@AchievementActivity, e))
                 }
             }
         } else {
-            showToast("Ошибка авторизации")
+            showToast(getString(R.string.session_expired))
         }
     }
 

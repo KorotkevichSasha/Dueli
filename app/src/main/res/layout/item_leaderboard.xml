@@ -4,14 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="56dp"
     android:paddingHorizontal="12dp"
-    android:background="#0B0B0D">
+    android:background="?attr/backgroundColor">
 
     <!-- Номер места -->
     <TextView
         android:id="@+id/rankText"
         android:layout_width="32dp"
         android:layout_height="wrap_content"
-        android:textColor="@color/gray"
+        android:textColor="?attr/textColor"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -40,7 +40,7 @@
         android:layout_marginEnd="8dp"
         android:ellipsize="end"
         android:maxLines="1"
-        android:textColor="@color/gray"
+        android:textColor="?attr/textColor"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="@id/avatarImage"
         app:layout_constraintEnd_toStartOf="@id/pointsText"
@@ -55,7 +55,7 @@
         android:layout_marginEnd="8dp"
         android:minWidth="64dp"
         android:gravity="end"
-        android:textColor="@color/gray"
+        android:textColor="?attr/textColor"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/avatarImage"

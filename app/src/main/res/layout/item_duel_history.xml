@@ -6,6 +6,7 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="8dp"
+    app:cardBackgroundColor="?attr/cardBackgroundColor"
     app:cardCornerRadius="12dp"
     app:cardElevation="4dp">
 
@@ -14,6 +15,18 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp">
+
+        <TextView
+            android:id="@+id/duelModeBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:background="@drawable/bg_selected_words"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="5dp"
+            android:textColor="@color/blue_primary"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -36,10 +49,14 @@
 
                 <TextView
                     android:id="@+id/player1Name"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
                     android:textSize="14sp"
+                    android:textColor="?attr/textColor"
                     android:textStyle="bold"/>
 
                 <TextView
@@ -61,6 +78,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="VS"
+                android:textColor="?attr/secondaryTextColor"
                 android:textSize="24sp"
                 android:textStyle="bold"
                 android:layout_marginHorizontal="16dp"/>
@@ -80,10 +98,14 @@
 
                 <TextView
                     android:id="@+id/player2Name"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
                     android:textSize="14sp"
+                    android:textColor="?attr/textColor"
                     android:textStyle="bold"/>
 
                 <TextView
@@ -101,5 +123,15 @@
                     android:textColor="?android:textColorSecondary"/>
             </LinearLayout>
         </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="end"
+            android:text="@string/duel_history_open_details"
+            android:textColor="@color/blue_primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
     </LinearLayout>
-</com.google.android.material.card.MaterialCardView> 
+</com.google.android.material.card.MaterialCardView>

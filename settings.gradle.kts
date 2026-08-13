@@ -23,5 +23,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Duelingo"
+rootProject.name = "DuelRush"
 include(":app")

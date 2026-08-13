@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/backgroundColor"
-    android:padding="8dp">
+    android:paddingHorizontal="16dp">
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/animationView"
@@ -15,13 +15,79 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/learningHeroCard"
+        android:layout_width="0dp"
+        android:layout_height="132dp"
+        android:layout_marginTop="16dp"
+        app:cardBackgroundColor="@color/blue_primary"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="6dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="20dp">
+
+            <ImageView
+                android:id="@+id/learningHeroIcon"
+                android:layout_width="62dp"
+                android:layout_height="62dp"
+                android:contentDescription="@string/learning_hero_title"
+                android:scaleType="centerCrop"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/learningHeroTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/learning_hero_title"
+                android:textColor="@color/white"
+                android:textSize="21sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/learningHeroIcon"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/learningPoints"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="12dp"
+                android:text="@string/learning_points_zero"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/learningHeroIcon"
+                app:layout_constraintTop_toBottomOf="@id/learningHeroTitle" />
+
+            <TextView
+                android:id="@+id/learningTopics"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="18dp"
+                android:text="@string/learning_topics_loading"
+                android:textColor="#DDEEFF"
+                android:textSize="14sp"
+                app:layout_constraintBaseline_toBaselineOf="@id/learningPoints"
+                app:layout_constraintStart_toEndOf="@id/learningPoints" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
 
     <!-- CardView для Listening -->
     <androidx.cardview.widget.CardView
         android:id="@+id/listeningCard"
         android:layout_width="0dp"
-        android:layout_height="72dp"
-        android:layout_marginTop="8dp"
+        android:layout_height="88dp"
+        android:layout_marginTop="10dp"
         app:cardBackgroundColor="?attr/cardBackgroundColor"
         app:cardCornerRadius="12dp"
         app:cardElevation="4dp"
@@ -32,20 +98,57 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="16dp">
+            android:padding="14dp">
+
+            <ImageView
+                android:id="@+id/listeningFeatureIcon"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_feature_icon"
+                android:padding="10dp"
+                android:src="@drawable/ic_headphones"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/blue_primary" />
 
             <!-- Текст Listening -->
             <TextView
                 android:id="@+id/tvListeningTitle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Listening"
-                android:textColor="@color/blue_primary"
+                android:layout_marginStart="14dp"
+                android:text="@string/learning_listening_title"
+                android:textColor="?attr/textColor"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@id/listeningArrow"
+                app:layout_constraintStart_toEndOf="@id/listeningFeatureIcon"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_marginTop="4dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/learning_listening_subtitle"
+                android:textColor="?attr/secondaryTextColor"
+                android:textSize="13sp"
+                app:layout_constraintEnd_toStartOf="@id/listeningArrow"
+                app:layout_constraintStart_toEndOf="@id/listeningFeatureIcon"
+                app:layout_constraintTop_toBottomOf="@id/tvListeningTitle" />
+
+            <TextView
+                android:id="@+id/listeningArrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="›"
+                android:textColor="@color/blue_primary"
+                android:textSize="28sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
@@ -54,32 +157,69 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/testsCard"
         android:layout_width="0dp"
-        android:layout_height="72dp"
-        android:layout_marginTop="8dp"
+        android:layout_height="88dp"
+        android:layout_marginTop="12dp"
         app:cardBackgroundColor="?attr/cardBackgroundColor"
         app:cardCornerRadius="12dp"
         app:cardElevation="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/learningHeroCard">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="16dp">
+            android:padding="14dp">
+
+            <ImageView
+                android:id="@+id/testsFeatureIcon"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_feature_icon"
+                android:padding="10dp"
+                android:src="@drawable/graduation24"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/blue_primary" />
 
             <!-- Текст Tests -->
             <TextView
                 android:id="@+id/tvTestsTitle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Tests"
-                android:textColor="@color/blue_primary"
+                android:layout_marginStart="14dp"
+                android:text="@string/learning_tests_title"
+                android:textColor="?attr/textColor"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@id/testsArrow"
+                app:layout_constraintStart_toEndOf="@id/testsFeatureIcon"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_marginTop="4dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/learning_tests_subtitle"
+                android:textColor="?attr/secondaryTextColor"
+                android:textSize="13sp"
+                app:layout_constraintEnd_toStartOf="@id/testsArrow"
+                app:layout_constraintStart_toEndOf="@id/testsFeatureIcon"
+                app:layout_constraintTop_toBottomOf="@id/tvTestsTitle" />
+
+            <TextView
+                android:id="@+id/testsArrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="›"
+                android:textColor="@color/blue_primary"
+                android:textSize="28sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
@@ -88,8 +228,8 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/vocabularyCard"
         android:layout_width="0dp"
-        android:layout_height="72dp"
-        android:layout_marginTop="8dp"
+        android:layout_height="88dp"
+        android:layout_marginTop="10dp"
         app:cardBackgroundColor="?attr/cardBackgroundColor"
         app:cardCornerRadius="12dp"
         app:cardElevation="4dp"
@@ -100,22 +240,113 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="16dp">
+            android:padding="14dp">
+
+            <ImageView
+                android:id="@+id/vocabularyFeatureIcon"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_feature_icon"
+                android:padding="10dp"
+                android:src="@drawable/ic_book"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/blue_primary" />
 
             <TextView
                 android:id="@+id/tvVocabularyTitle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Vocabulary"
-                android:textColor="@color/blue_primary"
+                android:layout_marginStart="14dp"
+                android:text="@string/learning_vocabulary_title"
+                android:textColor="?attr/textColor"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@id/vocabularyArrow"
+                app:layout_constraintStart_toEndOf="@id/vocabularyFeatureIcon"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_marginTop="4dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/learning_vocabulary_subtitle"
+                android:textColor="?attr/secondaryTextColor"
+                android:textSize="13sp"
+                app:layout_constraintEnd_toStartOf="@id/vocabularyArrow"
+                app:layout_constraintStart_toEndOf="@id/vocabularyFeatureIcon"
+                app:layout_constraintTop_toBottomOf="@id/tvVocabularyTitle" />
+
+            <TextView
+                android:id="@+id/vocabularyArrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="›"
+                android:textColor="@color/blue_primary"
+                android:textSize="28sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/learningTipCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:cardBackgroundColor="?attr/cardBackgroundColor"
+        app:cardCornerRadius="18dp"
+        app:strokeColor="@color/blue_primary"
+        app:strokeWidth="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/vocabularyCard">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="6dp"
+                android:src="@drawable/ic_lightbulb"
+                app:tint="@color/blue_primary" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/learning_tip_title"
+                    android:textColor="?attr/textColor"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/learningTipText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="@string/learning_tip_text"
+                    android:textColor="?attr/secondaryTextColor"
+                    android:textSize="13sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -158,7 +389,7 @@
                 android:id="@+id/testTest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Обучение"
+                android:text="@string/nav_learning"
                 android:textColor="#7A7A7B"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -195,7 +426,7 @@
                 android:id="@+id/mainTest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Дуэль"
+                android:text="@string/nav_duel"
                 android:textColor="#7A7A7B"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -232,7 +463,7 @@
                 android:id="@+id/cupTest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Рейтинг"
+                android:text="@string/nav_rank"
                 android:textColor="#7A7A7B"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -269,7 +500,7 @@
                 android:id="@+id/profileTest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Профиль"
+                android:text="@string/nav_profile"
                 android:textColor="#7A7A7B"
                 android:textSize="12sp" />
         </LinearLayout>

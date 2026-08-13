@@ -1,65 +1,14 @@
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="16dp"
-    android:background="#0B0B0D">
-
-    <!-- Аватар -->
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/avatarImage"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:contentDescription="@null"
-        android:scaleType="centerCrop"
-        android:src="@drawable/default_profile"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-
-    <!-- Имя пользователя -->
-    <TextView
-        android:id="@+id/usernameText"
-        android:layout_marginTop="8dp"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
-        android:ellipsize="end"
-        android:maxWidth="200dp"
-        android:textColor="@color/gray"
-        android:textSize="16sp"
-        app:layout_constraintStart_toEndOf="@id/avatarImage"
-        app:layout_constraintTop_toTopOf="@id/avatarImage"
-        app:layout_constraintEnd_toStartOf="@id/btnSendRequest"/>
-
-    <!-- Очки -->
-    <TextView
-        android:id="@+id/pointsText"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:gravity="start"
-        android:textColor="@color/gray"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/usernameText"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@id/usernameText"
-        app:layout_constraintTop_toBottomOf="@id/usernameText" />
-
-    <!-- Кнопка отправки заявки -->
-    <Button
-        android:id="@+id/btnSendRequest"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Add Friend"
-        android:backgroundTint="@color/blue_primary"
-        android:textColor="@color/white"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-</androidx.constraintlayout.widget.ConstraintLayout>
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"
+    app:cardBackgroundColor="?attr/cardBackgroundColor" app:cardCornerRadius="18dp" app:strokeColor="?attr/dividerColor" app:strokeWidth="1dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal" android:padding="12dp">
+        <de.hdodenhof.circleimageview.CircleImageView android:id="@+id/avatarImage" android:layout_width="44dp" android:layout_height="44dp" android:scaleType="centerCrop" android:src="@drawable/default_profile" />
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:layout_weight="1" android:orientation="vertical">
+            <TextView android:id="@+id/usernameText" android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1" android:textColor="?attr/textColor" android:textSize="16sp" android:textStyle="bold" />
+            <TextView android:id="@+id/pointsText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:textColor="?attr/secondaryTextColor" android:textSize="13sp" />
+        </LinearLayout>
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnSendRequest" android:layout_width="wrap_content" android:layout_height="46dp" android:minWidth="72dp"
+            android:text="@string/add_friend" android:textAllCaps="false" app:cornerRadius="14dp" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

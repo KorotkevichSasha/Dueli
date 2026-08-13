@@ -28,27 +28,95 @@
 
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:id="@+id/leaderboardContent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:orientation="vertical"
         android:background="?attr/backgroundColor"
-        android:padding="16dp">
+        android:padding="16dp"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <!-- Заголовок -->
         <TextView
             android:id="@+id/tvLeaderboardTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="LEADERBOARD"
+            android:text="@string/leaderboard_title"
             android:textSize="24sp"
-            android:textColor="@color/gray"
+            android:textColor="?attr/textColor"
             android:textStyle="bold"
             android:layout_gravity="center_horizontal"
             android:paddingBottom="16dp"/>
 
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/leagueSummaryCard"
+            android:layout_width="match_parent"
+            android:layout_height="134dp"
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="@color/blue_primary"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="5dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/league_title"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvRankProgress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/rank_first_place"
+                    android:textColor="#DDEEFF"
+                    android:textSize="12sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+                        <TextView android:id="@+id/tvRankSummary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="—" android:textColor="@color/white" android:textSize="22sp" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/rank_stat" android:textColor="#DDEEFF" android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <View android:layout_width="1dp" android:layout_height="34dp" android:background="#55FFFFFF" />
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+                        <TextView android:id="@+id/tvPointsSummary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/white" android:textSize="22sp" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/points_stat" android:textColor="#DDEEFF" android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <View android:layout_width="1dp" android:layout_height="34dp" android:background="#55FFFFFF" />
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+                        <TextView android:id="@+id/tvPlayersSummary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/white" android:textSize="22sp" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/players_stat" android:textColor="#DDEEFF" android:textSize="12sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="598dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:orientation="vertical">
 
             <!-- Отдельный блок для текущего пользователя -->
@@ -73,7 +141,7 @@
                     android:id="@+id/userContainer"
                     android:layout_width="0dp"
                     android:layout_height="51dp"
-                    android:background="#2A2A2E"
+                    android:background="@drawable/bg_current_user_rank"
                     android:padding="8dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -147,6 +215,7 @@
 
 
     <LinearLayout
+        android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:orientation="horizontal"
@@ -185,7 +254,7 @@
                 android:id="@+id/testTest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Обучение"
+                android:text="@string/nav_learning"
                 android:textColor="#7A7A7B"
                 android:textSize="12sp"/>
         </LinearLayout>
@@ -222,7 +291,7 @@
                 android:id="@+id/mainTest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Дуэль"
+                android:text="@string/nav_duel"
                 android:textColor="#7A7A7B"
                 android:textSize="12sp"/>
         </LinearLayout>
@@ -260,7 +329,7 @@
                 android:id="@+id/cupTest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Рейтинг"
+                android:text="@string/nav_rank"
                 android:textColor="#7A7A7B"
                 android:textSize="12sp"/>
         </LinearLayout>
@@ -297,7 +366,7 @@
                 android:id="@+id/profileTest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Профиль"
+                android:text="@string/nav_profile"
                 android:textColor="#7A7A7B"
                 android:textSize="12sp"/>
         </LinearLayout>
