@@ -9,5 +9,8 @@ data class DuelInHistoryResponse(
     val player1Time: Long,
     val player2: UserInDuelResponse,
     val player2Score: Int,
-    val player2Time: Long
+    val player2Time: Long,
+    val mode: String = "ONLINE",
+    val yourAnswers: List<DuelAnswerReviewResponse> = emptyList(),
+    val opponentAnswers: List<DuelAnswerReviewResponse> = emptyList()
 )

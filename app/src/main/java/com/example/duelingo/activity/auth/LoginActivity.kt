@@ -2,6 +2,7 @@ package com.example.duelingo.activity.auth
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -10,12 +11,17 @@ import com.example.duelingo.databinding.ActivityLoginBinding
 import com.example.duelingo.dto.request.SignInRequest
 import com.example.duelingo.dto.response.JwtAuthenticationResponse
 import com.example.duelingo.network.ApiClient
+import com.example.duelingo.network.AuthSessionManager
 import com.example.duelingo.storage.TokenManager
+import com.example.duelingo.utils.UserMessage
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import retrofit2.HttpException
 
 class LoginActivity : AppCompatActivity() {
+
+    companion object {
+        const val EXTRA_SESSION_EXPIRED = "session_expired"
+    }
 
     private lateinit var binding: ActivityLoginBinding
 
@@ -24,17 +30,21 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        if (intent.getBooleanExtra(EXTRA_SESSION_EXPIRED, false)) {
+            showToast(getString(com.example.duelingo.R.string.session_expired))
+        }
+
         binding.loginBtn.setOnClickListener {
             val username = binding.emailEt.text.toString()
             val password = binding.passwordEt.text.toString()
 
             when {
                 username.isEmpty() || password.isEmpty() -> {
-                    showToast("Fields cannot be empty")
+                    showToast(getString(com.example.duelingo.R.string.error_check_fields))
                 }
 
                 password.length < 8 -> {
-                    showToast("Password must be at least 8 characters")
+                    showToast(getString(com.example.duelingo.R.string.error_password_length))
                 }
 
                 else -> {
@@ -47,13 +57,19 @@ class LoginActivity : AppCompatActivity() {
         binding.noAccount.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
+        binding.passwordEt.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                binding.loginBtn.performClick()
+                true
+            } else false
+        }
     }
 
     private fun loginUser(signInRequest: SignInRequest) {
         lifecycleScope.launch {
             try {
                 val response = ApiClient.authService.signIn(signInRequest)
-                showToast("Login Successful")
+                showToast(getString(com.example.duelingo.R.string.login_successful))
 
                 saveTokens(response)
 
@@ -64,39 +80,19 @@ class LoginActivity : AppCompatActivity() {
                 handleServerError(e)
 
             } catch (e: Exception) {
-                showToast("Error: ${e.message}")
+                showToast(UserMessage.from(this@LoginActivity, e))
             }
         }
     }
     private fun saveTokens(response: JwtAuthenticationResponse) {
-        val sharedPreferences = getSharedPreferences("auth_prefs", MODE_PRIVATE)
-        with(sharedPreferences.edit()) {
-            putString("access_token", response.accessToken)
-            putString("refresh_token", response.refreshToken)
-            apply()
-        }
         val tokenManager = TokenManager(this)
         tokenManager.saveTokens(response.accessToken, response.refreshToken)
+        AuthSessionManager.onAuthenticated()
     }
 
 
     private fun handleServerError(e: HttpException) {
-        val errorBody = e.response()?.errorBody()?.string()
-
-        if (errorBody != null) {
-            try {
-                val json = JSONObject(errorBody)
-                val errorMessage = StringBuilder()
-                json.keys().forEach { key ->
-                    errorMessage.append(json.getString(key)).append("\n")
-                }
-                showToast(errorMessage.toString().trim())
-            } catch (ex: Exception) {
-                showToast("Server error: ${e.code()}")
-            }
-        } else {
-            showToast("Server error: ${e.code()}")
-        }
+        showToast(UserMessage.from(this, e))
     }
 
 

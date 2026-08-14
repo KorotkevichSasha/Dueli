@@ -1,31 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="blue_primary">#00A5FE</color>
+    <color name="blue_primary">#1687F8</color>
     <color name="red">#FF5252</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="gray">#7A7A7B</color>
 
     <!-- Цвета темы -->
-    <color name="background_dark">#0B0B0D</color>
-    <color name="background_light">#FFFFFF</color>
+    <color name="background_dark">#101318</color>
+    <color name="surface_dark">#1A1E25</color>
+    <color name="background_light">#F5F7FB</color>
+    <color name="surface_light">#FFFFFF</color>
     <color name="text_color_dark">#FFFFFF</color>
-    <color name="text_color_light">#000000</color>
-    <color name="secondary_text_dark">#7A7A7B</color>
-    <color name="secondary_text_light">#666666</color>
+    <color name="text_color_light">#18202B</color>
+    <color name="secondary_text_dark">#AAB2C0</color>
+    <color name="secondary_text_light">#647083</color>
 
     <color name="fon">#0B0B0D</color>
     <color name="transparent">#00000000</color>
-    <color name ="green">#008000</color>>
+    <color name="green">#008000</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
     <color name="gold">#FFD700</color>
-    <color name="silver">#C0C0C0</color>
+    <color name="silver">#8792A2</color>
     <color name="bronze">#CD7F32</color>
     <color name="gray_light">#B3B3B3</color>
     <color name="green_primary">#4CAF50</color>
+    <color name="achievement_icon_background">#EAF4FF</color>
+    <color name="hint_background">#EEF6FF</color>
+    <color name="hint_stroke">#B9D9FF</color>
 
     <color name="card_front_color">#80DEEA</color>
     <color name="card_back_color">#D1C4E9</color>
@@ -33,4 +38,11 @@
 
     <color name="winner_color">#4CAF50</color>
     <color name="loser_color">#F44336</color>
+    <color name="word_chip_background">#EDF5FF</color>
+    <color name="word_chip_text">#173B63</color>
+    <color name="word_chip_stroke">#B7D8FA</color>
+    <color name="feedback_correct_background">#E6F7ED</color>
+    <color name="feedback_correct_text">#176B3A</color>
+    <color name="feedback_incorrect_background">#FDEBEC</color>
+    <color name="feedback_incorrect_text">#9E2630</color>
 </resources>

@@ -1,7 +1,7 @@
 package com.example.duelingo.activity
 
 import android.animation.Animator
-import android.app.ProgressDialog
+import android.app.Dialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
@@ -10,10 +10,13 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
 import android.view.View
+import android.view.Window
+import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,32 +25,40 @@ import com.bumptech.glide.Glide
 import com.example.duelingo.R
 import com.example.duelingo.adapters.DuelHistoryAdapter
 import com.example.duelingo.databinding.ActivityMenuBinding
+import com.example.duelingo.databinding.DialogDuelDifficultyBinding
+import com.example.duelingo.databinding.DialogDuelChallengeBinding
 import com.example.duelingo.dto.event.DuelFoundEvent
 import com.example.duelingo.dto.event.DuelResultEvent
 import com.example.duelingo.dto.event.MatchmakingFailedEvent
+import com.example.duelingo.dto.event.DuelChallengeEvent
 import com.example.duelingo.manager.AvatarManager
+import com.example.duelingo.network.ApiClient
 import com.example.duelingo.network.DuelHistoryService
 import com.example.duelingo.network.UserService
 import com.example.duelingo.network.websocket.StompManager
 import com.example.duelingo.storage.TokenManager
-import com.example.duelingo.utils.AppConfig
+import com.example.duelingo.storage.OfflineDuelHistoryStore
 import com.google.gson.Gson
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.example.duelingo.utils.OfflineDuelFactory
+import com.example.duelingo.utils.UserMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
-import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resumeWithException
 
 class MenuActivity : AppCompatActivity() {
+    companion object {
+        private const val STATE_SEARCHING_FOR_DUEL = "searching_for_duel"
+    }
     private lateinit var binding: ActivityMenuBinding
     private var currentAnimationView: LottieAnimationView? = null
     private var currentIcon: ImageView? = null
@@ -57,11 +68,18 @@ class MenuActivity : AppCompatActivity() {
     private lateinit var userService: UserService
     private lateinit var duelHistoryService: DuelHistoryService
     private lateinit var stompManager: StompManager
-    private var loadingDialog: ProgressDialog? = null
+    private lateinit var historyAdapter: DuelHistoryAdapter
     private var currentPage = 0
     private var isLoading = false
     private var hasMorePages = true
+    private var isSearchingForDuel = false
+    private var historyRefreshJob: Job? = null
     private val pageSize = 5
+    private var selectedDifficulty = "MEDIUM"
+    private val handledChallenges = mutableSetOf<String>()
+    private val startedDuelIds = mutableSetOf<String>()
+    private var socketConnectionInProgress = false
+    private var contentReady = false
 
     private val scope = CoroutineScope(Dispatchers.Main + Job())
 
@@ -71,14 +89,17 @@ class MenuActivity : AppCompatActivity() {
         Log.d("MenuActivity", "onCreate started")
         binding = ActivityMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        binding.duelHeroImage.setImageDrawable(null)
+        binding.duelHeroImage.setBackgroundResource(R.drawable.bg_feature_icon)
+        binding.duelHeroImage.post {
+            Glide.with(this).load(R.drawable.duel_hero).dontAnimate().centerCrop().into(binding.duelHeroImage)
+        }
         Log.d("MenuActivity", "Initializing AvatarManager")
         avatarManager = AvatarManager(this, tokenManager, getSharedPreferences("user_prefs", MODE_PRIVATE))
 
-        Log.d("MenuActivity", "Creating Retrofit client")
-        val retrofit = RetrofitClient.getClient(tokenManager)
-        userService = retrofit.create(UserService::class.java)
-        duelHistoryService = retrofit.create(DuelHistoryService::class.java)
+        Log.d("MenuActivity", "Using shared authenticated API client")
+        userService = ApiClient.userService
+        duelHistoryService = ApiClient.duelHistoryService
 
         binding.mainIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.mainTest.setTextColor(Color.parseColor("#FF00A5FE"))
@@ -86,6 +107,7 @@ class MenuActivity : AppCompatActivity() {
         Log.d("MenuActivity", "Creating DuelWebSocketClient")
         stompManager = StompManager(tokenManager)
         setupDuelButton()
+        binding.btnOfflineDuel.setOnClickListener { showDifficultyDialog(offline = true) }
 
         binding.btnCancelSearch.setOnClickListener {
             Log.d("MenuActivity", "Cancel search button clicked")
@@ -94,9 +116,24 @@ class MenuActivity : AppCompatActivity() {
 
         Log.d("MenuActivity", "Setting up navigation buttons")
         setupNavigationButtons()
-        setupRecyclerView()
-        loadDuelHistory()
+        binding.root.post {
+            if (isFinishing || isDestroyed) return@post
+            setupRecyclerView()
+            contentReady = true
+            if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) resumeContent()
+        }
+        // Matchmaking is always an explicit user action. Restoring it after a
+        // configuration change could unexpectedly enqueue a new duel when the
+        // user returns from the result screen.
+        isSearchingForDuel = false
+        binding.btnDuel.setText(R.string.start_duel_search)
+        showLoading(false)
         Log.d("MenuActivity", "onCreate completed")
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(STATE_SEARCHING_FOR_DUEL, isSearchingForDuel)
     }
 
     override fun onDestroy() {
@@ -104,32 +141,118 @@ class MenuActivity : AppCompatActivity() {
         scope.cancel()
         Log.d("MenuActivity", "Disconnecting WebSocket")
         stompManager.disconnect()
-        loadingDialog?.dismiss()
         super.onDestroy()
         Log.d("MenuActivity", "onDestroy completed")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (contentReady) resumeContent()
+    }
+
+    private fun resumeContent() {
+        refreshDuelHistory()
+        loadDuelStats()
+        scope.launch {
+            if (!stompManager.isConnected() && !socketConnectionInProgress) {
+                socketConnectionInProgress = true
+                runCatching { connectToWebSocket() }
+                socketConnectionInProgress = false
+            }
+            loadPendingChallenges()
+        }
+        historyRefreshJob?.cancel()
+        historyRefreshJob = scope.launch {
+            while (isActive) {
+                delay(45_000)
+                refreshDuelHistory()
+            }
+        }
+    }
+
+    override fun onPause() {
+        historyRefreshJob?.cancel()
+        historyRefreshJob = null
+        super.onPause()
     }
 
     private fun setupDuelButton() {
         Log.d("MenuActivity", "setupDuelButton started")
         binding.btnDuel.setOnClickListener {
-            Log.d("MenuActivity", "Duel button clicked, current text: ${binding.btnDuel.text}")
+            Log.d("MenuActivity", "Duel button clicked, searching: $isSearchingForDuel")
             scope.launch {
-                if (binding.btnDuel.text == "DUEL") {
-                    Log.d("MenuActivity", "Starting duel search")
-                    startDuelSearch()
-                } else {
+                if (isSearchingForDuel) {
                     Log.d("MenuActivity", "Canceling duel search")
                     cancelDuelSearch()
+                } else {
+                    Log.d("MenuActivity", "Starting duel search")
+                    showDifficultyDialog()
                 }
             }
         }
         Log.d("MenuActivity", "setupDuelButton completed")
     }
 
+    private fun showDifficultyDialog(offline: Boolean = false) {
+        val content = DialogDuelDifficultyBinding.inflate(layoutInflater)
+        if (offline) {
+            content.titleText.setText(R.string.choose_practice_level)
+            content.subtitleText.setText(R.string.offline_practice_subtitle)
+        }
+        val dialog = Dialog(this).apply {
+            requestWindowFeature(Window.FEATURE_NO_TITLE)
+            setContentView(content.root)
+            window?.setBackgroundDrawableResource(android.R.color.transparent)
+            setOnShowListener {
+                val width = (resources.displayMetrics.widthPixels - 32 * resources.displayMetrics.density).toInt()
+                    .coerceAtMost((520 * resources.displayMetrics.density).toInt())
+                window?.setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT)
+            }
+        }
+        fun choose(mode: String) {
+            selectedDifficulty = mode
+            dialog.dismiss()
+            if (offline) {
+                val duel = OfflineDuelFactory.create(mode)
+                startActivity(Intent(this, DuelActivity::class.java).apply {
+                    putExtra("DUEL_INFO", Gson().toJson(duel))
+                    putExtra(DuelActivity.EXTRA_OFFLINE_DUEL, true)
+                })
+            } else {
+                scope.launch { startDuelSearch() }
+            }
+        }
+        content.closeButton.setOnClickListener { dialog.dismiss() }
+        content.easyButton.setOnClickListener { choose("EASY") }
+        content.mediumButton.setOnClickListener { choose("MEDIUM") }
+        content.hardButton.setOnClickListener { choose("HARD") }
+        dialog.show()
+        if (!offline) scope.launch {
+            val modes = listOf(
+                Triple("EASY", R.string.duel_easy_description, content.easyButton),
+                Triple("MEDIUM", R.string.duel_medium_description, content.mediumButton),
+                Triple("HARD", R.string.duel_hard_description, content.hardButton)
+            )
+            modes.map { (mode, label, button) ->
+                async {
+                    runCatching { duelHistoryService.getMatchmakingEstimate(mode) }
+                        .onSuccess { estimate ->
+                            button.text = if (estimate.playersWaiting > 0) {
+                                getString(R.string.duel_mode_opponent_waiting, getString(label))
+                            } else {
+                                getString(R.string.duel_mode_average_wait, getString(label), estimate.averageWaitSeconds)
+                            }
+                        }
+                }
+            }.forEach { it.await() }
+        }
+    }
+
     private suspend fun startDuelSearch() {
         Log.d("MenuActivity", "startDuelSearch started")
         withContext(Dispatchers.Main) {
-            binding.btnDuel.text = "CANCEL"
+            isSearchingForDuel = true
+            binding.btnDuel.text = getString(R.string.cancel_duel_search)
             Log.d("MenuActivity", "Changed duel button text to CANCEL")
             showLoading(true)
         }
@@ -150,15 +273,14 @@ class MenuActivity : AppCompatActivity() {
 
             withContext(Dispatchers.Main) {
                 Log.d("MenuActivity", "Showing searching toast")
-                Toast.makeText(this@MenuActivity, "Searching for opponent...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MenuActivity, R.string.searching_for_opponent, Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             Log.e("MenuActivity", "Error in startDuelSearch: ${e.message}", e)
             withContext(Dispatchers.Main) {
-                loadingDialog?.dismiss()
                 Toast.makeText(
                     this@MenuActivity,
-                    "Error: ${e.message ?: "Failed to start duel"}",
+                    UserMessage.from(this@MenuActivity, e),
                     Toast.LENGTH_LONG
                 ).show()
                 Log.d("MenuActivity", "Calling cancelDuelSearch after error")
@@ -172,8 +294,9 @@ class MenuActivity : AppCompatActivity() {
     private suspend fun cancelDuelSearch() {
         Log.d("MenuActivity", "cancelDuelSearch started")
         withContext(Dispatchers.Main) {
-            binding.btnDuel.text = "DUEL"
-            Log.d("MenuActivity", "Changed duel button text to DUEL")
+            isSearchingForDuel = false
+            binding.btnDuel.text = getString(R.string.start_duel_search)
+            Log.d("MenuActivity", "Restored duel search button text")
             showLoading(false)
         }
 
@@ -184,9 +307,6 @@ class MenuActivity : AppCompatActivity() {
             vibrate(50)
         } catch (e: Exception) {
             Log.e("MenuActivity", "Error in cancelDuelSearch", e)
-        } finally {
-            Log.d("MenuActivity", "Disconnecting WebSocket")
-            stompManager.disconnect()
         }
         Log.d("MenuActivity", "cancelDuelSearch completed")
     }
@@ -209,18 +329,26 @@ class MenuActivity : AppCompatActivity() {
                     },
                     onError = { error ->
                         Log.e("MenuActivity", "WebSocket connection error", error)
-                        continuation.resumeWithException(error)
+                        if (continuation.isActive) continuation.resumeWithException(error)
                     },
                     onDuelFound = { duelInfo ->
                         Log.d("MenuActivity", "Duel found with opponent: ${duelInfo.opponentId}")
-                        scope.launch { startDuelActivity(duelInfo) }
+                        // Matchmaking events are accepted only while the user is
+                        // visibly searching. A delayed event from an old queue
+                        // must never start a new duel after returning to menu.
+                        if (isSearchingForDuel || duelInfo.friendChallenge) {
+                            scope.launch { startDuelActivity(duelInfo) }
+                        } else {
+                            Log.w("MenuActivity", "Ignoring stale duel event ${duelInfo.duel.id}")
+                            stompManager.cancelMatchmaking()
+                        }
                     },
                     onMatchmakingFailed = { reason ->
                         Log.d("MenuActivity", "Matchmaking failed: ${reason.reason}")
                         scope.launch {
                             Toast.makeText(
                                 this@MenuActivity,
-                                "Matchmaking failed: ${reason.reason}",
+                                getString(R.string.error_matchmaking_failed),
                                 Toast.LENGTH_LONG
                             ).show()
                             cancelDuelSearch()
@@ -228,7 +356,8 @@ class MenuActivity : AppCompatActivity() {
                     },
                     onDuelResult = { result ->
                         Log.d("MenuActivity", "Received duel result in menu (unexpected): $result")
-                    }
+                    },
+                    onDuelChallenge = { challenge -> scope.launch { showDuelChallenge(challenge) } }
                 )
 
                 continuation.invokeOnCancellation {
@@ -247,17 +376,17 @@ class MenuActivity : AppCompatActivity() {
         Log.d("MenuActivity", "joinMatchmakingQueue started")
         try {
             Log.d("MenuActivity", "Joining matchmaking queue")
-            if (!stompManager.joinMatchmaking()) {  // Используем метод joinMatchmaking из StompManager
+            if (!stompManager.joinMatchmaking(selectedDifficulty)) {
                 throw IllegalStateException("Failed to join matchmaking queue")
             }
             withContext(Dispatchers.Main) {
                 Log.d("MenuActivity", "Showing searching toast")
-                Toast.makeText(this@MenuActivity, "Searching for opponent...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MenuActivity, R.string.searching_for_opponent, Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             Log.e("MenuActivity", "Error in joinMatchmakingQueue", e)
             withContext(Dispatchers.Main) {
-                Toast.makeText(this@MenuActivity, "Matchmaking error: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MenuActivity, UserMessage.from(this@MenuActivity, e), Toast.LENGTH_SHORT).show()
                 Log.d("MenuActivity", "Calling cancelDuelSearch after error")
                 cancelDuelSearch()
             }
@@ -286,10 +415,13 @@ class MenuActivity : AppCompatActivity() {
         }
     }
     private fun startDuelActivity(duelInfo: DuelFoundEvent) {
+        if (!startedDuelIds.add(duelInfo.duel.id)) return
         Log.d("MenuActivity", "startDuelActivity started with opponent: ${duelInfo.opponentId}")
         runOnUiThread {
             try {
-                loadingDialog?.dismiss()
+                isSearchingForDuel = false
+                binding.btnDuel.setText(R.string.start_duel_search)
+                showLoading(false)
                 Log.d("MenuActivity", "Creating DuelActivity intent")
                 val intent = Intent(this, DuelActivity::class.java).apply {
                     putExtra("DUEL_INFO", Gson().toJson(duelInfo))
@@ -395,6 +527,12 @@ class MenuActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         binding.duelHistoryRecyclerView.layoutManager = LinearLayoutManager(this)
+        historyAdapter = DuelHistoryAdapter(mutableListOf(), avatarManager) { duel ->
+            startActivity(Intent(this, DuelHistoryDetailsActivity::class.java).apply {
+                putExtra(DuelHistoryDetailsActivity.EXTRA_DUEL, Gson().toJson(duel))
+            })
+        }
+        binding.duelHistoryRecyclerView.adapter = historyAdapter
         binding.duelHistoryRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
@@ -425,15 +563,14 @@ class MenuActivity : AppCompatActivity() {
                 
                 withContext(Dispatchers.Main) {
                     if (currentPage == 0) {
-                        // First page - create new adapter
-                        val adapter = DuelHistoryAdapter(response.content.toMutableList(), avatarManager)
-                        binding.duelHistoryRecyclerView.adapter = adapter
-                        binding.duelHistoryRecyclerView.layoutManager = LinearLayoutManager(this@MenuActivity)
+                        val combinedHistory = OfflineDuelHistoryStore(this@MenuActivity).getAll() + response.content
+                        historyAdapter.replaceItems(combinedHistory)
+                        binding.emptyHistoryContainer.visibility =
+                            if (combinedHistory.isEmpty()) View.VISIBLE else View.GONE
+                        binding.duelHistoryRecyclerView.visibility =
+                            if (combinedHistory.isEmpty()) View.GONE else View.VISIBLE
                     } else {
-                        // Append to existing adapter
-                        (binding.duelHistoryRecyclerView.adapter as? DuelHistoryAdapter)?.let { adapter ->
-                            adapter.addItems(response.content)
-                        }
+                        historyAdapter.addItems(response.content)
                     }
                     
                     hasMorePages = currentPage < response.totalPages - 1
@@ -447,25 +584,90 @@ class MenuActivity : AppCompatActivity() {
         }
     }
 
-    object RetrofitClient {
-        fun getClient(tokenManager: TokenManager): Retrofit {
-            val okHttpClient = OkHttpClient.Builder()
-                .addInterceptor { chain ->
-                    val request = chain.request().newBuilder()
-                        .addHeader("Authorization", "Bearer ${tokenManager.getAccessToken()}")
-                        .build()
-                    chain.proceed(request)
-                }
-                .connectTimeout(AppConfig.CONNECT_TIMEOUT, TimeUnit.SECONDS)
-                .readTimeout(AppConfig.READ_TIMEOUT, TimeUnit.SECONDS)
-                .writeTimeout(AppConfig.WRITE_TIMEOUT, TimeUnit.SECONDS)
-                .build()
+    private suspend fun loadPendingChallenges() {
+        runCatching { duelHistoryService.getPendingChallenges() }
+            .getOrDefault(emptyList())
+            .firstOrNull { it.challengeId !in handledChallenges }
+            ?.let { showDuelChallenge(it) }
+    }
 
-            return Retrofit.Builder()
-                .baseUrl(AppConfig.BASE_URL)
-                .client(okHttpClient)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
+    private fun showDuelChallenge(challenge: DuelChallengeEvent) {
+        if (!handledChallenges.add(challenge.challengeId) || isFinishing) return
+        val level = when (challenge.difficulty) {
+            "EASY" -> getString(R.string.duel_easy_short)
+            "HARD" -> getString(R.string.duel_hard_short)
+            else -> getString(R.string.duel_medium_short)
+        }
+        val content = DialogDuelChallengeBinding.inflate(layoutInflater)
+        content.challengerName.text = challenge.challengerUsername
+        content.challengeLevel.text = getString(R.string.duel_challenge_level_format, level)
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setView(content.root)
+            .setCancelable(false)
+            .create()
+
+        content.declineChallengeButton.setOnClickListener {
+            dialog.dismiss()
+            scope.launch { runCatching { duelHistoryService.respondToChallenge(challenge.challengeId, false) } }
+        }
+        content.acceptChallengeButton.setOnClickListener {
+            content.acceptChallengeButton.isEnabled = false
+            content.acceptChallengeButton.text = getString(R.string.duel_challenge_accepting)
+            scope.launch {
+                runCatching { duelHistoryService.respondToChallenge(challenge.challengeId, true) }
+                    .onSuccess { response ->
+                        response.body()?.let {
+                            dialog.dismiss()
+                            startDuelActivity(it)
+                        } ?: run {
+                            content.acceptChallengeButton.isEnabled = true
+                            content.acceptChallengeButton.setText(R.string.accept_duel_challenge)
+                            Toast.makeText(this@MenuActivity, R.string.duel_challenge_expired, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    .onFailure {
+                        content.acceptChallengeButton.isEnabled = true
+                        content.acceptChallengeButton.setText(R.string.accept_duel_challenge)
+                        Toast.makeText(this@MenuActivity, R.string.duel_challenge_expired, Toast.LENGTH_SHORT).show()
+                    }
+            }
+        }
+        dialog.show()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        vibrate(90)
+    }
+
+    private fun refreshDuelHistory() {
+        if (isLoading) return
+        currentPage = 0
+        hasMorePages = true
+        loadDuelHistory()
+    }
+
+    private fun loadDuelStats() {
+        val accessToken = tokenManager.getAccessToken() ?: return
+        scope.launch {
+            runCatching {
+                val profile = userService.getProfile("Bearer $accessToken")
+                val history = duelHistoryService.getUserDuelHistory(0, 500)
+                profile.id to history
+            }.onSuccess { (currentUserId, history) ->
+                val wins = history.content.count { duel ->
+                    when (currentUserId) {
+                        duel.player1.userId.toString() -> duel.player1Score > duel.player2Score
+                        duel.player2.userId.toString() -> duel.player2Score > duel.player1Score
+                        else -> false
+                    }
+                }
+                val total = history.totalItems.toInt()
+                val winRate = if (total == 0) 0 else (wins * 100 / total)
+                binding.duelsPlayedValue.text = total.toString()
+                binding.duelsWonValue.text = wins.toString()
+                binding.duelWinRateValue.text = "$winRate%"
+            }.onFailure { error ->
+                Log.w("MenuActivity", "Could not load duel statistics", error)
+            }
         }
     }
+
 }

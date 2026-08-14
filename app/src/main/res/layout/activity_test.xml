@@ -8,15 +8,43 @@
     tools:context=".activity.TestActivity"
     android:background="?attr/backgroundColor">
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/backButton"
+        style="@style/Widget.Material3.Button.IconButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:contentDescription="@string/back"
+        app:icon="@drawable/ic_arrow_back"
+        app:iconTint="?attr/textColor"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/learning_tests_title"
+        android:textColor="?attr/textColor"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/backButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/backButton"
+        app:layout_constraintTop_toTopOf="@id/backButton" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTests"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginBottom="60dp"
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/backButton"/>
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/animationView"
@@ -66,7 +94,7 @@
                 android:id="@+id/testTest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Обучение"
+                android:text="@string/nav_learning"
                 android:textColor="#7A7A7B"
                 android:textSize="12sp"/>
         </LinearLayout>
@@ -103,7 +131,7 @@
                 android:id="@+id/mainTest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Дуэль"
+                android:text="@string/nav_duel"
                 android:textColor="#7A7A7B"
                 android:textSize="12sp"/>
         </LinearLayout>
@@ -141,7 +169,7 @@
                 android:id="@+id/cupTest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Рейтинг"
+                android:text="@string/nav_rank"
                 android:textColor="#7A7A7B"
                 android:textSize="12sp"/>
         </LinearLayout>
@@ -178,7 +206,7 @@
                 android:id="@+id/profileTest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Профиль"
+                android:text="@string/nav_profile"
                 android:textColor="#7A7A7B"
                 android:textSize="12sp"/>
         </LinearLayout>

@@ -18,6 +18,7 @@ import com.example.duelingo.adapters.TestsAdapter
 import com.example.duelingo.databinding.ActivityTestBinding
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
+import com.example.duelingo.utils.UserMessage
 import kotlinx.coroutines.launch
 
 class TestActivity : AppCompatActivity() {
@@ -32,12 +33,12 @@ class TestActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTestBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.backButton.setOnClickListener { finish() }
 
         binding.testIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.testTest.setTextColor(Color.parseColor("#FF00A5FE"))
 
         setupRecyclerView()
-        loadTests()
 
         binding.tests.setOnClickListener {}
         binding.duel.setOnClickListener {
@@ -70,6 +71,11 @@ class TestActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        loadTests()
+    }
+
     private fun setupRecyclerView() {
         binding.rvTests.layoutManager = LinearLayoutManager(this)
         testsAdapter = TestsAdapter(emptyList()) { test ->
@@ -93,11 +99,11 @@ class TestActivity : AppCompatActivity() {
                     val tests = ApiClient.testService.getTestsForTopic(tokenWithBearer, topic)
                     testsAdapter.updateData(tests)
                 } catch (e: Exception) {
-                    showToast("Error loading tests: ${e.message}")
+                    showToast(UserMessage.from(this@TestActivity, e))
                 }
             }
         } else {
-            showToast("Authentication error or missing topic")
+            showToast(getString(R.string.session_expired))
         }
     }
     private fun showToast(message: String) {

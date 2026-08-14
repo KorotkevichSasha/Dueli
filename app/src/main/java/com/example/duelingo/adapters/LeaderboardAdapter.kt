@@ -13,6 +13,7 @@ import com.example.duelingo.dto.response.LeaderboardResponse
 import com.example.duelingo.dto.response.PaginationResponse
 import com.example.duelingo.dto.response.UserInLeaderboardResponse
 import com.example.duelingo.manager.AvatarManager
+import com.google.android.material.color.MaterialColors
 import de.hdodenhof.circleimageview.CircleImageView
 
 class LeaderboardAdapter(private var users: LeaderboardResponse, private val avatarManager: AvatarManager) :
@@ -54,9 +55,13 @@ class LeaderboardAdapter(private var users: LeaderboardResponse, private val ava
                 holder.pointsText.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.bronze))
             }
             else -> {
-                holder.rankText.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.gray))
-                holder.usernameText.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.gray))
-                holder.pointsText.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.gray))
+                val onSurface = MaterialColors.getColor(
+                    holder.itemView,
+                    com.google.android.material.R.attr.colorOnSurface
+                )
+                holder.rankText.setTextColor(onSurface)
+                holder.usernameText.setTextColor(onSurface)
+                holder.pointsText.setTextColor(onSurface)
             }
         }
         holder.avatarImage.setImageResource(R.drawable.default_profile)
@@ -68,6 +73,7 @@ class LeaderboardAdapter(private var users: LeaderboardResponse, private val ava
     override fun getItemCount(): Int = users.top.content.size
 
     fun updateData(newUsers: LeaderboardResponse) {
+        if (users == newUsers) return
         users = newUsers
         notifyDataSetChanged()
     }

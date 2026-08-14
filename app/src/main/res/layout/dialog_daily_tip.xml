@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:background="@drawable/bg_dialog" android:orientation="vertical" android:padding="24dp">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+        <com.google.android.material.button.MaterialButton android:id="@+id/closeButton"
+            style="@style/Widget.Material3.Button.IconButton" android:layout_width="48dp" android:layout_height="48dp"
+            android:contentDescription="@string/back" app:icon="@drawable/ic_arrow_back" app:iconTint="?attr/textColor" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:layout_weight="1"
+            android:text="@string/learning_tip_title" android:textColor="?attr/textColor" android:textSize="22sp" android:textStyle="bold" />
+        <TextView android:layout_width="48dp" android:layout_height="48dp" android:gravity="center" android:text="💡" android:textSize="26sp" />
+    </LinearLayout>
+
+    <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="16dp" app:cardBackgroundColor="@color/word_chip_background" app:cardCornerRadius="20dp" app:cardElevation="0dp">
+        <TextView android:id="@+id/tipText" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:lineSpacingExtra="4dp" android:padding="20dp" android:textColor="?attr/textColor" android:textSize="18sp" android:textStyle="bold" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp"
+        android:text="@string/tip_try_today" android:textColor="?attr/textColor" android:textSize="16sp" android:textStyle="bold" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp"
+        android:drawablePadding="10dp" android:gravity="center_vertical" android:text="@string/tip_step_one"
+        android:textColor="?attr/secondaryTextColor" android:textSize="14sp" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"
+        android:drawablePadding="10dp" android:gravity="center_vertical" android:text="@string/tip_step_two"
+        android:textColor="?attr/secondaryTextColor" android:textSize="14sp" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"
+        android:drawablePadding="10dp" android:gravity="center_vertical" android:text="@string/tip_step_three"
+        android:textColor="?attr/secondaryTextColor" android:textSize="14sp" />
+
+    <com.google.android.material.button.MaterialButton android:id="@+id/doneButton"
+        android:layout_width="match_parent" android:layout_height="54dp" android:layout_marginTop="22dp"
+        android:text="@string/tip_got_it" android:textAllCaps="false" android:textSize="16sp" app:cornerRadius="16dp" />
+</LinearLayout>

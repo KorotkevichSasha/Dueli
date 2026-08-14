@@ -39,7 +39,7 @@ class FriendRequestsAdapter(
 
         holder.username.text = item.fromUsername
 
-        avatarManager.loadAvatar(item.fromUserId.toString(), holder.avatar)
+        avatarManager.loadAvatar(item.fromUserId.toString(), holder.avatar, item.fromAvatarUrl)
 
         holder.btnAccept.setOnClickListener { onAccept(item.id) }
         holder.btnReject.setOnClickListener { onReject(item.id) }

@@ -1,134 +1,135 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-
-    id("com.google.gms.google-services")
     id("kotlin-parcelize")
 }
 
+val buildingRelease = gradle.startParameter.taskNames.any { it.contains("release", ignoreCase = true) }
 val apiBaseUrl = providers.gradleProperty("API_BASE_URL")
-    .orElse(System.getenv("API_BASE_URL") ?: "https://api.example.com")
+    .orElse(if (buildingRelease) "" else "http://127.0.0.1:8082")
     .get()
+val applicationIdValue = providers.gradleProperty("APPLICATION_ID")
+    .orElse("com.example.duelingo")
+    .get()
+val privacyPolicyUrl = providers.gradleProperty("PRIVACY_POLICY_URL")
+    .orElse(if (buildingRelease) "" else "http://127.0.0.1:5173/privacy")
+    .get()
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.inputStream().use(::load)
+    }
+}
+
+if (buildingRelease) {
+    require(apiBaseUrl.startsWith("https://") && !apiBaseUrl.contains("example.com")) {
+        "Release builds require -PAPI_BASE_URL=https://your-production-api"
+    }
+    require(!applicationIdValue.startsWith("com.example.")) {
+        "Release builds require a permanent package id via -PAPPLICATION_ID=com.yourcompany.app"
+    }
+    require(keystorePropertiesFile.exists()) {
+        "Release builds require keystore.properties; copy keystore.properties.example and add the upload key"
+    }
+    require(privacyPolicyUrl.startsWith("https://")) {
+        "Release builds require -PPRIVACY_POLICY_URL=https://your-public-site/privacy"
+    }
+}
 
 android {
     namespace = "com.example.duelingo"
-    compileSdk = 34
-
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.duelingo"
+        applicationId = applicationIdValue
         minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
-        buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
+        targetSdk = 36
+        versionCode = providers.gradleProperty("VERSION_CODE").orElse("1").get().toInt()
+        versionName = providers.gradleProperty("VERSION_NAME").orElse("1.0.0").get()
+        buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl.trimEnd('/')}\"")
+        buildConfigField("String", "PRIVACY_POLICY_URL", "\"$privacyPolicyUrl\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    signingConfigs {
+        if (keystorePropertiesFile.exists()) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
         }
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = signingConfigs.findByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
     }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+    kotlinOptions.jvmTarget = "17"
 
     buildFeatures {
         buildConfig = true
-        compose = true
         viewBinding = true
         dataBinding = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
 
+    sourceSets.getByName("main").assets.srcDir("../play-store")
+
+    packaging.resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
+
+    lint {
+        abortOnError = true
+        checkReleaseBuilds = true
+        // Glide includes NotificationTarget, but this app never posts notifications.
+        disable += "NotificationPermission"
+    }
 }
 
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    implementation(libs.firebase.auth)
-    implementation(libs.firebase.database)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.databinding.runtime)
     implementation(libs.androidx.swiperefreshlayout)
-    implementation("androidx.viewpager2:viewpager2:1.0.0")
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
-
+    implementation(libs.androidx.preference.ktx)
     implementation(libs.material)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.gson)
     implementation(libs.okhttp)
     implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.androidx.preference.ktx)
 
-    implementation(platform("com.google.firebase:firebase-bom:32.0.0"))
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
-    implementation("com.airbnb.android:lottie:5.0.3")
-    implementation("com.google.android.material:material:1.10.0")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.7.5")
-    implementation("androidx.navigation:navigation-ui-ktx:2.7.5")
+    implementation("androidx.viewpager2:viewpager2:1.1.0")
+    implementation("com.airbnb.android:lottie:6.6.2")
     implementation("de.hdodenhof:circleimageview:3.1.0")
-    implementation("com.github.bumptech.glide:glide:4.15.1")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2")
-
-    implementation("de.hdodenhof:circleimageview:3.1.0")
-
-    implementation("com.google.android.flexbox:flexbox:3.0.0")
-    implementation ("androidx.media:media:1.6.0")
-
-    implementation ("com.squareup.okhttp3:logging-interceptor:4.9.1")
-    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
-    implementation("jakarta.validation:jakarta.validation-api:2.0.2")
-
-
-    implementation("org.java-websocket:Java-WebSocket:1.5.2")
-    implementation("com.google.code.gson:gson:2.8.9")
-
+    implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.github.NaikSoftware:StompProtocolAndroid:1.6.6")
+    implementation("io.reactivex.rxjava2:rxjava:2.2.21")
+    implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
 
-    implementation ("io.reactivex.rxjava2:rxjava:2.2.21")
-    implementation ("io.reactivex.rxjava2:rxandroid:2.1.1")
-
-
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

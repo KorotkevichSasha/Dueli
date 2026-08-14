@@ -3,31 +3,163 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
     android:padding="16dp">
 
     <LinearLayout
+        android:id="@+id/questionContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center"
-        android:layout_gravity="center">
+        android:gravity="center_horizontal">
 
         <TextView
-            android:id="@+id/tvQuestionText"
+            android:id="@+id/tvQuestionInstruction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="8dp"
+            android:text="@string/sentence_translation_instruction"
+            android:textColor="@color/blue_primary"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/questionCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:textColor="@color/white"
-            android:layout_gravity="center"/>
+            android:layout_marginTop="10dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="?attr/cardBackgroundColor"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="2dp"
+            app:strokeColor="@color/hint_stroke"
+            app:strokeWidth="1dp">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="132dp">
+
+                <LinearLayout
+                    android:id="@+id/questionFront"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="132dp"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:id="@+id/tvQuestionText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textColor="?attr/textColor"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tapHintLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:drawablePadding="6dp"
+                        android:gravity="center"
+                        android:text="@string/tap_card_for_hint"
+                        android:textColor="@color/blue_primary"
+                        android:textSize="13sp"
+                        app:drawableStartCompat="@drawable/ic_lightbulb"
+                        app:drawableTint="@color/blue_primary" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/questionBack"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="132dp"
+                    android:background="@color/hint_background"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="20dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/hint_title"
+                        android:textColor="@color/blue_primary"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvHintBack"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="7dp"
+                        android:gravity="center"
+                        android:lineSpacingExtra="2dp"
+                        android:textColor="?attr/textColor"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:text="@string/tap_card_to_question"
+                        android:textColor="?attr/secondaryTextColor"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </FrameLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="@color/hint_background"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/hint_stroke"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/hint_title"
+                    android:textColor="@color/blue_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvHint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:lineSpacingExtra="2dp"
+                    android:textColor="?attr/textColor"
+                    android:textSize="16sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:id="@+id/tvSelectedWord"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:textColor="@color/white"
+            android:textColor="?attr/textColor"
             android:visibility="gone"
             android:layout_marginTop="16dp"/>
 
@@ -36,7 +168,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:orientation="horizontal"
+            android:clipToPadding="false"
+            android:paddingBottom="4dp"
             android:layout_gravity="center_horizontal"/>
 
         <EditText
@@ -44,22 +177,41 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:textColor="?attr/textColor"
+            android:textColorHint="?attr/secondaryTextColor"
             android:visibility="gone"/>
 
-        <LinearLayout
+        <com.google.android.material.chip.ChipGroup
             android:id="@+id/containerWordBank"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginTop="16dp"
+            android:hint="@string/enter_answer"
+            android:imeOptions="actionDone"
+            android:singleLine="true"
+            android:animateLayoutChanges="true"
             android:visibility="gone"/>
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/tvSentenceDraftLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="@string/sentence_your_translation"
+            android:textColor="?attr/secondaryTextColor"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <com.google.android.material.chip.ChipGroup
             android:id="@+id/containerSelectedWords"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
+            android:minHeight="56dp"
+            android:padding="8dp"
+            android:background="@drawable/bg_selected_words"
+            android:animateLayoutChanges="true"
             android:visibility="gone"/>
 
         <TextView
@@ -67,8 +219,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:padding="8dp"
-            android:textColor="@color/white"
+            android:layout_marginTop="18dp"
+            android:padding="14dp"
+            android:textColor="@color/feedback_correct_text"
             android:textSize="18sp"
             android:visibility="gone"/>
 
@@ -77,8 +230,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:padding="8dp"
-            android:textColor="@color/white"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_selected_words"
+            android:padding="14dp"
+            android:textColor="?attr/textColor"
             android:textSize="16sp"
             android:visibility="gone"/>
 

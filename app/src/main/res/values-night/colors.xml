@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="word_chip_background">#21344A</color>
+    <color name="word_chip_text">#D7EAFE</color>
+    <color name="word_chip_stroke">#3E638A</color>
+    <color name="feedback_correct_background">#163A29</color>
+    <color name="feedback_correct_text">#9DE7B9</color>
+    <color name="feedback_incorrect_background">#48242A</color>
+    <color name="feedback_incorrect_text">#FFB8BE</color>
+    <color name="achievement_icon_background">#203246</color>
+    <color name="hint_background">#172A40</color>
+    <color name="hint_stroke">#315D8C</color>
+</resources>

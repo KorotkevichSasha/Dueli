@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
 import com.example.duelingo.R
 import com.example.duelingo.dto.response.DuelInHistoryResponse
 import com.example.duelingo.manager.AvatarManager
@@ -14,7 +15,8 @@ import java.util.concurrent.TimeUnit
 
 class DuelHistoryAdapter(
     private val duelsList: MutableList<DuelInHistoryResponse>,
-    private val avatarManager: AvatarManager
+    private val avatarManager: AvatarManager,
+    private val onDuelClick: (DuelInHistoryResponse) -> Unit
 ) : RecyclerView.Adapter<DuelHistoryAdapter.DuelHistoryViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DuelHistoryViewHolder {
@@ -26,6 +28,12 @@ class DuelHistoryAdapter(
     override fun onBindViewHolder(holder: DuelHistoryViewHolder, position: Int) {
         val duel = duelsList[position]
         holder.bind(duel, avatarManager)
+        holder.itemView.setOnClickListener { onDuelClick(duel) }
+        holder.itemView.apply {
+            alpha = 0f
+            translationY = 24f
+            animate().alpha(1f).translationY(0f).setDuration(260).start()
+        }
     }
 
     override fun getItemCount(): Int = duelsList.size
@@ -34,6 +42,21 @@ class DuelHistoryAdapter(
         val startPosition = duelsList.size
         duelsList.addAll(newItems)
         notifyItemRangeInserted(startPosition, newItems.size)
+    }
+
+    fun replaceItems(newItems: List<DuelInHistoryResponse>) {
+        val oldItems = duelsList.toList()
+        val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+            override fun getOldListSize() = oldItems.size
+            override fun getNewListSize() = newItems.size
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+                oldItems[oldItemPosition].id == newItems[newItemPosition].id
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+                oldItems[oldItemPosition] == newItems[newItemPosition]
+        })
+        duelsList.clear()
+        duelsList.addAll(newItems)
+        diff.dispatchUpdatesTo(this)
     }
 
     class DuelHistoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -46,8 +69,13 @@ class DuelHistoryAdapter(
         private val player2Name: TextView = itemView.findViewById(R.id.player2Name)
         private val player2Score: TextView = itemView.findViewById(R.id.player2Score)
         private val player2Time: TextView = itemView.findViewById(R.id.player2Time)
+        private val modeBadge: TextView = itemView.findViewById(R.id.duelModeBadge)
 
         fun bind(duel: DuelInHistoryResponse, avatarManager: AvatarManager) {
+            modeBadge.setText(
+                if (duel.mode == "OFFLINE") R.string.duel_mode_offline_history
+                else R.string.duel_mode_online_history
+            )
             // Player 1
             player1Name.text = duel.player1.username
             player1Score.text = duel.player1Score.toString()
@@ -61,12 +89,24 @@ class DuelHistoryAdapter(
             Log.d("DuelHistoryAdapter","Player 1 id" + duel.player1.userId)
             avatarManager.loadAvatar(duel.player2.userId.toString(), player2Avatar)
 
-            val winner = if (duel.player1Score > duel.player2Score) 1 else 2
+            val winner = when {
+                duel.player1Score > duel.player2Score -> 1
+                duel.player2Score > duel.player1Score -> 2
+                else -> 0
+            }
             player1Score.setTextColor(itemView.context.getColor(
-                if (winner == 1) R.color.winner_color else R.color.loser_color
+                when (winner) {
+                    1 -> R.color.winner_color
+                    2 -> R.color.loser_color
+                    else -> R.color.gray
+                }
             ))
             player2Score.setTextColor(itemView.context.getColor(
-                if (winner == 2) R.color.winner_color else R.color.loser_color
+                when (winner) {
+                    2 -> R.color.winner_color
+                    1 -> R.color.loser_color
+                    else -> R.color.gray
+                }
             ))
         }
 
@@ -76,4 +116,4 @@ class DuelHistoryAdapter(
             return String.format("%02d:%02d", minutes, seconds)
         }
     }
-} 
+}

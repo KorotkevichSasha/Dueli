@@ -23,7 +23,11 @@ import com.example.duelingo.dto.response.UserInLeaderboardResponse
 import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
+import com.example.duelingo.utils.UserMessage
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 class RankActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRankBinding
@@ -35,6 +39,8 @@ class RankActivity : AppCompatActivity() {
     private lateinit var leaderboardRecyclerView: RecyclerView
 
     private lateinit var avatarManager: AvatarManager
+    private var refreshJob: Job? = null
+    private var leaderboardLoading = false
     private val tokenManager by lazy { TokenManager(this) }
     private val sharedPreferences by lazy { getSharedPreferences("user_prefs", MODE_PRIVATE) }
 
@@ -55,7 +61,6 @@ class RankActivity : AppCompatActivity() {
 
         binding.rvLeaderboard.layoutManager = LinearLayoutManager(this)
         leaderboardRecyclerView.adapter = leaderboardAdapter
-        loadLeaderboard()
 
         binding.tests.setOnClickListener {
             resetAll();
@@ -92,6 +97,24 @@ class RankActivity : AppCompatActivity() {
                 "profAnim.json"
             )
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadLeaderboard()
+        refreshJob?.cancel()
+        refreshJob = lifecycleScope.launch {
+            while (isActive) {
+                delay(45_000)
+                loadLeaderboard()
+            }
+        }
+    }
+
+    override fun onPause() {
+        refreshJob?.cancel()
+        refreshJob = null
+        super.onPause()
     }
 
     private fun createEmptyLeaderboardResponse(): LeaderboardResponse {
@@ -167,6 +190,7 @@ class RankActivity : AppCompatActivity() {
         binding.profileIcon.setImageResource(R.drawable.profile24)
     }
     private fun loadLeaderboard() {
+        if (leaderboardLoading) return
         val tokenManager = TokenManager(this)
         val accessToken = tokenManager.getAccessToken()
 
@@ -174,28 +198,46 @@ class RankActivity : AppCompatActivity() {
             val tokenWithBearer = "Bearer $accessToken"
 
             lifecycleScope.launch {
+                leaderboardLoading = true
                 try {
                     val response = ApiClient.leaderboardService.getLeaderboard(tokenWithBearer)
-                    leaderboardAdapter.updateData(response)
                     updateUI(response)
                 } catch (e: Exception) {
-                    showToast(e.toString())
-
+                    showToast(UserMessage.from(this@RankActivity, e))
+                } finally {
+                    leaderboardLoading = false
                 }
             }
         } else {
-            showToast("RankActivity" + "Access token is missing.")
+            showToast(getString(R.string.session_expired))
         }
     }
     private fun updateUI(response: LeaderboardResponse) {
         val currentUser = response.currentUser
         if (currentUser != null) {
             updateCurrentUserInfo(currentUser)
+            binding.tvRankSummary.text = "#${currentUser.rank}"
+            binding.tvPointsSummary.text = currentUser.points.toString()
+            binding.tvPlayersSummary.text = response.top.totalItems.toString()
+
+            val nextPlayer = response.top.content.firstOrNull { it.rank == currentUser.rank - 1 }
+            binding.tvRankProgress.text = if (nextPlayer == null) {
+                getString(R.string.rank_first_place)
+            } else {
+                getString(
+                    R.string.rank_next_format,
+                    (nextPlayer.points - currentUser.points).coerceAtLeast(0)
+                )
+            }
         }
 
-        val adapter = LeaderboardAdapter(response, avatarManager)
-        binding.rvLeaderboard.adapter = adapter
-        binding.rvLeaderboard.layoutManager = LinearLayoutManager(this)
+        leaderboardAdapter.updateData(response)
+        binding.leagueSummaryCard.apply {
+            alpha = 0f
+            scaleX = 0.97f
+            scaleY = 0.97f
+            animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(280).start()
+        }
     }
     private fun updateCurrentUserInfo(currentUser: UserInLeaderboardResponse) {
         binding.tvUserRank.text = currentUser.rank.toString()
@@ -203,6 +245,11 @@ class RankActivity : AppCompatActivity() {
         binding.tvUserPoints.text = currentUser.points.toString()
 
         avatarManager.loadAvatar(currentUser.id, binding.ivUserAvatar)
+        binding.userContainer.apply {
+            alpha = 0f
+            translationY = 16f
+            animate().alpha(1f).translationY(0f).setDuration(280).start()
+        }
     }
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()

@@ -6,7 +6,9 @@ data class RelationshipResponse(
     val id: UUID,
     val fromUserId: UUID,
     val fromUsername: String,
-    val fromUserAvatarUrl: String?,
+    val fromAvatarUrl: String?,
     val toUserId: UUID,
+    val toUsername: String,
+    val toAvatarUrl: String?,
     val status: RelationshipStatus
 )
