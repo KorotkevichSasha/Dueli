@@ -68,11 +68,23 @@
                 android:textColor="?android:textColorPrimary"
                 android:textColorHint="?android:textColorSecondary" />
 
+            <TextView
+                android:id="@+id/forgot_password"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_gravity="end"
+                android:gravity="center"
+                android:paddingHorizontal="8dp"
+                android:text="@string/forgot_password"
+                android:textColor="@color/blue_primary"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
             <Button
                 android:id="@+id/login_btn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
+                android:layout_marginTop="2dp"
                 android:background="@drawable/bg_button"
                 android:backgroundTint="@color/blue_primary"
                 android:padding="12dp"

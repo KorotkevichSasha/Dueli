@@ -18,6 +18,7 @@ import com.example.duelingo.databinding.ActivityAchievementsBinding
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.utils.UserMessage
+import com.example.duelingo.utils.openTopLevel
 import kotlinx.coroutines.launch
 
 class AchievementActivity : AppCompatActivity() {
@@ -77,28 +78,28 @@ class AchievementActivity : AppCompatActivity() {
     private fun setupNavigationButtons() {
         binding.tests.setOnClickListener {
             resetAll()
-            startActivity(Intent(this, LearningActivity::class.java))
+            openTopLevel(LearningActivity::class.java)
             changeColorAndIcon(binding.testIcon, binding.testTest, R.drawable.grad)
             playAnimation(binding.testAnimation, binding.testIcon, binding.testTest, "graAnim.json")
         }
 
         binding.duel.setOnClickListener {
             resetAll()
-            startActivity(Intent(this, MenuActivity::class.java))
+            openTopLevel(MenuActivity::class.java)
             changeColorAndIcon(binding.mainIcon, binding.mainTest, R.drawable.swo)
             playAnimation(binding.duelAnimation, binding.mainIcon, binding.mainTest, "swordAnim.json")
         }
 
         binding.leaderboard.setOnClickListener {
             resetAll()
-            startActivity(Intent(this, RankActivity::class.java))
+            openTopLevel(RankActivity::class.java)
             changeColorAndIcon(binding.cupIcon, binding.cupTest, R.drawable.tro)
             playAnimation(binding.cupAnimation, binding.cupIcon, binding.cupTest, "cupAnim.json")
         }
 
         binding.profile.setOnClickListener {
             resetAll()
-            startActivity(Intent(this, ProfileActivity::class.java))
+            openTopLevel(ProfileActivity::class.java)
             changeColorAndIcon(binding.profileIcon, binding.profileTest, R.drawable.prof)
             playAnimation(binding.profAnimation, binding.profileIcon, binding.profileTest, "profAnim.json")
         }
@@ -129,6 +130,7 @@ class AchievementActivity : AppCompatActivity() {
         animationView.setAnimation(animationFile)
         animationView.playAnimation()
 
+        animationView.removeAllAnimatorListeners()
         animationView.addAnimatorListener(object : android.animation.Animator.AnimatorListener {
             override fun onAnimationStart(animation: android.animation.Animator) {}
             override fun onAnimationEnd(animation: android.animation.Animator) {

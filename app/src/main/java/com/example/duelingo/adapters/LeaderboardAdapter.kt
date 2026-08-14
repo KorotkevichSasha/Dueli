@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
 import com.bumptech.glide.Glide
 import com.example.duelingo.R
 import com.example.duelingo.dto.response.LeaderboardResponse
@@ -74,7 +75,17 @@ class LeaderboardAdapter(private var users: LeaderboardResponse, private val ava
 
     fun updateData(newUsers: LeaderboardResponse) {
         if (users == newUsers) return
+        val oldItems = users.top.content
+        val newItems = newUsers.top.content
+        val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+            override fun getOldListSize() = oldItems.size
+            override fun getNewListSize() = newItems.size
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+                oldItems[oldItemPosition].id == newItems[newItemPosition].id
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+                oldItems[oldItemPosition] == newItems[newItemPosition]
+        })
         users = newUsers
-        notifyDataSetChanged()
+        diff.dispatchUpdatesTo(this)
     }
 }

@@ -28,6 +28,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import com.example.duelingo.utils.openTopLevel
 
 class RankActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRankBinding
@@ -41,6 +42,7 @@ class RankActivity : AppCompatActivity() {
     private lateinit var avatarManager: AvatarManager
     private var refreshJob: Job? = null
     private var leaderboardLoading = false
+    private var leaderboardRendered = false
     private val tokenManager by lazy { TokenManager(this) }
     private val sharedPreferences by lazy { getSharedPreferences("user_prefs", MODE_PRIVATE) }
 
@@ -64,7 +66,7 @@ class RankActivity : AppCompatActivity() {
 
         binding.tests.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@RankActivity, LearningActivity::class.java))
+            openTopLevel(LearningActivity::class.java)
             changeColorAndIcon(
                 binding.testIcon,
                 binding.testTest,
@@ -74,7 +76,7 @@ class RankActivity : AppCompatActivity() {
         }
         binding.duel.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@RankActivity, MenuActivity::class.java))
+            openTopLevel(MenuActivity::class.java)
             changeColorAndIcon(binding.mainIcon, binding.mainTest, R.drawable.swo)
             playAnimation(
                 binding.duelAnimation,
@@ -88,7 +90,7 @@ class RankActivity : AppCompatActivity() {
         }
         binding.profile.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@RankActivity, ProfileActivity::class.java))
+            openTopLevel(ProfileActivity::class.java)
             changeColorAndIcon(binding.profileIcon, binding.profileTest, R.drawable.prof)
             playAnimation(
                 binding.profAnimation,
@@ -153,6 +155,7 @@ class RankActivity : AppCompatActivity() {
         animationView.setAnimation(animationFile)
         animationView.playAnimation()
 
+        animationView.removeAllAnimatorListeners()
         animationView.addAnimatorListener(object : Animator.AnimatorListener {
             override fun onAnimationStart(animation: Animator) {
             }
@@ -232,11 +235,14 @@ class RankActivity : AppCompatActivity() {
         }
 
         leaderboardAdapter.updateData(response)
-        binding.leagueSummaryCard.apply {
-            alpha = 0f
-            scaleX = 0.97f
-            scaleY = 0.97f
-            animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(280).start()
+        if (!leaderboardRendered) {
+            binding.leagueSummaryCard.apply {
+                alpha = 0f
+                scaleX = 0.98f
+                scaleY = 0.98f
+                animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(180).start()
+            }
+            leaderboardRendered = true
         }
     }
     private fun updateCurrentUserInfo(currentUser: UserInLeaderboardResponse) {
@@ -245,11 +251,6 @@ class RankActivity : AppCompatActivity() {
         binding.tvUserPoints.text = currentUser.points.toString()
 
         avatarManager.loadAvatar(currentUser.id, binding.ivUserAvatar)
-        binding.userContainer.apply {
-            alpha = 0f
-            translationY = 16f
-            animate().alpha(1f).translationY(0f).setDuration(280).start()
-        }
     }
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()

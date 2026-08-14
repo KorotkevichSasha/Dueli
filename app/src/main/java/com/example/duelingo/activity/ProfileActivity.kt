@@ -50,6 +50,7 @@ import com.example.duelingo.fragment.FriendsListFragment
 import com.example.duelingo.fragment.OutgoingRequestsFragment
 import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.utils.KeyboardInsets
+import com.example.duelingo.utils.openTopLevel
 import com.example.duelingo.manager.LocaleManager
 import com.example.duelingo.manager.ThemeManager
 import com.example.duelingo.network.ApiClient
@@ -77,6 +78,7 @@ class ProfileActivity : AppCompatActivity() {
     private var currentProfileUsername: String = ""
     private var currentProfileId: UUID? = null
     private val sharedPreferences by lazy { getSharedPreferences("user_prefs", MODE_PRIVATE) }
+    private var profileLoading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,7 +102,6 @@ class ProfileActivity : AppCompatActivity() {
         binding.profileImage.setOnClickListener { showAvatarPicker() }
         binding.uploadPhotoButton.setOnClickListener { showAvatarPicker() }
         binding.shareProfileButton.setOnClickListener { shareProfile() }
-        loadProfile()
 
         binding.achievementsButton.setOnClickListener{ startActivity(Intent(this@ProfileActivity, AchievementActivity::class.java)) }
 
@@ -108,19 +109,19 @@ class ProfileActivity : AppCompatActivity() {
 
         binding.tests.setOnClickListener {
             resetAll()
-            startActivity(Intent(this@ProfileActivity, LearningActivity::class.java))
+            openTopLevel(LearningActivity::class.java)
             changeColorAndIcon(binding.testIcon, binding.testTest, R.drawable.grad)
             playAnimation(binding.testAnimation, binding.testIcon, binding.testTest, "graAnim.json")
         }
         binding.duel.setOnClickListener {
             resetAll()
-            startActivity(Intent(this@ProfileActivity, MenuActivity::class.java))
+            openTopLevel(MenuActivity::class.java)
             changeColorAndIcon(binding.mainIcon, binding.mainTest, R.drawable.swo)
             playAnimation(binding.duelAnimation, binding.mainIcon, binding.mainTest, "swordAnim.json")
         }
         binding.leaderboard.setOnClickListener {
             resetAll()
-            startActivity(Intent(this@ProfileActivity, RankActivity::class.java))
+            openTopLevel(RankActivity::class.java)
             changeColorAndIcon(binding.cupIcon, binding.cupTest, R.drawable.tro)
             playAnimation(binding.cupAnimation, binding.cupIcon, binding.cupTest, "cupAnim.json")
         }
@@ -333,6 +334,7 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun loadProfile() {
+        if (profileLoading) return
         val accessToken = tokenManager.getAccessToken() ?: run {
             showToast(getString(R.string.session_expired))
             return
@@ -396,6 +398,7 @@ class ProfileActivity : AppCompatActivity() {
     private fun deleteAccount() {
         val accessToken = tokenManager.getAccessToken() ?: return logout()
         lifecycleScope.launch {
+            profileLoading = true
             try {
                 userService.deleteAccount("Bearer $accessToken")
                 sharedPreferences.edit().clear().apply()
@@ -437,6 +440,7 @@ class ProfileActivity : AppCompatActivity() {
         animationView.setAnimation(animationFile)
         animationView.playAnimation()
 
+        animationView.removeAllAnimatorListeners()
         animationView.addAnimatorListener(object : Animator.AnimatorListener {
             override fun onAnimationStart(animation: Animator) {}
 
@@ -603,6 +607,8 @@ class ProfileActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Log.e("ProfileActivity", "Friend request failed", e)
                 showToast(UserMessage.from(this@ProfileActivity, e))
+            } finally {
+                profileLoading = false
             }
         }
     }

@@ -42,6 +42,7 @@ import com.google.gson.Gson
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.example.duelingo.utils.OfflineDuelFactory
 import com.example.duelingo.utils.UserMessage
+import com.example.duelingo.utils.openTopLevel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -465,6 +466,7 @@ class MenuActivity : AppCompatActivity() {
         animationView.setAnimation(animationFile)
         animationView.playAnimation()
 
+        animationView.removeAllAnimatorListeners()
         animationView.addAnimatorListener(object : Animator.AnimatorListener {
             override fun onAnimationStart(animation: Animator) {
             }
@@ -502,7 +504,7 @@ class MenuActivity : AppCompatActivity() {
         binding.tests.setOnClickListener {
             Log.d("MenuActivity", "Tests button clicked")
             resetAll()
-            startActivity(Intent(this, LearningActivity::class.java))
+            openTopLevel(LearningActivity::class.java)
             changeColorAndIcon(binding.testIcon, binding.testTest, R.drawable.grad)
             playAnimation(binding.testAnimation, binding.testIcon, binding.testTest, "graAnim.json")
         }
@@ -510,7 +512,7 @@ class MenuActivity : AppCompatActivity() {
         binding.leaderboard.setOnClickListener {
             Log.d("MenuActivity", "Leaderboard button clicked")
             resetAll()
-            startActivity(Intent(this, RankActivity::class.java))
+            openTopLevel(RankActivity::class.java)
             changeColorAndIcon(binding.cupIcon, binding.cupTest, R.drawable.tro)
             playAnimation(binding.cupAnimation, binding.cupIcon, binding.cupTest, "cupAnim.json")
         }
@@ -518,7 +520,7 @@ class MenuActivity : AppCompatActivity() {
         binding.profile.setOnClickListener {
             Log.d("MenuActivity", "Profile button clicked")
             resetAll()
-            startActivity(Intent(this, ProfileActivity::class.java))
+            openTopLevel(ProfileActivity::class.java)
             changeColorAndIcon(binding.profileIcon, binding.profileTest, R.drawable.prof)
             playAnimation(binding.profAnimation, binding.profileIcon, binding.profileTest, "profAnim.json")
         }
@@ -645,25 +647,12 @@ class MenuActivity : AppCompatActivity() {
     }
 
     private fun loadDuelStats() {
-        val accessToken = tokenManager.getAccessToken() ?: return
         scope.launch {
-            runCatching {
-                val profile = userService.getProfile("Bearer $accessToken")
-                val history = duelHistoryService.getUserDuelHistory(0, 500)
-                profile.id to history
-            }.onSuccess { (currentUserId, history) ->
-                val wins = history.content.count { duel ->
-                    when (currentUserId) {
-                        duel.player1.userId.toString() -> duel.player1Score > duel.player2Score
-                        duel.player2.userId.toString() -> duel.player2Score > duel.player1Score
-                        else -> false
-                    }
-                }
-                val total = history.totalItems.toInt()
-                val winRate = if (total == 0) 0 else (wins * 100 / total)
-                binding.duelsPlayedValue.text = total.toString()
-                binding.duelsWonValue.text = wins.toString()
-                binding.duelWinRateValue.text = "$winRate%"
+            runCatching { duelHistoryService.getUserDuelStats() }
+            .onSuccess { stats ->
+                binding.duelsPlayedValue.text = stats.total.toString()
+                binding.duelsWonValue.text = stats.wins.toString()
+                binding.duelWinRateValue.text = "${stats.winRate}%"
             }.onFailure { error ->
                 Log.w("MenuActivity", "Could not load duel statistics", error)
             }

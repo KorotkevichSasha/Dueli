@@ -20,6 +20,7 @@ import com.example.duelingo.databinding.ActivityTopicsBinding
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.utils.UserMessage
+import com.example.duelingo.utils.openTopLevel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -48,7 +49,7 @@ class TopicsActivity : AppCompatActivity() {
         binding.tests.setOnClickListener {}
         binding.duel.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@TopicsActivity, MenuActivity::class.java))
+            openTopLevel(MenuActivity::class.java)
             changeColorAndIcon(binding.mainIcon, binding.mainTest, R.drawable.swo)
             playAnimation(
                 binding.duelAnimation,
@@ -59,13 +60,13 @@ class TopicsActivity : AppCompatActivity() {
         }
         binding.leaderboard.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@TopicsActivity, RankActivity::class.java))
+            openTopLevel(RankActivity::class.java)
             changeColorAndIcon(binding.cupIcon, binding.cupTest, R.drawable.tro)
             playAnimation(binding.cupAnimation, binding.cupIcon, binding.cupTest, "cupAnim.json")
         }
         binding.profile.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@TopicsActivity, ProfileActivity::class.java))
+            openTopLevel(ProfileActivity::class.java)
             changeColorAndIcon(binding.profileIcon, binding.profileTest, R.drawable.prof)
             playAnimation(
                 binding.profAnimation,
@@ -204,6 +205,7 @@ class TopicsActivity : AppCompatActivity() {
         animationView.setAnimation(animationFile)
         animationView.playAnimation()
 
+        animationView.removeAllAnimatorListeners()
         animationView.addAnimatorListener(object : Animator.AnimatorListener {
             override fun onAnimationStart(animation: Animator) {
             }

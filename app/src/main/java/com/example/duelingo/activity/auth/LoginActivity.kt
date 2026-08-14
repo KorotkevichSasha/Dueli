@@ -57,6 +57,9 @@ class LoginActivity : AppCompatActivity() {
         binding.noAccount.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
+        binding.forgotPassword.setOnClickListener {
+            startActivity(Intent(this, ForgotPasswordActivity::class.java))
+        }
         binding.passwordEt.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 binding.loginBtn.performClick()

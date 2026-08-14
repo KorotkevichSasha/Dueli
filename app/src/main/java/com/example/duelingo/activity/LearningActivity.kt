@@ -22,6 +22,7 @@ import com.example.duelingo.storage.TokenManager
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import com.example.duelingo.utils.openTopLevel
 
 class LearningActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLearningBinding
@@ -60,7 +61,7 @@ class LearningActivity : AppCompatActivity() {
 
         binding.duel.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@LearningActivity, MenuActivity::class.java))
+            openTopLevel(MenuActivity::class.java)
             changeColorAndIcon(binding.mainIcon, binding.mainTest, R.drawable.swo)
             playAnimation(
                 binding.duelAnimation,
@@ -72,13 +73,13 @@ class LearningActivity : AppCompatActivity() {
 
         binding.leaderboard.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@LearningActivity, RankActivity::class.java))
+            openTopLevel(RankActivity::class.java)
             changeColorAndIcon(binding.cupIcon, binding.cupTest, R.drawable.tro)
             playAnimation(binding.cupAnimation, binding.cupIcon, binding.cupTest, "cupAnim.json")
         }
         binding.profile.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@LearningActivity, ProfileActivity::class.java))
+            openTopLevel(ProfileActivity::class.java)
             changeColorAndIcon(binding.profileIcon, binding.profileTest, R.drawable.prof)
             playAnimation(
                 binding.profAnimation,
@@ -90,10 +91,10 @@ class LearningActivity : AppCompatActivity() {
 
         listOf(binding.learningHeroCard, binding.testsCard, binding.listeningCard,
             binding.vocabularyCard, binding.learningTipCard).forEachIndexed { index, view ->
-            view.alpha = 1f
-            view.translationY = 22f
-            view.animate().translationY(0f)
-                .setStartDelay(index * 70L).setDuration(320).start()
+            view.alpha = 0.94f
+            view.translationY = 10f
+            view.animate().alpha(1f).translationY(0f)
+                .setStartDelay(index * 22L).setDuration(180).start()
         }
     }
 
@@ -175,6 +176,7 @@ class LearningActivity : AppCompatActivity() {
         animationView.setAnimation(animationFile)
         animationView.playAnimation()
 
+        animationView.removeAllAnimatorListeners()
         animationView.addAnimatorListener(object : Animator.AnimatorListener {
             override fun onAnimationStart(animation: Animator) {
             }
