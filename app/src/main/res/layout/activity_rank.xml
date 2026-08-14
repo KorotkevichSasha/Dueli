@@ -136,6 +136,31 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toTopOf="@id/userContainer" />
 
+                <LinearLayout
+                    android:id="@+id/leaderboardLoading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    app:layout_constraintBottom_toTopOf="@id/userContainer"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ProgressBar
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:indeterminateTint="@color/blue_primary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/leaderboard_loading"
+                        android:textColor="?attr/secondaryTextColor"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
                 <!-- Контейнер для текущего пользователя -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/userContainer"

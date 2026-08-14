@@ -117,6 +117,7 @@
     <string name="back_to_menu">Вернуться в меню</string>
 
     <string name="leaderboard_title">Рейтинг игроков</string>
+    <string name="leaderboard_loading">Обновляем рейтинг…</string>
     <string name="league_title">Ваша позиция в лиге</string>
     <string name="rank_stat">Место</string>
     <string name="points_stat">Очки</string>

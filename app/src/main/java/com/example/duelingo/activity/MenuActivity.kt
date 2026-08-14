@@ -41,6 +41,7 @@ import com.example.duelingo.storage.OfflineDuelHistoryStore
 import com.google.gson.Gson
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.example.duelingo.utils.OfflineDuelFactory
+import com.example.duelingo.utils.LeaderboardCache
 import com.example.duelingo.utils.UserMessage
 import com.example.duelingo.utils.openTopLevel
 import kotlinx.coroutines.CoroutineScope
@@ -152,6 +153,7 @@ class MenuActivity : AppCompatActivity() {
     }
 
     private fun resumeContent() {
+        LeaderboardCache.prefetch(tokenManager.getAccessToken())
         refreshDuelHistory()
         loadDuelStats()
         scope.launch {

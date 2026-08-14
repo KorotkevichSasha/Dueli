@@ -113,6 +113,7 @@
     <string name="time_spent">Time spent:</string>
     <string name="back_to_menu">Back to menu</string>
     <string name="leaderboard_title">Player ranking</string>
+    <string name="leaderboard_loading">Updating ranking…</string>
     <string name="league_title">Your league position</string>
     <string name="rank_stat">Rank</string>
     <string name="points_stat">Points</string>

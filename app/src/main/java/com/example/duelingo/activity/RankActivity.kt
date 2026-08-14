@@ -23,6 +23,7 @@ import com.example.duelingo.dto.response.UserInLeaderboardResponse
 import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
+import com.example.duelingo.utils.LeaderboardCache
 import com.example.duelingo.utils.UserMessage
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Job
@@ -57,12 +58,20 @@ class RankActivity : AppCompatActivity() {
         binding.cupIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.cupTest.setTextColor(Color.parseColor("#FF00A5FE"))
 
-        leaderboardRecyclerView = findViewById(R.id.rvLeaderboard)
+        val cachedLeaderboard = LeaderboardCache.current(tokenManager.getAccessToken())
+        leaderboardRecyclerView = binding.rvLeaderboard
         leaderboardRecyclerView.layoutManager = LinearLayoutManager(this)
-        leaderboardAdapter = LeaderboardAdapter(createEmptyLeaderboardResponse(), avatarManager)
-
-        binding.rvLeaderboard.layoutManager = LinearLayoutManager(this)
+        leaderboardAdapter = LeaderboardAdapter(
+            cachedLeaderboard ?: createEmptyLeaderboardResponse(),
+            avatarManager
+        )
         leaderboardRecyclerView.adapter = leaderboardAdapter
+        if (cachedLeaderboard != null) {
+            updateUI(cachedLeaderboard)
+        } else {
+            binding.leaderboardLoading.visibility = View.VISIBLE
+            binding.userContainer.visibility = View.INVISIBLE
+        }
 
         binding.tests.setOnClickListener {
             resetAll();
@@ -204,6 +213,7 @@ class RankActivity : AppCompatActivity() {
                 leaderboardLoading = true
                 try {
                     val response = ApiClient.leaderboardService.getLeaderboard(tokenWithBearer)
+                    LeaderboardCache.store(accessToken, response)
                     updateUI(response)
                 } catch (e: Exception) {
                     showToast(UserMessage.from(this@RankActivity, e))
@@ -216,6 +226,8 @@ class RankActivity : AppCompatActivity() {
         }
     }
     private fun updateUI(response: LeaderboardResponse) {
+        binding.leaderboardLoading.visibility = View.GONE
+        binding.userContainer.visibility = View.VISIBLE
         val currentUser = response.currentUser
         if (currentUser != null) {
             updateCurrentUserInfo(currentUser)

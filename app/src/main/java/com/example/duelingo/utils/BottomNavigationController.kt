@@ -162,6 +162,8 @@ object BottomNavigationController {
     private fun styleBar(activity: Activity, bar: ViewGroup?, onSurface: Int) {
         bar ?: return
         val parent = bar.parent as? ViewGroup
+        parent?.clipChildren = false
+        parent?.clipToPadding = false
         val targetWidth = parent?.width?.takeIf { it > 0 }
             ?: activity.window.decorView.width.takeIf { it > 0 }
             ?: activity.resources.displayMetrics.widthPixels
