@@ -8,6 +8,7 @@ import com.example.duelingo.manager.LocaleManager
 import com.example.duelingo.manager.ThemeManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.network.AuthSessionManager
+import com.example.duelingo.utils.BottomNavigationController
 import com.example.duelingo.utils.KeyboardInsets
 
 class DuelingoApplication : Application() {
@@ -27,7 +28,9 @@ class DuelingoApplication : Application() {
             }
 
             override fun onActivityStarted(activity: Activity) = Unit
-            override fun onActivityResumed(activity: Activity) = Unit
+            override fun onActivityResumed(activity: Activity) {
+                BottomNavigationController.sync(activity)
+            }
             override fun onActivityPaused(activity: Activity) = Unit
             override fun onActivityStopped(activity: Activity) = Unit
             override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
