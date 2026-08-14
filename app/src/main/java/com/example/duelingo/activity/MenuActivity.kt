@@ -313,7 +313,7 @@ class MenuActivity : AppCompatActivity() {
     }
 
 
-    private suspend fun connectToWebSocket() {
+    private suspend fun connectToWebSocket() = withContext(Dispatchers.IO) {
         Log.d("MenuActivity", "connectToWebSocket started")
         try {
             val token = tokenManager.getAccessToken()

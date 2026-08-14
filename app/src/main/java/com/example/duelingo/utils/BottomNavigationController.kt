@@ -27,10 +27,8 @@ import com.google.android.material.color.MaterialColors
 
 /** Owns the complete visual and click state of the duplicated bottom navigation views. */
 object BottomNavigationController {
-    private const val CLICK_DEBOUNCE_MS = 350L
-    private const val TRANSITION_INPUT_GUARD_MS = 650L
+    private const val CLICK_DEBOUNCE_MS = 220L
     private var lastNavigationAt = 0L
-    private var navigationInProgress = false
 
     private enum class Destination { LEARNING, DUEL, RANK, PROFILE }
 
@@ -78,19 +76,9 @@ object BottomNavigationController {
                 scaleY = 1f
                 background = navigationBackground(activity, primary, selected)
                 isSelected = selected
-                isEnabled = !navigationInProgress
+                isEnabled = true
                 setOnClickListener { navigate(activity, item, active) }
             }
-        }
-
-        if (navigationInProgress) {
-            // Touches made while the previous Activity is pausing may be delivered to the
-            // newly resumed screen. Keep every destination disabled briefly so those stale
-            // events cannot trigger a different tab.
-            items.first().container.postDelayed({
-                navigationInProgress = false
-                items.forEach { it.container.isEnabled = true }
-            }, TRANSITION_INPUT_GUARD_MS)
         }
 
         items.first { it.destination == active }.container.apply {
@@ -102,7 +90,7 @@ object BottomNavigationController {
 
     private fun navigate(activity: Activity, item: Item, active: Destination) {
         val now = SystemClock.elapsedRealtime()
-        if (navigationInProgress || now - lastNavigationAt < CLICK_DEBOUNCE_MS) return
+        if (now - lastNavigationAt < CLICK_DEBOUNCE_MS) return
         lastNavigationAt = now
         item.container.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
@@ -122,9 +110,37 @@ object BottomNavigationController {
             Destination.RANK -> RankActivity::class.java
             Destination.PROFILE -> ProfileActivity::class.java
         }
-        navigationInProgress = true
-        findItems(activity)?.forEach { it.container.isEnabled = false }
+        showPendingDestination(activity, item.destination)
         activity.openTopLevel(destination)
+    }
+
+    private fun showPendingDestination(activity: Activity, destination: Destination) {
+        val items = findItems(activity) ?: return
+        val primary = MaterialColors.getColor(
+            items.first().container,
+            com.google.android.material.R.attr.colorPrimary
+        )
+        val onSurface = MaterialColors.getColor(
+            items.first().container,
+            com.google.android.material.R.attr.colorOnSurface
+        )
+        items.forEach { candidate ->
+            val selected = candidate.destination == destination
+            candidate.container.isSelected = selected
+            candidate.container.background = navigationBackground(activity, primary, selected)
+            candidate.icon.setColorFilter(
+                if (selected) primary else ColorUtils.setAlphaComponent(onSurface, 155)
+            )
+            candidate.label.setTextColor(
+                if (selected) primary else ColorUtils.setAlphaComponent(onSurface, 165)
+            )
+        }
+        items.first { it.destination == destination }.container.apply {
+            animate().cancel()
+            scaleX = 0.96f
+            scaleY = 0.96f
+            animate().scaleX(1f).scaleY(1f).setDuration(120).start()
+        }
     }
 
     private fun navigationBackground(activity: Activity, primary: Int, selected: Boolean): InsetDrawable {
@@ -145,6 +161,19 @@ object BottomNavigationController {
 
     private fun styleBar(activity: Activity, bar: ViewGroup?, onSurface: Int) {
         bar ?: return
+        val parent = bar.parent as? ViewGroup
+        val targetWidth = parent?.width?.takeIf { it > 0 }
+            ?: activity.window.decorView.width.takeIf { it > 0 }
+            ?: activity.resources.displayMetrics.widthPixels
+        bar.layoutParams = bar.layoutParams.apply {
+            width = targetWidth
+            height = activity.dp(60f).toInt()
+        }
+        bar.post {
+            // Some screens apply horizontal padding to their root. The navigation bar must
+            // still occupy the same full-window geometry on every top-level destination.
+            bar.translationX = -bar.left.toFloat()
+        }
         val surface = MaterialColors.getColor(bar, com.google.android.material.R.attr.colorSurface)
         bar.background = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
