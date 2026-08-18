@@ -34,6 +34,16 @@
             android:textStyle="bold" />
     </LinearLayout>
 
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/questionProgress"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:max="100"
+        android:progress="0"
+        app:indicatorColor="@color/blue_primary"
+        app:trackColor="?attr/cardBackgroundColor"
+        app:trackCornerRadius="3dp" />
+
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
         android:layout_width="match_parent"

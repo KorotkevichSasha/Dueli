@@ -8,7 +8,9 @@ import com.example.duelingo.manager.LocaleManager
 import com.example.duelingo.manager.ThemeManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.network.AuthSessionManager
+import com.example.duelingo.utils.BottomNavigationController
 import com.example.duelingo.utils.KeyboardInsets
+import com.bumptech.glide.Glide
 
 class DuelingoApplication : Application() {
     override fun onCreate() {
@@ -18,6 +20,7 @@ class DuelingoApplication : Application() {
         ThemeManager.init(this)
         AuthSessionManager.initialize(this)
         ApiClient.initialize(this)
+        Glide.with(this).load(R.drawable.duel_hero).preload(1024, 500)
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
                 activity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
@@ -27,7 +30,9 @@ class DuelingoApplication : Application() {
             }
 
             override fun onActivityStarted(activity: Activity) = Unit
-            override fun onActivityResumed(activity: Activity) = Unit
+            override fun onActivityResumed(activity: Activity) {
+                BottomNavigationController.sync(activity)
+            }
             override fun onActivityPaused(activity: Activity) = Unit
             override fun onActivityStopped(activity: Activity) = Unit
             override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit

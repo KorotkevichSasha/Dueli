@@ -13,12 +13,13 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <TextView
+        <ImageView
             android:id="@+id/tvResultIcon"
             android:layout_width="104dp"
             android:layout_height="104dp"
-            android:gravity="center"
-            android:textSize="64sp" />
+            android:background="@drawable/bg_feature_icon"
+            android:contentDescription="@null"
+            android:padding="24dp" />
 
         <TextView
             android:id="@+id/tvResultsTitle"
@@ -93,10 +94,21 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnFinish"
+            android:id="@+id/btnReview"
+            style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="24dp"
+            android:text="@string/duel_review_mistakes"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            app:cornerRadius="18dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFinish"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="10dp"
             android:text="@string/back_to_menu"
             android:textAllCaps="false"
             android:textSize="16sp"

@@ -72,7 +72,7 @@ class VocabularyActivity : AppCompatActivity() {
                     binding.tvWordCount.text = if (count == 0) {
                         getString(R.string.words_to_review_zero)
                     } else {
-                        "$count ${getCountString(count)}"
+                        resources.getQuantityString(R.plurals.words_to_review_count, count, count)
                     }
                 }
             } catch (e: Exception) {
@@ -97,7 +97,7 @@ class VocabularyActivity : AppCompatActivity() {
 
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@VocabularyActivity,
-                        "Слово добавлено", Toast.LENGTH_SHORT).show()
+                        getString(R.string.word_added), Toast.LENGTH_SHORT).show()
                     loadWordCount()
                     onComplete(true)
                 }
@@ -112,13 +112,6 @@ class VocabularyActivity : AppCompatActivity() {
                     onComplete(false)
                 }
             }
-        }
-    }
-    private fun getCountString(count: Int): String {
-        return when {
-            count % 10 == 1 && count % 100 != 11 -> "слово для повторения"
-            count % 10 in 2..4 && count % 100 !in 12..14 -> "слова для повторения"
-            else -> "слов для повторения"
         }
     }
     private fun showAddWordDialog() {

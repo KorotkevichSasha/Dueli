@@ -39,10 +39,18 @@ class TestsAdapter(
     class TestViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvTestTitle: TextView = itemView.findViewById(R.id.tvTestTitle)
         private val ivTestCheckmark: ImageView = itemView.findViewById(R.id.ivTestCheckmark)
+        private val subtitle: TextView = itemView.findViewById(R.id.tvTestSubtitle)
 
         fun bind(test: TestSummaryResponse) {
-            tvTestTitle.text = test.difficulty
-            ivTestCheckmark.visibility = if (test.isCompleted) View.VISIBLE else View.GONE
+            tvTestTitle.text = when (test.difficulty) {
+                "EASY" -> itemView.context.getString(R.string.easy)
+                "HARD" -> itemView.context.getString(R.string.hard)
+                else -> itemView.context.getString(R.string.medium)
+            }
+            subtitle.text = itemView.context.getString(
+                if (test.isCompleted) R.string.test_completed_subtitle else R.string.test_ready_subtitle
+            )
+            ivTestCheckmark.alpha = if (test.isCompleted) 1f else 0.2f
         }
     }
 }

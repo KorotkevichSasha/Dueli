@@ -6,7 +6,7 @@
 - Select the permanent Android application id. Google Play package names cannot be changed after the first artifact is uploaded; do not publish `com.example.duelingo`.
 - Register the production domain, support email, and privacy-policy URL.
 - Publish a working web page where a user can request account deletion. The app already provides in-app deletion under Profile settings, and the backend permanently deletes linked data.
-- Replace or document the provenance and license of every remaining raster illustration and Lottie animation. The launcher icon and achievement icons no longer rely on remote third-party artwork, but repository history is not proof of rights for the other assets.
+- Keep `play-store/ASSET_PROVENANCE.md` with the release records and retain the original source files for the generated artwork.
 
 ## Build and signing
 
@@ -23,7 +23,7 @@
 - Add store listing text, screenshots for required device sizes, feature graphic, high-resolution icon, support contact, and release notes.
 - Test account deletion, data retention, and the public deletion-request link from a signed release build.
 
-## Current technical baseline (verified 2026-08-07)
+## Current technical baseline (verified 2026-08-15)
 
 - `compileSdk` and `targetSdk`: 36 (Android 16).
 - Release shrinking/obfuscation: enabled.

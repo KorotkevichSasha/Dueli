@@ -13,6 +13,11 @@ import retrofit2.http.Query
 
 
 interface TestService {
+    @GET("/tests/all")
+    suspend fun getAllTests(
+        @Header("Authorization") token: String
+    ): List<TestSummaryResponse>
+
     @GET("/tests")
     suspend fun getTestsForTopic(
         @Header("Authorization") token: String,

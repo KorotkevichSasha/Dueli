@@ -23,11 +23,15 @@ import com.example.duelingo.dto.response.UserInLeaderboardResponse
 import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
+import com.example.duelingo.utils.LeaderboardCache
 import com.example.duelingo.utils.UserMessage
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import com.example.duelingo.utils.openTopLevel
+import com.example.duelingo.utils.ConnectivityRetry
+import com.google.android.material.snackbar.Snackbar
 
 class RankActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRankBinding
@@ -41,6 +45,8 @@ class RankActivity : AppCompatActivity() {
     private lateinit var avatarManager: AvatarManager
     private var refreshJob: Job? = null
     private var leaderboardLoading = false
+    private var offlineSnackbar: Snackbar? = null
+    private var leaderboardRendered = false
     private val tokenManager by lazy { TokenManager(this) }
     private val sharedPreferences by lazy { getSharedPreferences("user_prefs", MODE_PRIVATE) }
 
@@ -55,16 +61,25 @@ class RankActivity : AppCompatActivity() {
         binding.cupIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.cupTest.setTextColor(Color.parseColor("#FF00A5FE"))
 
-        leaderboardRecyclerView = findViewById(R.id.rvLeaderboard)
+        ConnectivityRetry(this, lifecycle) { loadLeaderboard() }
+        val cachedLeaderboard = LeaderboardCache.current(this, tokenManager.getAccessToken())
+        leaderboardRecyclerView = binding.rvLeaderboard
         leaderboardRecyclerView.layoutManager = LinearLayoutManager(this)
-        leaderboardAdapter = LeaderboardAdapter(createEmptyLeaderboardResponse(), avatarManager)
-
-        binding.rvLeaderboard.layoutManager = LinearLayoutManager(this)
+        leaderboardAdapter = LeaderboardAdapter(
+            cachedLeaderboard ?: createEmptyLeaderboardResponse(),
+            avatarManager
+        )
         leaderboardRecyclerView.adapter = leaderboardAdapter
+        if (cachedLeaderboard != null) {
+            updateUI(cachedLeaderboard)
+        } else {
+            binding.leaderboardLoading.visibility = View.VISIBLE
+            binding.userContainer.visibility = View.INVISIBLE
+        }
 
         binding.tests.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@RankActivity, LearningActivity::class.java))
+            openTopLevel(LearningActivity::class.java)
             changeColorAndIcon(
                 binding.testIcon,
                 binding.testTest,
@@ -74,7 +89,7 @@ class RankActivity : AppCompatActivity() {
         }
         binding.duel.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@RankActivity, MenuActivity::class.java))
+            openTopLevel(MenuActivity::class.java)
             changeColorAndIcon(binding.mainIcon, binding.mainTest, R.drawable.swo)
             playAnimation(
                 binding.duelAnimation,
@@ -88,7 +103,7 @@ class RankActivity : AppCompatActivity() {
         }
         binding.profile.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@RankActivity, ProfileActivity::class.java))
+            openTopLevel(ProfileActivity::class.java)
             changeColorAndIcon(binding.profileIcon, binding.profileTest, R.drawable.prof)
             playAnimation(
                 binding.profAnimation,
@@ -124,7 +139,7 @@ class RankActivity : AppCompatActivity() {
             totalPages = 0,
             currentPage = 0
         )
-        val emptyUser = UserInLeaderboardResponse("", "", 0, "", 0)
+        val emptyUser = UserInLeaderboardResponse("", "", 0, "", 0, null)
         return LeaderboardResponse(emptyPaginationResponse, emptyUser)
     }
 
@@ -153,6 +168,7 @@ class RankActivity : AppCompatActivity() {
         animationView.setAnimation(animationFile)
         animationView.playAnimation()
 
+        animationView.removeAllAnimatorListeners()
         animationView.addAnimatorListener(object : Animator.AnimatorListener {
             override fun onAnimationStart(animation: Animator) {
             }
@@ -201,9 +217,20 @@ class RankActivity : AppCompatActivity() {
                 leaderboardLoading = true
                 try {
                     val response = ApiClient.leaderboardService.getLeaderboard(tokenWithBearer)
+                    LeaderboardCache.store(this@RankActivity, accessToken, response)
                     updateUI(response)
+                    offlineSnackbar?.dismiss()
+                    offlineSnackbar = null
                 } catch (e: Exception) {
-                    showToast(UserMessage.from(this@RankActivity, e))
+                    val cached = LeaderboardCache.current(this@RankActivity, accessToken)
+                    if (cached != null) updateUI(cached)
+                    offlineSnackbar?.dismiss()
+                    offlineSnackbar = Snackbar.make(
+                        binding.root,
+                        R.string.offline_showing_saved_data,
+                        Snackbar.LENGTH_INDEFINITE
+                    ).setAction(R.string.retry_connection) { loadLeaderboard() }
+                    offlineSnackbar?.show()
                 } finally {
                     leaderboardLoading = false
                 }
@@ -213,30 +240,40 @@ class RankActivity : AppCompatActivity() {
         }
     }
     private fun updateUI(response: LeaderboardResponse) {
+        binding.leaderboardLoading.visibility = View.GONE
+        binding.userContainer.visibility = View.VISIBLE
         val currentUser = response.currentUser
-        if (currentUser != null) {
-            updateCurrentUserInfo(currentUser)
-            binding.tvRankSummary.text = "#${currentUser.rank}"
-            binding.tvPointsSummary.text = currentUser.points.toString()
-            binding.tvPlayersSummary.text = response.top.totalItems.toString()
+        updateCurrentUserInfo(currentUser)
+        binding.tvRankSummary.text = "#${currentUser.rank}"
+        binding.tvPointsSummary.text = currentUser.points.toString()
+        binding.tvPlayersSummary.text = response.top.totalItems.toString()
 
-            val nextPlayer = response.top.content.firstOrNull { it.rank == currentUser.rank - 1 }
-            binding.tvRankProgress.text = if (nextPlayer == null) {
-                getString(R.string.rank_first_place)
-            } else {
-                getString(
-                    R.string.rank_next_format,
-                    (nextPlayer.points - currentUser.points).coerceAtLeast(0)
-                )
-            }
+        binding.tvRankProgress.text = if (currentUser.pointsToNextRank == null) {
+            getString(R.string.rank_first_place)
+        } else {
+            getString(R.string.rank_next_format, currentUser.pointsToNextRank)
+        }
+
+        findViewById<TextView?>(R.id.rankGapIndicator)?.apply {
+            val lastVisibleRank = response.top.content.lastOrNull()?.rank ?: 0
+            val missing = currentUser.rank - lastVisibleRank - 1
+            visibility = if (missing > 0) View.VISIBLE else View.GONE
+            text = resources.getQuantityString(
+                R.plurals.rank_hidden_positions,
+                missing.toInt(),
+                missing.toInt()
+            )
         }
 
         leaderboardAdapter.updateData(response)
-        binding.leagueSummaryCard.apply {
-            alpha = 0f
-            scaleX = 0.97f
-            scaleY = 0.97f
-            animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(280).start()
+        if (!leaderboardRendered) {
+            binding.leagueSummaryCard.apply {
+                alpha = 0f
+                scaleX = 0.98f
+                scaleY = 0.98f
+                animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(180).start()
+            }
+            leaderboardRendered = true
         }
     }
     private fun updateCurrentUserInfo(currentUser: UserInLeaderboardResponse) {
@@ -245,11 +282,6 @@ class RankActivity : AppCompatActivity() {
         binding.tvUserPoints.text = currentUser.points.toString()
 
         avatarManager.loadAvatar(currentUser.id, binding.ivUserAvatar)
-        binding.userContainer.apply {
-            alpha = 0f
-            translationY = 16f
-            animate().alpha(1f).translationY(0f).setDuration(280).start()
-        }
     }
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()

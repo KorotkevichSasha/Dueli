@@ -68,7 +68,7 @@ class FriendsListFragment : Fragment() {
                 }
                 launch {
                     while (isActive) {
-                        delay(30_000)
+                        delay(15_000)
                         loadFriends()
                     }
                 }

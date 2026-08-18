@@ -3,6 +3,7 @@ package com.example.duelingo.network
 import com.example.duelingo.dto.response.DuelInHistoryResponse
 import com.example.duelingo.dto.response.PaginationResponse
 import com.example.duelingo.dto.response.MatchmakingEstimateResponse
+import com.example.duelingo.dto.response.DuelStatsResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 import retrofit2.http.POST
@@ -25,6 +26,9 @@ interface DuelHistoryService {
         @Query("page") page: Int = 0,
         @Query("size") size: Int = 5
     ): PaginationResponse<DuelInHistoryResponse>
+
+    @GET("duels/stats")
+    suspend fun getUserDuelStats(): DuelStatsResponse
 
     @POST("duels/challenges")
     suspend fun challengeFriend(@Body request: DuelChallengeRequest): DuelChallengeEvent

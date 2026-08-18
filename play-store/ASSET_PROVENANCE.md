@@ -22,4 +22,12 @@
 - Navigation pulse animations under `app/src/main/assets` are project-authored Lottie JSON files.
 - The previous raster icon set and legacy launcher WebP files were removed because their source and license could not be verified.
 
+## In-app avatars and duel illustration
+
+- Files: `app/src/main/res/drawable-nodpi/avatar_01.png` through `avatar_10.png`, and `duel_hero.png`.
+- Added to the project: 2026-08-13 in commit `a81effa82ef8a55622698f096d22528c545acf16`.
+- Method: original AI-generated artwork commissioned specifically for DuelRush during product development; the duel illustration is the same original source artwork used for the Play feature graphic.
+- External source assets, logos, brands, copyrighted characters, screenshots, and watermarks: none requested or incorporated.
+- Purpose: bundled default profile choices and the duel landing-page hero. The files are stored locally and do not depend on a third-party asset service at runtime.
+
 Before publishing, keep this file with the release records and run a final trademark review after the permanent product name is selected.

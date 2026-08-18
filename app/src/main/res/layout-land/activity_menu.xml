@@ -38,7 +38,7 @@
 
             <TextView android:id="@+id/duelSubtitle" android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:layout_marginVertical="5dp" android:gravity="center"
-                android:maxLines="1" android:text="@string/duel_subtitle" android:textColor="?attr/secondaryTextColor"
+                android:maxLines="2" android:text="@string/duel_subtitle" android:textColor="?attr/secondaryTextColor"
                 android:textSize="12sp" />
 
             <com.google.android.material.card.MaterialCardView android:id="@+id/duelStatsCard"
@@ -47,17 +47,17 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
                     android:gravity="center" android:orientation="horizontal">
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                        <TextView android:id="@+id/duelsPlayedValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="?attr/textColor" android:textSize="18sp" android:textStyle="bold" />
+                            <TextView android:id="@+id/duelsPlayedValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/value_zero" android:textColor="?attr/textColor" android:textSize="18sp" android:textStyle="bold" />
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/duels_played" android:textColor="?attr/secondaryTextColor" android:textSize="11sp" />
                     </LinearLayout>
                     <View android:layout_width="1dp" android:layout_height="32dp" android:background="?attr/dividerColor" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                        <TextView android:id="@+id/duelsWonValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/green_primary" android:textSize="18sp" android:textStyle="bold" />
+                            <TextView android:id="@+id/duelsWonValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/value_zero" android:textColor="@color/green_primary" android:textSize="18sp" android:textStyle="bold" />
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/duels_won" android:textColor="?attr/secondaryTextColor" android:textSize="11sp" />
                     </LinearLayout>
                     <View android:layout_width="1dp" android:layout_height="32dp" android:background="?attr/dividerColor" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                        <TextView android:id="@+id/duelWinRateValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0%" android:textColor="@color/blue_primary" android:textSize="18sp" android:textStyle="bold" />
+                            <TextView android:id="@+id/duelWinRateValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/percentage_zero" android:textColor="@color/blue_primary" android:textSize="18sp" android:textStyle="bold" />
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/duel_win_rate" android:textColor="?attr/secondaryTextColor" android:textSize="11sp" />
                     </LinearLayout>
                 </LinearLayout>

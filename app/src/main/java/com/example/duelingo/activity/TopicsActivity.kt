@@ -1,11 +1,14 @@
 package com.example.duelingo.activity
 
 import android.animation.Animator
+import android.app.Dialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.Window
+import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -17,9 +20,11 @@ import com.airbnb.lottie.LottieAnimationView
 import com.example.duelingo.R
 import com.example.duelingo.adapters.TopicsAdapter
 import com.example.duelingo.databinding.ActivityTopicsBinding
+import com.example.duelingo.databinding.DialogDuelDifficultyBinding
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.utils.UserMessage
+import com.example.duelingo.utils.openTopLevel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -48,7 +53,7 @@ class TopicsActivity : AppCompatActivity() {
         binding.tests.setOnClickListener {}
         binding.duel.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@TopicsActivity, MenuActivity::class.java))
+            openTopLevel(MenuActivity::class.java)
             changeColorAndIcon(binding.mainIcon, binding.mainTest, R.drawable.swo)
             playAnimation(
                 binding.duelAnimation,
@@ -59,13 +64,13 @@ class TopicsActivity : AppCompatActivity() {
         }
         binding.leaderboard.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@TopicsActivity, RankActivity::class.java))
+            openTopLevel(RankActivity::class.java)
             changeColorAndIcon(binding.cupIcon, binding.cupTest, R.drawable.tro)
             playAnimation(binding.cupAnimation, binding.cupIcon, binding.cupTest, "cupAnim.json")
         }
         binding.profile.setOnClickListener {
             resetAll();
-            startActivity(Intent(this@TopicsActivity, ProfileActivity::class.java))
+            openTopLevel(ProfileActivity::class.java)
             changeColorAndIcon(binding.profileIcon, binding.profileTest, R.drawable.prof)
             playAnimation(
                 binding.profAnimation,
@@ -136,13 +141,37 @@ class TopicsActivity : AppCompatActivity() {
                 startActivity(intent)
             },
             onRandomTestClick = {
-                loadRandomTest()
+                showRandomTestDifficulty()
             }
         )
         binding.rvTopics.adapter = topicsAdapter
     }
 
-    private fun loadRandomTest() {
+    private fun showRandomTestDifficulty() {
+        val content = DialogDuelDifficultyBinding.inflate(layoutInflater)
+        val dialog = Dialog(this).apply {
+            requestWindowFeature(Window.FEATURE_NO_TITLE)
+            setContentView(content.root)
+            window?.setBackgroundDrawableResource(android.R.color.transparent)
+            setOnShowListener {
+                val width = (resources.displayMetrics.widthPixels - 32 * resources.displayMetrics.density)
+                    .toInt().coerceAtMost((520 * resources.displayMetrics.density).toInt())
+                window?.setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT)
+            }
+        }
+        content.titleText.setText(R.string.random_test_dialog_title)
+        content.subtitleText.setText(R.string.random_test_dialog_subtitle)
+        content.easyButton.setText(R.string.random_test_easy)
+        content.mediumButton.setText(R.string.random_test_medium)
+        content.hardButton.setText(R.string.random_test_hard)
+        content.closeButton.setOnClickListener { dialog.dismiss() }
+        content.easyButton.setOnClickListener { dialog.dismiss(); loadRandomTest("EASY") }
+        content.mediumButton.setOnClickListener { dialog.dismiss(); loadRandomTest("MEDIUM") }
+        content.hardButton.setOnClickListener { dialog.dismiss(); loadRandomTest("HARD") }
+        dialog.show()
+    }
+
+    private fun loadRandomTest(difficulty: String) {
         val tokenManager = TokenManager(this)
         val accessToken = tokenManager.getAccessToken()
 
@@ -153,7 +182,7 @@ class TopicsActivity : AppCompatActivity() {
                 try {
                     val randomQuestions = ApiClient.questionService.getRandomQuestions(
                         tokenWithBearer,
-                        null,
+                        difficulty,
                         null,
                         10
                     )
@@ -161,6 +190,7 @@ class TopicsActivity : AppCompatActivity() {
                     if (randomQuestions.isNotEmpty()) {
                         val intent = Intent(this@TopicsActivity, TestDetailsActivity::class.java).apply {
                             putExtra("randomTest", true)
+                            putExtra("difficulty", difficulty)
                             putParcelableArrayListExtra("questions", ArrayList(randomQuestions))
                         }
                         startActivity(intent)
@@ -204,6 +234,7 @@ class TopicsActivity : AppCompatActivity() {
         animationView.setAnimation(animationFile)
         animationView.playAnimation()
 
+        animationView.removeAllAnimatorListeners()
         animationView.addAnimatorListener(object : Animator.AnimatorListener {
             override fun onAnimationStart(animation: Animator) {
             }

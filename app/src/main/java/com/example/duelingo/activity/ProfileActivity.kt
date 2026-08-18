@@ -50,6 +50,7 @@ import com.example.duelingo.fragment.FriendsListFragment
 import com.example.duelingo.fragment.OutgoingRequestsFragment
 import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.utils.KeyboardInsets
+import com.example.duelingo.utils.openTopLevel
 import com.example.duelingo.manager.LocaleManager
 import com.example.duelingo.manager.ThemeManager
 import com.example.duelingo.network.ApiClient
@@ -57,6 +58,10 @@ import com.example.duelingo.network.UserService
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.utils.RefreshEvents
 import com.example.duelingo.utils.UserMessage
+import com.example.duelingo.utils.ProfileCache
+import com.example.duelingo.utils.ConnectivityRetry
+import com.example.duelingo.utils.LeaderboardCache
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.Dispatchers
@@ -77,6 +82,8 @@ class ProfileActivity : AppCompatActivity() {
     private var currentProfileUsername: String = ""
     private var currentProfileId: UUID? = null
     private val sharedPreferences by lazy { getSharedPreferences("user_prefs", MODE_PRIVATE) }
+    private var profileLoading = false
+    private var offlineSnackbar: Snackbar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,15 +99,16 @@ class ProfileActivity : AppCompatActivity() {
         
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        ConnectivityRetry(this, lifecycle) { loadProfile() }
 
         binding.profileIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.profileTest.setTextColor(Color.parseColor("#FF00A5FE"))
 
         avatarManager = AvatarManager(this, tokenManager, sharedPreferences)
+        ProfileCache.read(this, tokenManager.getAccessToken())?.let(::updateUI)
         binding.profileImage.setOnClickListener { showAvatarPicker() }
         binding.uploadPhotoButton.setOnClickListener { showAvatarPicker() }
         binding.shareProfileButton.setOnClickListener { shareProfile() }
-        loadProfile()
 
         binding.achievementsButton.setOnClickListener{ startActivity(Intent(this@ProfileActivity, AchievementActivity::class.java)) }
 
@@ -108,19 +116,19 @@ class ProfileActivity : AppCompatActivity() {
 
         binding.tests.setOnClickListener {
             resetAll()
-            startActivity(Intent(this@ProfileActivity, LearningActivity::class.java))
+            openTopLevel(LearningActivity::class.java)
             changeColorAndIcon(binding.testIcon, binding.testTest, R.drawable.grad)
             playAnimation(binding.testAnimation, binding.testIcon, binding.testTest, "graAnim.json")
         }
         binding.duel.setOnClickListener {
             resetAll()
-            startActivity(Intent(this@ProfileActivity, MenuActivity::class.java))
+            openTopLevel(MenuActivity::class.java)
             changeColorAndIcon(binding.mainIcon, binding.mainTest, R.drawable.swo)
             playAnimation(binding.duelAnimation, binding.mainIcon, binding.mainTest, "swordAnim.json")
         }
         binding.leaderboard.setOnClickListener {
             resetAll()
-            startActivity(Intent(this@ProfileActivity, RankActivity::class.java))
+            openTopLevel(RankActivity::class.java)
             changeColorAndIcon(binding.cupIcon, binding.cupTest, R.drawable.tro)
             playAnimation(binding.cupAnimation, binding.cupIcon, binding.cupTest, "cupAnim.json")
         }
@@ -156,7 +164,7 @@ class ProfileActivity : AppCompatActivity() {
             
             // Set tab text
             tabText.text = when (position) {
-                0 -> "Друзья"
+                0 -> getString(R.string.friends)
                 1 -> getString(R.string.incoming_requests_tab)
                 2 -> getString(R.string.outgoing_requests_tab)
                 else -> ""
@@ -275,7 +283,9 @@ class ProfileActivity : AppCompatActivity() {
         binding.playerEmail.text = response.email
         binding.pointCount.text = getString(R.string.profile_points_format, response.points)
         binding.profilePointsValue.text = response.points.toString()
-        binding.profileGoalValue.text = (100 - (response.points % 100)).toString()
+        val cachedGap = LeaderboardCache.current(this, tokenManager.getAccessToken())
+            ?.currentUser?.pointsToNextRank
+        binding.profileGoalValue.text = cachedGap?.toString() ?: "—"
         avatarManager.loadAvatar(response.id, binding.profileImage, response.avatarUrl)
     }
 
@@ -333,7 +343,10 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun loadProfile() {
+        if (profileLoading) return
+        profileLoading = true
         val accessToken = tokenManager.getAccessToken() ?: run {
+            profileLoading = false
             showToast(getString(R.string.session_expired))
             return
         }
@@ -345,11 +358,26 @@ class ProfileActivity : AppCompatActivity() {
                 val response = ApiClient.userService.getProfile(tokenWithBearer)
                 withContext(Dispatchers.Main) {
                     updateUI(response)
+                    ProfileCache.store(this@ProfileActivity, accessToken, response)
+                    offlineSnackbar?.dismiss()
+                    offlineSnackbar = null
                 }
                 loadProfileRank(tokenWithBearer)
             } catch (e: Exception) {
                 Log.e("ProfileError", "Error loading profile: ${e.message}")
-                showToast(UserMessage.from(this@ProfileActivity, e))
+                offlineSnackbar?.dismiss()
+                offlineSnackbar = Snackbar.make(
+                    binding.root,
+                    if (ProfileCache.read(this@ProfileActivity, accessToken) != null) {
+                        R.string.offline_showing_saved_data
+                    } else {
+                        R.string.error_network
+                    },
+                    Snackbar.LENGTH_INDEFINITE
+                ).setAction(R.string.retry_connection) { loadProfile() }
+                offlineSnackbar?.show()
+            } finally {
+                profileLoading = false
             }
         }
     }
@@ -363,11 +391,22 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private suspend fun loadProfileRank(authHeader: String) {
+        val accessToken = authHeader.removePrefix("Bearer ")
         runCatching { ApiClient.leaderboardService.getLeaderboard(authHeader) }
             .onSuccess { leaderboard ->
+                LeaderboardCache.store(this, accessToken, leaderboard)
                 binding.profileRankValue.text = "#${leaderboard.currentUser.rank}"
+                binding.profileGoalValue.text =
+                    (leaderboard.currentUser.pointsToNextRank ?: 0).toString()
             }
-            .onFailure { Log.w("ProfileActivity", "Could not load profile rank", it) }
+            .onFailure {
+                LeaderboardCache.current(this, accessToken)?.let { cached ->
+                    binding.profileRankValue.text = "#${cached.currentUser.rank}"
+                    binding.profileGoalValue.text =
+                        (cached.currentUser.pointsToNextRank ?: 0).toString()
+                }
+                Log.w("ProfileActivity", "Could not load profile rank", it)
+            }
     }
 
     private fun shareProfile() {
@@ -437,6 +476,7 @@ class ProfileActivity : AppCompatActivity() {
         animationView.setAnimation(animationFile)
         animationView.playAnimation()
 
+        animationView.removeAllAnimatorListeners()
         animationView.addAnimatorListener(object : Animator.AnimatorListener {
             override fun onAnimationStart(animation: Animator) {}
 
@@ -473,6 +513,7 @@ class ProfileActivity : AppCompatActivity() {
         val progressBar = rootView.findViewById<ProgressBar>(R.id.progressBar)
         val userContainer = rootView.findViewById<LinearLayout>(R.id.userContainer)
         val resultsScroll = rootView.findViewById<NestedScrollView>(R.id.resultsScroll)
+        val emptySearchText = rootView.findViewById<TextView>(R.id.emptySearchText)
         rootView.findViewById<View>(R.id.closeButton)?.setOnClickListener { dialog.dismiss() }
 
         if (editUsername == null || btnSearch == null || progressBar == null || userContainer == null) {
@@ -484,7 +525,7 @@ class ProfileActivity : AppCompatActivity() {
         btnSearch.setOnClickListener {
             val username = editUsername.text.toString()
             if (username.isNotEmpty()) {
-                searchUser(username, progressBar, userContainer, resultsScroll)
+                searchUser(username.trim(), progressBar, userContainer, resultsScroll, emptySearchText)
             } else {
                 showToast(getString(R.string.error_username_required))
             }
@@ -505,7 +546,13 @@ class ProfileActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun searchUser(username: String, progressBar: ProgressBar, container: LinearLayout, resultsScroll: View) {
+    private fun searchUser(
+        username: String,
+        progressBar: ProgressBar,
+        container: LinearLayout,
+        resultsScroll: View,
+        emptySearchText: TextView
+    ) {
         if (!::tokenManager.isInitialized) {
             Log.e("ProfileActivity", "Token manager is not initialized")
             showToast(getString(R.string.session_expired))
@@ -523,6 +570,7 @@ class ProfileActivity : AppCompatActivity() {
                 progressBar.visibility = View.VISIBLE
                 container.removeAllViews()
                 resultsScroll.visibility = View.GONE
+                emptySearchText.visibility = View.GONE
 
                 val response = ApiClient.userService.searchUsers(
                     "Bearer $accessToken",
@@ -536,7 +584,7 @@ class ProfileActivity : AppCompatActivity() {
                     }
                     resultsScroll.visibility = View.VISIBLE
                 } else {
-                    showToast(getString(R.string.no_users_found))
+                    emptySearchText.visibility = View.VISIBLE
                 }
             } catch (e: Exception) {
                 Log.e("ProfileActivity", "Friend search failed", e)

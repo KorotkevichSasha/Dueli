@@ -12,6 +12,8 @@ class OptionsAdapter(
     private val onOptionSelected: (String) -> Unit
 ) : RecyclerView.Adapter<OptionsAdapter.ViewHolder>() {
 
+    private var selectedPosition = RecyclerView.NO_POSITION
+
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvOption: TextView = view.findViewById(R.id.tvOption)
     }
@@ -25,8 +27,23 @@ class OptionsAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val option = options[position]
         holder.tvOption.text = option
+        val selected = position == selectedPosition
+        holder.tvOption.isSelected = selected
+        holder.tvOption.setTextColor(
+            holder.itemView.context.getColor(
+                if (selected) R.color.white else R.color.word_chip_text
+            )
+        )
 
         holder.itemView.setOnClickListener {
+            val previous = selectedPosition
+            selectedPosition = if (selectedPosition == holder.bindingAdapterPosition) {
+                RecyclerView.NO_POSITION
+            } else {
+                holder.bindingAdapterPosition
+            }
+            if (previous != RecyclerView.NO_POSITION) notifyItemChanged(previous)
+            if (selectedPosition != RecyclerView.NO_POSITION) notifyItemChanged(selectedPosition)
             onOptionSelected(option)
         }
     }

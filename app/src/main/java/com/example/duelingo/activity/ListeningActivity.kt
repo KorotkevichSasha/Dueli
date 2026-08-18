@@ -21,6 +21,7 @@ import com.example.duelingo.R
 import com.example.duelingo.databinding.ActivityListeningBinding
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
+import com.example.duelingo.storage.LearningHabitTracker
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -84,6 +85,8 @@ class ListeningActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
         override fun onError(error: Int) {
             resetRecognitionState()
+            binding.recognizedText.text = lastRecognizedText
+                ?: getString(R.string.listening_nothing_recorded)
             binding.recordingStatus.text = getString(speechErrorMessage(error))
         }
 
@@ -95,6 +98,7 @@ class ListeningActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
             resetRecognitionState()
             if (recognized.isNullOrBlank()) {
+                binding.recognizedText.setText(R.string.listening_nothing_recorded)
                 binding.recordingStatus.setText(R.string.listening_no_speech)
                 return
             }
@@ -228,7 +232,10 @@ class ListeningActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             lastRecognizedText?.let(::checkAnswer)
                 ?: showToast(getString(R.string.listening_record_first))
         }
-        binding.nextListeningButton.setOnClickListener { loadAudioQuestion() }
+        binding.nextListeningButton.setOnClickListener {
+            LearningHabitTracker(this).recordPractice(3)
+            loadAudioQuestion()
+        }
         binding.replayCorrectAnswerButton.setOnClickListener { playCurrentSentence() }
     }
 
@@ -320,6 +327,7 @@ class ListeningActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             recognizer.startListening(intent)
         } catch (_: Exception) {
             resetRecognitionState()
+            binding.recognizedText.setText(R.string.listening_nothing_recorded)
             showToast(getString(R.string.listening_recognition_start_error))
         }
     }

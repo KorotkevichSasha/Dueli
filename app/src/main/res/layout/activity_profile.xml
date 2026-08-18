@@ -14,7 +14,7 @@
         android:src="@drawable/ic_settings"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:padding="12dp"
-        android:contentDescription="Настройки"
+        android:contentDescription="@string/settings_title"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp"
@@ -69,7 +69,7 @@
         android:id="@+id/player_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Имя игрока"
+        android:text="@string/username_hint"
         android:textColor="?attr/textColor"
         android:textSize="24sp"
         app:layout_constraintTop_toBottomOf="@id/upload_photo_button"
@@ -82,7 +82,7 @@
         android:id="@+id/player_email"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="email@example.com"
+        android:text="@string/email_hint"
         android:textColor="?attr/secondaryTextColor"
         android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@id/player_name"
@@ -125,21 +125,21 @@
             android:paddingHorizontal="8dp">
 
             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                <TextView android:id="@+id/profilePointsValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/blue_primary" android:textSize="20sp" android:textStyle="bold" />
+                <TextView android:id="@+id/profilePointsValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/value_zero" android:textColor="@color/blue_primary" android:textSize="20sp" android:textStyle="bold" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/points_stat" android:textColor="?attr/secondaryTextColor" android:textSize="12sp" />
             </LinearLayout>
 
             <View android:layout_width="1dp" android:layout_height="36dp" android:background="?attr/dividerColor" />
 
             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                <TextView android:id="@+id/profileRankValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="—" android:textColor="?attr/textColor" android:textSize="20sp" android:textStyle="bold" />
+                <TextView android:id="@+id/profileRankValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/value_dash" android:textColor="?attr/textColor" android:textSize="20sp" android:textStyle="bold" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/rank_stat" android:textColor="?attr/secondaryTextColor" android:textSize="12sp" />
             </LinearLayout>
 
             <View android:layout_width="1dp" android:layout_height="36dp" android:background="?attr/dividerColor" />
 
             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1.25" android:gravity="center" android:orientation="vertical">
-                <TextView android:id="@+id/profileGoalValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="100" android:textColor="@color/green_primary" android:textSize="20sp" android:textStyle="bold" />
+                <TextView android:id="@+id/profileGoalValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/value_hundred" android:textColor="@color/green_primary" android:textSize="20sp" android:textStyle="bold" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center" android:text="@string/profile_goal" android:textColor="?attr/secondaryTextColor" android:textSize="12sp" />
             </LinearLayout>
         </LinearLayout>
@@ -187,6 +187,10 @@
                 android:text="@string/friends"
                 android:textColor="@color/blue_primary"
                 android:textSize="20sp"
+                android:layout_toStartOf="@id/add_friend_button"
+                android:layout_marginEnd="12dp"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:layout_centerVertical="true"/>
 
             <ImageButton
@@ -197,7 +201,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:padding="12dp"
                 android:layout_alignParentEnd="true"
-                android:contentDescription="Добавить друга"
+            android:contentDescription="@string/add_friend"
                 app:tint="@color/blue_primary"/>
         </RelativeLayout>
 
@@ -248,7 +252,7 @@
                     android:id="@+id/testIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="Тесты"
+                    android:contentDescription="@string/nav_learning"
                     android:src="@drawable/graduation24" />
 
                 <com.airbnb.lottie.LottieAnimationView
@@ -286,7 +290,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/swords24"
-                    android:contentDescription="Дуэль" />
+                    android:contentDescription="@string/nav_duel" />
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/duelAnimation"
@@ -323,7 +327,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/trophy24"
-                    android:contentDescription="Рейтинг"/>
+                    android:contentDescription="@string/nav_rank"/>
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/cupAnimation"
@@ -360,7 +364,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/profile24"
-                    android:contentDescription="Профиль"/>
+                    android:contentDescription="@string/nav_profile"/>
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/profAnimation"

@@ -92,21 +92,21 @@
                     android:orientation="horizontal">
 
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                        <TextView android:id="@+id/tvRankSummary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="—" android:textColor="@color/white" android:textSize="22sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tvRankSummary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/value_dash" android:textColor="@color/white" android:textSize="22sp" android:textStyle="bold" />
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/rank_stat" android:textColor="#DDEEFF" android:textSize="12sp" />
                     </LinearLayout>
 
                     <View android:layout_width="1dp" android:layout_height="34dp" android:background="#55FFFFFF" />
 
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                        <TextView android:id="@+id/tvPointsSummary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/white" android:textSize="22sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tvPointsSummary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/value_zero" android:textColor="@color/white" android:textSize="22sp" android:textStyle="bold" />
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/points_stat" android:textColor="#DDEEFF" android:textSize="12sp" />
                     </LinearLayout>
 
                     <View android:layout_width="1dp" android:layout_height="34dp" android:background="#55FFFFFF" />
 
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                        <TextView android:id="@+id/tvPlayersSummary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/white" android:textSize="22sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tvPlayersSummary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/value_zero" android:textColor="@color/white" android:textSize="22sp" android:textStyle="bold" />
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/players_stat" android:textColor="#DDEEFF" android:textSize="12sp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -134,7 +134,44 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintBottom_toTopOf="@id/userContainer" />
+                    app:layout_constraintBottom_toTopOf="@id/rankGapIndicator" />
+
+                <TextView
+                    android:id="@+id/rankGapIndicator"
+                    android:layout_width="0dp"
+                    android:layout_height="28dp"
+                    android:gravity="center"
+                    android:textColor="?attr/secondaryTextColor"
+                    android:textSize="13sp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toTopOf="@id/userContainer"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <LinearLayout
+                    android:id="@+id/leaderboardLoading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    app:layout_constraintBottom_toTopOf="@id/userContainer"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ProgressBar
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:indeterminateTint="@color/blue_primary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/leaderboard_loading"
+                        android:textColor="?attr/secondaryTextColor"
+                        android:textSize="14sp" />
+                </LinearLayout>
 
                 <!-- Контейнер для текущего пользователя -->
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -241,7 +278,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/graduation24"
-                    android:contentDescription="Тесты"/>
+                    android:contentDescription="@string/nav_learning"/>
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/testAnimation"
@@ -278,7 +315,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/swords24"
-                    android:contentDescription="Дуэль" />
+                    android:contentDescription="@string/nav_duel" />
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/duelAnimation"
@@ -316,7 +353,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/trophy24"
-                    android:contentDescription="Рейтинг"/>
+                    android:contentDescription="@string/nav_rank"/>
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/cupAnimation"
@@ -353,7 +390,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/profile24"
-                    android:contentDescription="Профиль"/>
+                    android:contentDescription="@string/nav_profile"/>
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/profAnimation"
