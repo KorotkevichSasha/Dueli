@@ -44,29 +44,39 @@
                 android:textColor="@color/blue_primary"
                 android:textSize="30sp" />
 
-            <EditText
+            <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/email_et"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:layout_marginTop="18dp"
-                android:background="@drawable/bg_edittext"
-                android:fontFamily="@font/montserrat_medium"
+                android:background="@drawable/bg_auth_field"
+                android:drawableStart="@drawable/profile24"
+                android:drawablePadding="12dp"
                 android:hint="@string/username_hint"
+                android:imeOptions="actionNext"
                 android:inputType="text"
-                android:textColor="?android:textColorPrimary"
-                android:textColorHint="?android:textColorSecondary" />
+                android:maxLines="1"
+                android:paddingHorizontal="16dp"
+                android:textColor="?attr/textColor"
+                android:textColorHint="?attr/secondaryTextColor"
+                app:drawableTint="@color/blue_primary" />
 
-            <EditText
+            <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/password_et"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:layout_marginTop="12dp"
-                android:background="@drawable/bg_edittext"
-                android:fontFamily="@font/montserrat_medium"
+                android:background="@drawable/bg_auth_field"
+                android:drawableStart="@drawable/ic_lock"
+                android:drawablePadding="12dp"
                 android:hint="@string/password_hint"
+                android:imeOptions="actionDone"
                 android:inputType="textPassword"
-                android:textColor="?android:textColorPrimary"
-                android:textColorHint="?android:textColorSecondary" />
+                android:maxLines="1"
+                android:paddingHorizontal="16dp"
+                android:textColor="?attr/textColor"
+                android:textColorHint="?attr/secondaryTextColor"
+                app:drawableTint="@color/blue_primary" />
 
             <TextView
                 android:id="@+id/forgot_password"

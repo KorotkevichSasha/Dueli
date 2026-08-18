@@ -1,14 +1,18 @@
 package com.example.duelingo.activity.auth
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Patterns
 import android.view.View
+import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.duelingo.activity.MenuActivity
+import com.example.duelingo.activity.OnboardingActivity
+import com.example.duelingo.BuildConfig
 import com.example.duelingo.databinding.ActivityRegisterBinding
 import com.example.duelingo.dto.request.SignUpRequest
 import com.example.duelingo.dto.request.VerifyEmailRequest
@@ -34,6 +38,35 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        binding.legalNotice.setText(com.example.duelingo.R.string.registration_legal_notice_short)
+        binding.legalNotice.setOnClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(BuildConfig.PRIVACY_POLICY_URL)))
+        }
+
+        listOf(binding.username, binding.email, binding.password, binding.confirmPassword).forEach { field ->
+            field.setOnFocusChangeListener { _, hasFocus ->
+                if (hasFocus) {
+                    binding.main.postDelayed({
+                        val keepSubmitVisible = field === binding.password || field === binding.confirmPassword
+                        val desiredBottom = if (keepSubmitVisible) {
+                            binding.loginBtn.bottom - field.top + resources.displayMetrics.density.times(12).toInt()
+                        } else {
+                            field.height
+                        }
+                        field.requestRectangleOnScreen(
+                            android.graphics.Rect(
+                                0,
+                                0,
+                                field.width,
+                                desiredBottom
+                            ),
+                            true
+                        )
+                    }, 250L)
+                }
+            }
+        }
 
         binding.backBtn.setOnClickListener {
             onBackPressedDispatcher.onBackPressed()
@@ -122,10 +155,12 @@ class RegisterActivity : AppCompatActivity() {
     private fun showVerificationStep(email: String, emailSent: Boolean) {
         verificationEmail = email
         binding.imageView3.visibility = View.GONE
+        binding.registerSubtitle.visibility = View.GONE
         binding.username.visibility = View.GONE
         binding.email.visibility = View.GONE
         binding.password.visibility = View.GONE
         binding.confirmPassword.visibility = View.GONE
+        binding.legalNotice.visibility = View.GONE
         binding.loginBtn.visibility = View.GONE
         binding.verificationContainer.visibility = View.VISIBLE
         binding.registerTitle.setText(com.example.duelingo.R.string.verify_email_title)
@@ -150,7 +185,7 @@ class RegisterActivity : AppCompatActivity() {
                 val response = ApiClient.authService.verifyEmail(VerifyEmailRequest(email, code))
                 saveTokens(response)
                 showToast(getString(com.example.duelingo.R.string.verification_success))
-                startActivity(Intent(this@RegisterActivity, MenuActivity::class.java).apply {
+                startActivity(Intent(this@RegisterActivity, OnboardingActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 })
             } catch (error: HttpException) {
@@ -187,7 +222,7 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun saveTokens(response: JwtAuthenticationResponse) {
         val tokenManager = TokenManager(this)
-        tokenManager.saveTokens(response.accessToken, response.refreshToken)
+        tokenManager.saveTokens(response.accessToken, response.refreshToken, newSession = true)
         AuthSessionManager.onAuthenticated()
     }
 

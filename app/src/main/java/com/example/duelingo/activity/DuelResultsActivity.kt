@@ -40,11 +40,21 @@ class DuelResultsActivity : AppCompatActivity() {
         }
         binding.tvResultsTitle.text = title
         binding.tvResultMessage.text = message
-        binding.tvResultIcon.text = when {
-            isDraw -> "🤝"
-            isWinner -> "🏆"
-            else -> "🌱"
-        }
+        binding.tvResultIcon.setImageResource(when {
+            isDraw -> com.example.duelingo.R.drawable.swords24
+            isWinner -> com.example.duelingo.R.drawable.trophy24
+            else -> com.example.duelingo.R.drawable.ic_book
+        })
+        binding.tvResultIcon.setColorFilter(
+            androidx.core.content.ContextCompat.getColor(
+                this,
+                when {
+                    isDraw -> com.example.duelingo.R.color.blue_primary
+                    isWinner -> com.example.duelingo.R.color.gold
+                    else -> com.example.duelingo.R.color.green_primary
+                }
+            )
+        )
         binding.tvOpponentName.text = opponentName
         binding.tvYourScore.text = "$correctAnswers/$totalQuestions"
         binding.tvOpponentScore.text = "$opponentScore/$totalQuestions"
@@ -54,6 +64,7 @@ class DuelResultsActivity : AppCompatActivity() {
         binding.tvTimeSpent.text = String.format("%02d:%02d", minutes, seconds)
 
         binding.btnFinish.setOnClickListener { returnToMenu() }
+        binding.btnReview.setOnClickListener { returnToMenu(openLatestHistory = true) }
         onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
             override fun handleOnBackPressed() = returnToMenu()
         })
@@ -73,9 +84,13 @@ class DuelResultsActivity : AppCompatActivity() {
         }
     }
 
-    private fun returnToMenu() {
+    private fun returnToMenu(openLatestHistory: Boolean = false) {
         startActivity(Intent(this, MenuActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            putExtra(MenuActivity.EXTRA_OPEN_LATEST_HISTORY, openLatestHistory)
+            if (openLatestHistory) {
+                putExtra(MenuActivity.EXTRA_OPEN_HISTORY_ID, intent.getStringExtra("duel_id"))
+            }
         })
         finish()
     }

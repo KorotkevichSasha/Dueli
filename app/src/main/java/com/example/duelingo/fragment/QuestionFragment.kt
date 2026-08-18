@@ -142,6 +142,10 @@ class QuestionFragment : Fragment() {
 
         binding.containerWordBank.removeAllViews()
         binding.containerSelectedWords.removeAllViews()
+        binding.containerSelectedWords.minimumHeight =
+            (72 * resources.displayMetrics.density).toInt()
+        binding.containerSelectedWords.contentDescription =
+            getString(R.string.sentence_answer_area_description)
         enableDropZone(binding.containerWordBank)
         enableDropZone(binding.containerSelectedWords)
 
@@ -307,14 +311,9 @@ class QuestionFragment : Fragment() {
     private fun onOptionSelected(option: String) {
         if (selectedOption == option) {
             selectedOption = null
-            binding.tvSelectedWord.visibility = View.GONE
         } else {
             selectedOption = option
-            binding.tvSelectedWord.text = option
-            binding.tvSelectedWord.visibility = View.VISIBLE
         }
-
-        binding.rvOptions.adapter?.notifyDataSetChanged()
     }
 
     fun getQuestion(): QuestionDetailedResponse {

@@ -11,12 +11,12 @@
 
         <com.google.android.material.card.MaterialCardView android:id="@+id/reviewWordsLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground" app:cardBackgroundColor="@color/blue_primary" app:cardCornerRadius="24dp" app:cardElevation="4dp">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal" android:padding="22dp">
-                <TextView android:layout_width="58dp" android:layout_height="58dp" android:gravity="center" android:text="🧠" android:textSize="34sp" />
+                <ImageView android:layout_width="58dp" android:layout_height="58dp" android:background="@drawable/bg_feature_icon" android:contentDescription="@null" android:padding="15dp" android:src="@drawable/ic_book" app:tint="@color/blue_primary" />
                 <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="14dp" android:layout_weight="1" android:orientation="vertical">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/review_words_title" android:textColor="@color/white" android:textSize="20sp" android:textStyle="bold" />
                     <TextView android:id="@+id/tvWordCount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="@string/words_to_review_zero" android:textColor="#DCEEFF" android:textSize="14sp" />
                 </LinearLayout>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="›" android:textColor="@color/white" android:textSize="36sp" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chevron_next" android:textColor="@color/white" android:textSize="36sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -27,7 +27,7 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/all_words_title" android:textColor="?attr/textColor" android:textSize="18sp" android:textStyle="bold" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="@string/all_words_description" android:textColor="?attr/secondaryTextColor" android:textSize="14sp" />
                 </LinearLayout>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="›" android:textColor="?attr/secondaryTextColor" android:textSize="32sp" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chevron_next" android:textColor="?attr/secondaryTextColor" android:textSize="32sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

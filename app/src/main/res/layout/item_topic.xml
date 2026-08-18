@@ -1,66 +1,106 @@
-<androidx.cardview.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="72dp"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp"
-    app:cardBackgroundColor="?attr/backgroundColor">
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="6dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="?attr/cardBackgroundColor"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="2dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="112dp"
         android:padding="16dp">
 
-        <!-- Название темы -->
         <TextView
             android:id="@+id/tvTopicTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Present Simple"
-            android:textColor="@color/blue_primary"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="?attr/textColor"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/ivEasyCheckmark"
+            app:layout_constraintEnd_toStartOf="@id/tvTopicProgress"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Галочка для EASY -->
+        <TextView
+            android:id="@+id/tvTopicProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textColor="@color/blue_primary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintBaseline_toBaselineOf="@id/tvTopicTitle"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/tvTopicDescription"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="?attr/secondaryTextColor"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTopicTitle" />
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/topicProgressBar"
+            android:layout_width="0dp"
+            android:layout_height="6dp"
+            android:layout_marginTop="12dp"
+            android:max="3"
+            app:indicatorColor="@color/blue_primary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/ivEasyCheckmark"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTopicDescription"
+            app:trackColor="?attr/backgroundColor"
+            app:trackCornerRadius="3dp" />
+
         <ImageView
             android:id="@+id/ivEasyCheckmark"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="12dp"
+            android:contentDescription="@string/easy"
             android:src="@drawable/check"
-            android:visibility="gone"
-            android:contentDescription="Easy Completed"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/topicProgressBar"
             app:layout_constraintEnd_toStartOf="@id/ivMediumCheckmark"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@id/topicProgressBar" />
 
-        <!-- Галочка для MEDIUM -->
         <ImageView
             android:id="@+id/ivMediumCheckmark"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="5dp"
+            android:contentDescription="@string/medium"
             android:src="@drawable/check"
-            android:visibility="gone"
-            android:contentDescription="Medium Completed"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/ivEasyCheckmark"
             app:layout_constraintEnd_toStartOf="@id/ivHardCheckmark"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@id/ivEasyCheckmark" />
 
-        <!-- Галочка для HARD -->
         <ImageView
             android:id="@+id/ivHardCheckmark"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="5dp"
+            android:alpha="0.25"
+            android:contentDescription="@string/hard"
             android:src="@drawable/check"
-            android:visibility="gone"
-            android:contentDescription="Hard Completed"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/ivMediumCheckmark"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@id/ivMediumCheckmark" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

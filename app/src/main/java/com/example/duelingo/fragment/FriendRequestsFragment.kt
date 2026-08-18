@@ -57,7 +57,7 @@ class FriendRequestsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (isActive) {
-                    delay(30_000)
+                    delay(15_000)
                     loadRequests()
                 }
             }

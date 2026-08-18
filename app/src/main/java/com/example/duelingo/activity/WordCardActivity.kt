@@ -67,7 +67,7 @@ class WordCardActivity : AppCompatActivity() {
                         showCurrentWord()
                     } else {
                         Toast.makeText(this@WordCardActivity,
-                            "Нет слов для повторения", Toast.LENGTH_SHORT).show()
+                            getString(com.example.duelingo.R.string.words_to_review_zero), Toast.LENGTH_SHORT).show()
                         finish()
                     }
                 }
@@ -76,15 +76,15 @@ class WordCardActivity : AppCompatActivity() {
                     when {
                         e is IllegalStateException -> {
                             Toast.makeText(this@WordCardActivity,
-                                "Требуется авторизация", Toast.LENGTH_SHORT).show()
+                                getString(com.example.duelingo.R.string.session_expired), Toast.LENGTH_SHORT).show()
                         }
                         e.message?.contains("401") == true -> {
                             tokenManager.clearTokens()
                             Toast.makeText(this@WordCardActivity,
-                                "Сессия истекла, войдите снова", Toast.LENGTH_SHORT).show()
+                                getString(com.example.duelingo.R.string.session_expired), Toast.LENGTH_SHORT).show()
                         }
                         else -> Toast.makeText(this@WordCardActivity,
-                            "Ошибка загрузки слов", Toast.LENGTH_SHORT).show()
+                            getString(com.example.duelingo.R.string.words_loading_error), Toast.LENGTH_SHORT).show()
                     }
                     finish()
                 }
@@ -120,15 +120,15 @@ class WordCardActivity : AppCompatActivity() {
                     when {
                         e is IllegalStateException -> {
                             Toast.makeText(this@WordCardActivity,
-                                "Требуется авторизация", Toast.LENGTH_SHORT).show()
+                                getString(com.example.duelingo.R.string.session_expired), Toast.LENGTH_SHORT).show()
                         }
                         e.message?.contains("401") == true -> {
                             tokenManager.clearTokens()
                             Toast.makeText(this@WordCardActivity,
-                                "Сессия истекла, войдите снова", Toast.LENGTH_SHORT).show()
+                                getString(com.example.duelingo.R.string.session_expired), Toast.LENGTH_SHORT).show()
                         }
                         else -> Toast.makeText(this@WordCardActivity,
-                            "Ошибка сохранения", Toast.LENGTH_SHORT).show()
+                            getString(com.example.duelingo.R.string.word_review_save_error), Toast.LENGTH_SHORT).show()
                     }
                 }
             }

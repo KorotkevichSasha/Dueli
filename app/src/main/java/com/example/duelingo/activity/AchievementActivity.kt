@@ -37,6 +37,7 @@ class AchievementActivity : AppCompatActivity() {
 
         setupRecyclerView()
         setupNavigationButtons()
+        changeColorAndIcon(binding.profileIcon, binding.profileTest, R.drawable.prof)
     }
 
     override fun onResume() {
@@ -59,7 +60,14 @@ class AchievementActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
                     val achievements = ApiClient.achievementService.getUserAchievements(bearerToken)
-                    adapter.updateData(achievements)
+                    adapter.updateData(
+                        achievements.sortedWith(
+                            compareByDescending<com.example.duelingo.dto.response.UserAchievementResponse> { it.isAchieved }
+                                .thenByDescending {
+                                    it.currentValue.toFloat() / it.requiredValue.coerceAtLeast(1)
+                                }
+                        )
+                    )
                     val unlocked = achievements.count { it.isAchieved }
                     binding.achievementSummaryValue.text = getString(
                         R.string.achievements_summary_format,

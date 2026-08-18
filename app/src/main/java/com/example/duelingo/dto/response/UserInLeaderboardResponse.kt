@@ -5,5 +5,6 @@ data class UserInLeaderboardResponse(
     val username: String,
     val points: Int,
     val avatarUrl: String,
-    val rank: Long
+    val rank: Long,
+    val pointsToNextRank: Int? = null
 )

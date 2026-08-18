@@ -10,6 +10,8 @@ import com.example.duelingo.activity.auth.LoginActivity
 import com.example.duelingo.databinding.ActivityMainBinding
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
+import com.example.duelingo.storage.OnboardingPreferences
+import com.example.duelingo.utils.ProfileCache
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -34,31 +36,57 @@ class MainActivity : AppCompatActivity() {
         if (sessionCheckRunning) return
 
         val accessToken = tokenManager.getAccessToken()
-        val refreshToken = tokenManager.getRefreshToken()
-        if (accessToken.isNullOrBlank() || refreshToken.isNullOrBlank()) {
+        if (accessToken.isNullOrBlank()) {
             openLogin()
+            return
+        }
+
+        // Render the authenticated shell immediately after the first successful load.
+        // Destination screens refresh their own data and the API interceptor still
+        // handles an expired access token, so a network round-trip is not required
+        // on every cold start.
+        if (ProfileCache.read(this, accessToken) != null) {
+            openAuthenticatedDestination()
             return
         }
 
         setChecking(true)
         lifecycleScope.launch {
             try {
-                ApiClient.userService.getProfile("Bearer $accessToken")
-                startActivity(Intent(this@MainActivity, MenuActivity::class.java))
-                finish()
+                val profile = ApiClient.userService.getProfile("Bearer $accessToken")
+                ProfileCache.store(this@MainActivity, accessToken, profile)
+                openAuthenticatedDestination()
             } catch (error: HttpException) {
                 if (error.code() == 401 || error.code() == 403) {
                     tokenManager.clearTokens()
                     openLogin()
                 } else {
-                    showConnectionError()
+                    openCachedSessionOrShowError(accessToken)
                 }
             } catch (_: IOException) {
-                showConnectionError()
+                openCachedSessionOrShowError(accessToken)
             } catch (_: Exception) {
-                showConnectionError()
+                openCachedSessionOrShowError(accessToken)
             }
         }
+    }
+
+    private fun openCachedSessionOrShowError(accessToken: String) {
+        if (ProfileCache.read(this, accessToken) != null) {
+            openAuthenticatedDestination()
+        } else {
+            showConnectionError()
+        }
+    }
+
+    private fun openAuthenticatedDestination() {
+        val destination = if (OnboardingPreferences(this).isComplete) {
+            MenuActivity::class.java
+        } else {
+            OnboardingActivity::class.java
+        }
+        startActivity(Intent(this, destination))
+        finish()
     }
 
     private fun setChecking(checking: Boolean) {

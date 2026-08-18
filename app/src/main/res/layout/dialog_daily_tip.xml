@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:background="@drawable/bg_dialog" android:orientation="vertical" android:padding="24dp">
+    android:background="@drawable/bg_dialog"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
 
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
         <com.google.android.material.button.MaterialButton android:id="@+id/closeButton"
@@ -10,7 +17,7 @@
             android:contentDescription="@string/back" app:icon="@drawable/ic_arrow_back" app:iconTint="?attr/textColor" />
         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:layout_weight="1"
             android:text="@string/learning_tip_title" android:textColor="?attr/textColor" android:textSize="22sp" android:textStyle="bold" />
-        <TextView android:layout_width="48dp" android:layout_height="48dp" android:gravity="center" android:text="💡" android:textSize="26sp" />
+        <ImageView android:layout_width="48dp" android:layout_height="48dp" android:contentDescription="@null" android:padding="11dp" android:src="@drawable/ic_lightbulb" app:tint="@color/blue_primary" />
     </LinearLayout>
 
     <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -21,17 +28,18 @@
 
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp"
         android:text="@string/tip_try_today" android:textColor="?attr/textColor" android:textSize="16sp" android:textStyle="bold" />
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp"
+    <TextView android:id="@+id/tipStepOne" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp"
         android:drawablePadding="10dp" android:gravity="center_vertical" android:text="@string/tip_step_one"
         android:textColor="?attr/secondaryTextColor" android:textSize="14sp" />
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"
+    <TextView android:id="@+id/tipStepTwo" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"
         android:drawablePadding="10dp" android:gravity="center_vertical" android:text="@string/tip_step_two"
         android:textColor="?attr/secondaryTextColor" android:textSize="14sp" />
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"
+    <TextView android:id="@+id/tipStepThree" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"
         android:drawablePadding="10dp" android:gravity="center_vertical" android:text="@string/tip_step_three"
         android:textColor="?attr/secondaryTextColor" android:textSize="14sp" />
 
     <com.google.android.material.button.MaterialButton android:id="@+id/doneButton"
         android:layout_width="match_parent" android:layout_height="54dp" android:layout_marginTop="22dp"
         android:text="@string/tip_got_it" android:textAllCaps="false" android:textSize="16sp" app:cornerRadius="16dp" />
-</LinearLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

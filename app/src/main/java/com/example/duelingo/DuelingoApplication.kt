@@ -10,6 +10,7 @@ import com.example.duelingo.network.ApiClient
 import com.example.duelingo.network.AuthSessionManager
 import com.example.duelingo.utils.BottomNavigationController
 import com.example.duelingo.utils.KeyboardInsets
+import com.bumptech.glide.Glide
 
 class DuelingoApplication : Application() {
     override fun onCreate() {
@@ -19,6 +20,7 @@ class DuelingoApplication : Application() {
         ThemeManager.init(this)
         AuthSessionManager.initialize(this)
         ApiClient.initialize(this)
+        Glide.with(this).load(R.drawable.duel_hero).preload(1024, 500)
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
                 activity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)

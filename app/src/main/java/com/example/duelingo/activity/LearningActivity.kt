@@ -19,6 +19,11 @@ import com.example.duelingo.databinding.ActivityLearningBinding
 import com.example.duelingo.databinding.DialogDailyTipBinding
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
+import com.example.duelingo.storage.LearningHabitTracker
+import com.example.duelingo.storage.OnboardingPreferences
+import com.example.duelingo.dto.response.TestSummaryResponse
+import com.example.duelingo.utils.LearningCatalogCache
+import com.example.duelingo.utils.ProfileCache
 import com.example.duelingo.utils.openTopLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -31,6 +36,7 @@ class LearningActivity : AppCompatActivity() {
     private var currentIcon: ImageView? = null
     private var currentText: TextView? = null
     private val tokenManager by lazy { TokenManager(this) }
+    private var recommendedTopic: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +61,17 @@ class LearningActivity : AppCompatActivity() {
 
         binding.vocabularyCard.setOnClickListener {
             startActivity(Intent(this, VocabularyActivity::class.java))
+        }
+
+        findViewById<View?>(R.id.learningPathCard)?.setOnClickListener {
+            val topic = recommendedTopic
+            startActivity(
+                if (topic.isNullOrBlank()) {
+                    Intent(this, TopicsActivity::class.java)
+                } else {
+                    Intent(this, TestActivity::class.java).putExtra("topic", topic)
+                }
+            )
         }
 
         binding.duel.setOnClickListener {
@@ -117,9 +134,28 @@ class LearningActivity : AppCompatActivity() {
             }
         }
         content.tipText.text = tip
+        val details = tipDetails(tip)
+        content.tipStepOne.setText(details[0])
+        content.tipStepTwo.setText(details[1])
+        content.tipStepThree.setText(details[2])
         content.closeButton.setOnClickListener { dialog.dismiss() }
         content.doneButton.setOnClickListener { dialog.dismiss() }
         dialog.show()
+    }
+
+    private fun tipDetails(tip: String): IntArray {
+        val normalized = tip.lowercase()
+        return when {
+            listOf("слуш", "голос", "произнес", "реч", "фильм", "ролик", "аудирован", "listen", "voice", "speak", "film", "video", "pronunciation", "shadow").any(normalized::contains) ->
+                intArrayOf(R.string.tip_audio_one, R.string.tip_audio_two, R.string.tip_audio_three)
+            listOf("слов", "лексик", "предлог", "артикл", "глагол", "word", "vocabulary", "preposition", "article", "verb").any(normalized::contains) ->
+                intArrayOf(R.string.tip_word_one, R.string.tip_word_two, R.string.tip_word_three)
+            listOf("заголов", "чита", "дневник", "пишите", "текст", "headline", "read", "journal", "write", "text").any(normalized::contains) ->
+                intArrayOf(R.string.tip_read_one, R.string.tip_read_two, R.string.tip_read_three)
+            listOf("кажд", "сер", "цель", "регуляр", "daily", "streak", "goal", "consistency").any(normalized::contains) ->
+                intArrayOf(R.string.tip_habit_one, R.string.tip_habit_two, R.string.tip_habit_three)
+            else -> intArrayOf(R.string.tip_grammar_one, R.string.tip_grammar_two, R.string.tip_grammar_three)
+        }
     }
 
     override fun onResume() {
@@ -129,17 +165,79 @@ class LearningActivity : AppCompatActivity() {
 
     private fun loadLearningSummary() {
         val token = tokenManager.getAccessToken() ?: return
+        val cachedTests = LearningCatalogCache.read(this, token)
+        val cachedProfile = ProfileCache.read(this, token)
+        if (cachedTests.isNotEmpty() || cachedProfile != null) {
+            renderLearningSummary(cachedProfile?.points, cachedTests)
+        }
         lifecycleScope.launch {
             runCatching {
                 val auth = "Bearer $token"
                 val profile = async(Dispatchers.IO) { ApiClient.userService.getProfile(auth) }
-                val topics = async(Dispatchers.IO) { ApiClient.testService.getUniqueTestTopics(auth) }
-                profile.await() to topics.await()
-            }.onSuccess { (profile, topics) ->
-                binding.learningPoints.text = getString(R.string.learning_points_format, profile.points)
-                binding.learningTopics.text = getString(R.string.learning_topics_format, topics.size)
+                val allTests = async(Dispatchers.IO) { ApiClient.testService.getAllTests(auth) }
+                val tests = allTests.await()
+                profile.await() to tests
+            }.onSuccess { (profile, tests) ->
+                ProfileCache.store(this@LearningActivity, token, profile)
+                LearningCatalogCache.store(this@LearningActivity, token, tests)
+                renderLearningSummary(profile.points, tests)
             }
         }
+        renderHabit()
+    }
+
+    private fun renderLearningSummary(points: Int?, tests: List<TestSummaryResponse>) {
+        points?.let { binding.learningPoints.text = getString(R.string.learning_points_format, it) }
+        if (tests.isNotEmpty()) {
+            binding.learningTopics.text = getString(
+                R.string.learning_topics_format,
+                tests.map { it.topic }.distinct().size
+            )
+        }
+        val completed = tests.count { it.isCompleted }
+        val percent = if (tests.isEmpty()) 0 else completed * 100 / tests.size
+        findViewById<com.google.android.material.progressindicator.LinearProgressIndicator?>(
+            R.id.learningOverallProgress
+        )?.setProgressCompat(percent, true)
+        findViewById<TextView?>(R.id.learningProgressText)?.text =
+            getString(R.string.learning_progress_format, completed, tests.size)
+
+        val preferredDifficulty = when (OnboardingPreferences(this).learnerLevel) {
+            OnboardingPreferences.LEVEL_ADVANCED -> "HARD"
+            OnboardingPreferences.LEVEL_INTERMEDIATE -> "MEDIUM"
+            else -> "EASY"
+        }
+        val next = tests.firstOrNull { !it.isCompleted && it.difficulty == preferredDifficulty }
+            ?: tests.firstOrNull { !it.isCompleted }
+        recommendedTopic = next?.topic
+        findViewById<TextView?>(R.id.learningRecommendation)?.text = if (next == null && tests.isNotEmpty()) {
+            getString(R.string.learning_all_complete)
+        } else if (next == null) {
+            getString(R.string.learning_topics_loading)
+        } else {
+            getString(
+                R.string.learning_recommendation_format,
+                next.topic,
+                localizedDifficulty(next.difficulty)
+            )
+        }
+    }
+
+    private fun renderHabit() {
+        val habit = LearningHabitTracker(this).snapshot()
+        val goal = OnboardingPreferences(this).dailyGoalMinutes
+        findViewById<TextView?>(R.id.learningHabit)?.text = getString(
+            R.string.learning_habit_format,
+            habit.streakDays,
+            habit.minutesToday.coerceAtMost(goal),
+            goal
+        )
+    }
+
+    private fun localizedDifficulty(value: String): String = when (value) {
+        "EASY" -> getString(R.string.easy)
+        "HARD" -> getString(R.string.hard)
+        else -> getString(R.string.medium)
     }
 
     private fun changeColorAndIcon(icon: ImageView, text: TextView, iconRes: Int) {

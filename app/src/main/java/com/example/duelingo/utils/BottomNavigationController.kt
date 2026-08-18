@@ -110,37 +110,7 @@ object BottomNavigationController {
             Destination.RANK -> RankActivity::class.java
             Destination.PROFILE -> ProfileActivity::class.java
         }
-        showPendingDestination(activity, item.destination)
         activity.openTopLevel(destination)
-    }
-
-    private fun showPendingDestination(activity: Activity, destination: Destination) {
-        val items = findItems(activity) ?: return
-        val primary = MaterialColors.getColor(
-            items.first().container,
-            com.google.android.material.R.attr.colorPrimary
-        )
-        val onSurface = MaterialColors.getColor(
-            items.first().container,
-            com.google.android.material.R.attr.colorOnSurface
-        )
-        items.forEach { candidate ->
-            val selected = candidate.destination == destination
-            candidate.container.isSelected = selected
-            candidate.container.background = navigationBackground(activity, primary, selected)
-            candidate.icon.setColorFilter(
-                if (selected) primary else ColorUtils.setAlphaComponent(onSurface, 155)
-            )
-            candidate.label.setTextColor(
-                if (selected) primary else ColorUtils.setAlphaComponent(onSurface, 165)
-            )
-        }
-        items.first { it.destination == destination }.container.apply {
-            animate().cancel()
-            scaleX = 0.96f
-            scaleY = 0.96f
-            animate().scaleX(1f).scaleY(1f).setDuration(120).start()
-        }
     }
 
     private fun navigationBackground(activity: Activity, primary: Int, selected: Boolean): InsetDrawable {
@@ -221,7 +191,8 @@ object BottomNavigationController {
     }
 
     private fun destinationFor(activity: Activity): Destination? = when (activity) {
-        is LearningActivity, is TestActivity, is TopicsActivity, is AchievementActivity -> Destination.LEARNING
+        is LearningActivity, is TestActivity, is TopicsActivity -> Destination.LEARNING
+        is AchievementActivity -> Destination.PROFILE
         is MenuActivity -> Destination.DUEL
         is RankActivity -> Destination.RANK
         is ProfileActivity -> Destination.PROFILE

@@ -181,7 +181,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-                <TextView android:id="@+id/duelsPlayedValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="?attr/textColor" android:textSize="21sp" android:textStyle="bold" />
+                <TextView android:id="@+id/duelsPlayedValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/value_zero" android:textColor="?attr/textColor" android:textSize="21sp" android:textStyle="bold" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/duels_played" android:textColor="?attr/secondaryTextColor" android:textSize="12sp" />
             </LinearLayout>
 
@@ -193,7 +193,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-                <TextView android:id="@+id/duelsWonValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/green_primary" android:textSize="21sp" android:textStyle="bold" />
+                <TextView android:id="@+id/duelsWonValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/value_zero" android:textColor="@color/green_primary" android:textSize="21sp" android:textStyle="bold" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/duels_won" android:textColor="?attr/secondaryTextColor" android:textSize="12sp" />
             </LinearLayout>
 
@@ -205,7 +205,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-                <TextView android:id="@+id/duelWinRateValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0%" android:textColor="@color/blue_primary" android:textSize="21sp" android:textStyle="bold" />
+                <TextView android:id="@+id/duelWinRateValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/percentage_zero" android:textColor="@color/blue_primary" android:textSize="21sp" android:textStyle="bold" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/duel_win_rate" android:textColor="?attr/secondaryTextColor" android:textSize="12sp" />
             </LinearLayout>
         </LinearLayout>
@@ -239,6 +239,7 @@
             android:layout_width="44dp"
             android:layout_height="44dp"
             android:alpha="0.85"
+            android:contentDescription="@null"
             android:src="@drawable/swords24"
             app:tint="@color/blue_primary" />
 
@@ -294,7 +295,7 @@
                     android:id="@+id/testIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="Тесты"
+                    android:contentDescription="@string/nav_learning"
                     android:src="@drawable/graduation24" />
 
                 <com.airbnb.lottie.LottieAnimationView
@@ -331,7 +332,7 @@
                     android:id="@+id/mainIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="Дуэль"
+                    android:contentDescription="@string/nav_duel"
                     android:src="@drawable/swords24" />
 
                 <com.airbnb.lottie.LottieAnimationView
@@ -369,7 +370,7 @@
                     android:id="@+id/cupIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="Рейтинг"
+                    android:contentDescription="@string/nav_rank"
                     android:src="@drawable/trophy24" />
 
                 <com.airbnb.lottie.LottieAnimationView
@@ -406,7 +407,7 @@
                     android:id="@+id/profileIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="Профиль"
+                    android:contentDescription="@string/nav_profile"
                     android:src="@drawable/profile24" />
 
                 <com.airbnb.lottie.LottieAnimationView

@@ -51,8 +51,9 @@ class AchievementsAdapter(
 
         @SuppressLint("SetTextI18n")
         fun bind(achievement: UserAchievementResponse) {
-            tvTitle.text = achievement.title
-            tvDescription.text = achievement.description
+            val english = itemView.resources.configuration.locales[0].language == "en"
+            tvTitle.text = if (english) englishTitle(achievement) else achievement.title
+            tvDescription.text = if (english) englishDescription(achievement) else achievement.description
             tvProgressText.text = "${achievement.currentValue} / ${achievement.requiredValue}"
 
             progressBar.max = achievement.requiredValue.coerceAtLeast(1)
@@ -90,6 +91,40 @@ class AchievementsAdapter(
                     ColorStateList.valueOf(ContextCompat.getColor(itemView.context, R.color.gray))
                 )
             }
+        }
+
+        private fun englishTitle(achievement: UserAchievementResponse): String = when (achievement.type) {
+            AchievementType.DUELS -> when (achievement.requiredValue) {
+                1 -> "First challenge"
+                in 2..25 -> "Arena warm-up"
+                in 26..100 -> "Seasoned duelist"
+                else -> "DuelRush legend"
+            }
+            AchievementType.FRIENDS -> when (achievement.requiredValue) {
+                1 -> "First teammate"
+                in 2..10 -> "Learning circle"
+                in 11..35 -> "Language club"
+                else -> "Community leader"
+            }
+            AchievementType.TESTS -> when (achievement.requiredValue) {
+                1 -> "First ten"
+                in 2..10 -> "Accurate learner"
+                in 11..35 -> "Grammar navigator"
+                else -> "Language architect"
+            }
+            AchievementType.WORDS -> when (achievement.requiredValue) {
+                1 -> "First word"
+                in 2..25 -> "Pocket dictionary"
+                in 26..200 -> "Meaning collector"
+                else -> "Living encyclopedia"
+            }
+        }
+
+        private fun englishDescription(achievement: UserAchievementResponse): String = when (achievement.type) {
+            AchievementType.DUELS -> itemView.context.getString(R.string.achievement_duels_description, achievement.requiredValue)
+            AchievementType.FRIENDS -> itemView.context.getString(R.string.achievement_friends_description, achievement.requiredValue)
+            AchievementType.TESTS -> itemView.context.getString(R.string.achievement_tests_description, achievement.requiredValue)
+            AchievementType.WORDS -> itemView.context.getString(R.string.achievement_words_description, achievement.requiredValue)
         }
     }
 }

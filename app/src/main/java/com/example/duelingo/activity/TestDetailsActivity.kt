@@ -1,19 +1,21 @@
 package com.example.duelingo.activity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.example.duelingo.R
 import com.example.duelingo.adapters.QuestionsPagerAdapter
 import com.example.duelingo.databinding.ActivityTestDetailsBinding
+import com.example.duelingo.databinding.DialogTestResultsBinding
 import com.example.duelingo.dto.response.QuestionDetailedResponse
 import com.example.duelingo.dto.response.TestDetailedResponse
 import com.example.duelingo.fragment.QuestionFragment
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
+import com.example.duelingo.storage.LearningHabitTracker
 import com.example.duelingo.utils.UserMessage
 import kotlinx.coroutines.launch
 
@@ -26,6 +28,7 @@ class TestDetailsActivity : AppCompatActivity() {
 
     private var questions: List<QuestionDetailedResponse>? = null
     private var isRandomTest: Boolean = false
+    private var resultsShown = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +36,8 @@ class TestDetailsActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.backButton.setOnClickListener { finish() }
 
-        val isRandomTest = intent.getBooleanExtra("randomTest", false)
+        setupViewPager()
+        isRandomTest = intent.getBooleanExtra("randomTest", false)
         if (isRandomTest) {
             val questions = intent.getParcelableArrayListExtra<QuestionDetailedResponse>("questions")
             if (questions != null) {
@@ -43,7 +47,6 @@ class TestDetailsActivity : AppCompatActivity() {
                 finish()
             }
         } else {
-            setupViewPager()
             loadTestDetails()
         }
 
@@ -68,7 +71,6 @@ class TestDetailsActivity : AppCompatActivity() {
                     }
 
                     setResult(RESULT_OK)
-                    finish()
                 } catch (e: Exception) {
                     Log.e("TestCompletion", "Error marking test as passed: ${e.message}")
                 }
@@ -79,6 +81,7 @@ class TestDetailsActivity : AppCompatActivity() {
     }
 
     private fun submitTest() {
+        if (resultsShown) return
         val questionsToCheck = if (intent.getBooleanExtra("randomTest", false)) {
             questions ?: run {
                 showToast(getString(R.string.no_questions_available))
@@ -108,7 +111,9 @@ class TestDetailsActivity : AppCompatActivity() {
             Log.d("TestCompletion", "Test not completed successfully. Correct answers: $correctAnswersCount/${questionsAdapter.itemCount}")
         }
 
-        showResultsDialog(correctAnswersCount)
+        resultsShown = true
+        LearningHabitTracker(this).recordPractice(5)
+        showResultsDialog(correctAnswersCount, questionsToCheck)
     }
 
     private fun setupRandomTest(questions: List<QuestionDetailedResponse>) {
@@ -122,6 +127,10 @@ class TestDetailsActivity : AppCompatActivity() {
         }
         questionsAdapter = QuestionsPagerAdapter(this, questions)
         binding.viewPager.adapter = questionsAdapter
+        binding.tvTestInfo.text = getString(
+            R.string.random_test_header_format,
+            localizedDifficulty(intent.getStringExtra("difficulty").orEmpty())
+        )
         updateButtonText(0)
     }
 
@@ -130,6 +139,7 @@ class TestDetailsActivity : AppCompatActivity() {
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 updateButtonText(position)
+                updateQuestionProgress(position)
             }
         })
     }
@@ -207,12 +217,14 @@ class TestDetailsActivity : AppCompatActivity() {
     }
 
     private fun updateButtonText(position: Int) {
+        if (!::questionsAdapter.isInitialized || questionsAdapter.itemCount == 0) return
         binding.btnSubmit.text = if (position == questionsAdapter.itemCount - 1) {
             getString(R.string.submit_action)
         } else {
             getString(R.string.next_action)
         }
         feedbackShownForCurrentQuestion = false
+        updateQuestionProgress(position)
     }
 
 
@@ -231,15 +243,75 @@ class TestDetailsActivity : AppCompatActivity() {
         .replace(Regex("[^\\p{L}\\p{N}']+"), " ")
         .trim()
         .replace(Regex("\\s+"), " ")
-    private fun showResultsDialog(correct: Int) {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.test_results)
-            .setMessage(getString(R.string.correct_answers_format, correct, questionsAdapter.itemCount))
-            .setPositiveButton("OK") { _, _ -> finish() }
-            .show()
+    private fun showResultsDialog(correct: Int, checkedQuestions: List<QuestionDetailedResponse>) {
+        val content = DialogTestResultsBinding.inflate(layoutInflater)
+        val dialog = android.app.Dialog(this).apply {
+            requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
+            setContentView(content.root)
+            setCancelable(false)
+            window?.setBackgroundDrawableResource(android.R.color.transparent)
+            setOnShowListener {
+                val width = (resources.displayMetrics.widthPixels - 32 * resources.displayMetrics.density)
+                    .toInt().coerceAtMost((520 * resources.displayMetrics.density).toInt())
+                window?.setLayout(width, android.view.WindowManager.LayoutParams.WRAP_CONTENT)
+            }
+        }
+        val total = questionsAdapter.itemCount
+        val percentage = if (total == 0) 0 else correct * 100 / total
+        content.resultScore.text = getString(R.string.test_result_score_format, correct, total, percentage)
+        content.resultMessage.setText(
+            when {
+                percentage == 100 -> R.string.test_result_perfect
+                percentage >= 70 -> R.string.test_result_good
+                else -> R.string.test_result_practice
+            }
+        )
+        val firstMistake = checkedQuestions.indices.firstOrNull { index ->
+            !answersMatch(checkedQuestions[index], userAnswers[index].orEmpty())
+        }
+        content.reviewButton.visibility = if (firstMistake == null) android.view.View.GONE else android.view.View.VISIBLE
+        content.reviewButton.setOnClickListener {
+            dialog.dismiss()
+            firstMistake?.let { binding.viewPager.setCurrentItem(it, true) }
+            resultsShown = false
+        }
+        content.retryButton.setOnClickListener {
+            startActivity(Intent(this, TestDetailsActivity::class.java).putExtras(intent))
+            finish()
+            dialog.dismiss()
+        }
+        content.doneButton.setOnClickListener {
+            setResult(RESULT_OK)
+            dialog.dismiss()
+            finish()
+        }
+        dialog.show()
     }
     private fun updateTestInfo(test: TestDetailedResponse) {
-        binding.tvTestInfo.text = "${test.topic} - ${test.difficulty}"
+        binding.tvTestInfo.text = getString(
+            R.string.test_header_format,
+            test.topic,
+            localizedDifficulty(test.difficulty)
+        )
+    }
+
+    private fun updateQuestionProgress(position: Int) {
+        if (!::questionsAdapter.isInitialized || questionsAdapter.itemCount == 0) return
+        binding.questionProgress.setProgressCompat(
+            ((position + 1) * 100 / questionsAdapter.itemCount),
+            true
+        )
+        binding.tvTestInfo.contentDescription = getString(
+            R.string.question_progress_accessibility,
+            position + 1,
+            questionsAdapter.itemCount
+        )
+    }
+
+    private fun localizedDifficulty(value: String): String = when (value) {
+        "EASY" -> getString(R.string.easy)
+        "HARD" -> getString(R.string.hard)
+        else -> getString(R.string.medium)
     }
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()

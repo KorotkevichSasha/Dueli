@@ -7,12 +7,14 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.duelingo.activity.MenuActivity
+import com.example.duelingo.activity.OnboardingActivity
 import com.example.duelingo.databinding.ActivityLoginBinding
 import com.example.duelingo.dto.request.SignInRequest
 import com.example.duelingo.dto.response.JwtAuthenticationResponse
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.network.AuthSessionManager
 import com.example.duelingo.storage.TokenManager
+import com.example.duelingo.storage.OnboardingPreferences
 import com.example.duelingo.utils.UserMessage
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -76,7 +78,12 @@ class LoginActivity : AppCompatActivity() {
 
                 saveTokens(response)
 
-                startActivity(Intent(this@LoginActivity, MenuActivity::class.java))
+                val destination = if (OnboardingPreferences(this@LoginActivity).isComplete) {
+                    MenuActivity::class.java
+                } else {
+                    OnboardingActivity::class.java
+                }
+                startActivity(Intent(this@LoginActivity, destination))
                 finish()
 
             } catch (e: HttpException) {
@@ -89,7 +96,7 @@ class LoginActivity : AppCompatActivity() {
     }
     private fun saveTokens(response: JwtAuthenticationResponse) {
         val tokenManager = TokenManager(this)
-        tokenManager.saveTokens(response.accessToken, response.refreshToken)
+        tokenManager.saveTokens(response.accessToken, response.refreshToken, newSession = true)
         AuthSessionManager.onAuthenticated()
     }
 

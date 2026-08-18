@@ -25,6 +25,7 @@ import com.example.duelingo.network.ApiClient
 import com.example.duelingo.network.websocket.StompManager
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.storage.OfflineDuelHistoryStore
+import com.example.duelingo.storage.LearningHabitTracker
 import com.example.duelingo.utils.RefreshEvents
 import com.example.duelingo.utils.UserMessage
 import com.google.gson.Gson
@@ -231,6 +232,7 @@ class DuelActivity : AppCompatActivity() {
         // Only handle the result if we haven't finished yet
         if (!isFinishing) {
             val intent = Intent(this, DuelResultsActivity::class.java).apply {
+                putExtra("duel_id", duelId)
                 putExtra("opponent_name", opponentName)
                 putExtra("correct_answers", correctAnswers)
                 putExtra("total_questions", totalQuestions)
@@ -385,6 +387,7 @@ class DuelActivity : AppCompatActivity() {
     private fun finishDuel() {
         if (isFinishingDuel) return
         isFinishingDuel = true
+        LearningHabitTracker(this).recordPractice(10)
         timer.cancel()
         val timeSpent = duelDurationMillis - timeLeftMillis
 
@@ -399,6 +402,7 @@ class DuelActivity : AppCompatActivity() {
             }.coerceAtMost(duelDurationMillis)
             saveOfflineHistory(opponentScore, timeSpent, opponentTime)
             val intent = Intent(this, DuelResultsActivity::class.java).apply {
+                putExtra("duel_id", duelId)
                 putExtra("opponent_name", opponentName)
                 putExtra("correct_answers", correctAnswers)
                 putExtra("total_questions", totalQuestions)
@@ -448,6 +452,7 @@ class DuelActivity : AppCompatActivity() {
     private fun showResults(resultsSent: Boolean) {
         if (!isFinishing) {
             val intent = Intent(this, DuelResultsActivity::class.java).apply {
+                putExtra("duel_id", duelId)
                 putExtra("opponent_name", opponentName)
                 putExtra("correct_answers", correctAnswers)
                 putExtra("total_questions", totalQuestions)
@@ -483,7 +488,7 @@ class DuelActivity : AppCompatActivity() {
         val player2Score = if (opponentIsPlayerOne) correctAnswers else opponentScore
         val player1Time = if (opponentIsPlayerOne) opponentTime else userTime
         val player2Time = if (opponentIsPlayerOne) userTime else opponentTime
-        OfflineDuelHistoryStore(this).add(
+        OfflineDuelHistoryStore(this, tokenManager.getAccessToken()).add(
             DuelInHistoryResponse(
                 id = UUID.fromString(duelId),
                 player1 = duelInfo.duel.player1,

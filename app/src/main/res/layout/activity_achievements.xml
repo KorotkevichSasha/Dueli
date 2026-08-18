@@ -149,7 +149,7 @@
                     android:id="@+id/testIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="Тесты"
+                    android:contentDescription="@string/nav_learning"
                     android:src="@drawable/graduation24" />
 
                 <com.airbnb.lottie.LottieAnimationView
@@ -186,7 +186,7 @@
                     android:id="@+id/mainIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="Дуэль"
+                    android:contentDescription="@string/nav_duel"
                     android:src="@drawable/swords24" />
 
                 <com.airbnb.lottie.LottieAnimationView
@@ -223,7 +223,7 @@
                     android:id="@+id/cupIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="Рейтинг"
+                    android:contentDescription="@string/nav_rank"
                     android:src="@drawable/trophy24" />
 
                 <com.airbnb.lottie.LottieAnimationView
@@ -260,7 +260,7 @@
                     android:id="@+id/profileIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="Профиль"
+                    android:contentDescription="@string/nav_profile"
                     android:src="@drawable/profile24" />
 
                 <com.airbnb.lottie.LottieAnimationView

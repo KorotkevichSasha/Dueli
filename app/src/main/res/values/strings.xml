@@ -1,9 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">DuelRush</string>
+    <string name="onboarding_step_format">Шаг %1$d из %2$d</string>
+    <string name="onboarding_skip">Пропустить</string>
+    <string name="onboarding_later">Настроить позже</string>
+    <string name="onboarding_start_learning">Начать обучение</string>
+    <string name="onboarding_welcome_title">Добро пожаловать в DuelRush</string>
+    <string name="onboarding_welcome_body">Изучайте английский короткими занятиями, закрепляйте слова и проверяйте знания в честных дуэлях.</string>
+    <string name="onboarding_features">✓ Грамматика по темам\n✓ Аудирование и произношение\n✓ Личный словарь\n✓ Онлайн- и тренировочные дуэли</string>
+    <string name="onboarding_level_title">Выберите стартовый уровень</string>
+    <string name="onboarding_level_body">Мы используем его, чтобы подсказать подходящую сложность. Изменить выбор можно будет позже.</string>
+    <string name="onboarding_level_beginner">Начинающий · базовая грамматика</string>
+    <string name="onboarding_level_intermediate">Средний · уверенная практика</string>
+    <string name="onboarding_level_advanced">Продвинутый · сложные конструкции</string>
+    <string name="onboarding_level_note">Это не экзамен: выбор не закрывает другие темы и уровни.</string>
+    <string name="onboarding_goal_title">Поставьте дневную цель</string>
+    <string name="onboarding_goal_body">Регулярность важнее длинных занятий. Начните с комфортного темпа.</string>
+    <string name="onboarding_goal_five">5 минут · лёгкий старт</string>
+    <string name="onboarding_goal_ten">10 минут · рекомендуем</string>
+    <string name="onboarding_goal_twenty">20 минут · интенсивно</string>
+    <string name="onboarding_ready_body">Начните с рекомендованной темы, затем закрепите её в аудировании или дуэли. Прогресс и следующие шаги всегда будут видны в разделе «Обучение».</string>
     <string name="startup_checking">Проверяем сервер и вашу сессию…</string>
     <string name="startup_server_unavailable">Сервер DuelRush сейчас недоступен. Проверьте подключение и попробуйте снова.</string>
     <string name="retry_connection">Повторить проверку</string>
+    <string name="offline_showing_saved_data">Нет подключения. Показываем сохранённые данные.</string>
     <string name="session_expired">Сессия истекла. Войдите снова.</string>
 
     <string name="nav_learning">Обучение</string>
@@ -16,6 +36,10 @@
     <string name="achievements_summary_caption">Продолжайте — следующая награда уже близко</string>
     <string name="achievements_summary_empty">—</string>
     <string name="achievements_summary_format">%1$d из %2$d</string>
+    <string name="achievement_duels_description">Завершите %1$d дуэлей</string>
+    <string name="achievement_friends_description">Добавьте %1$d друзей</string>
+    <string name="achievement_tests_description">Пройдите %1$d тестов</string>
+    <string name="achievement_words_description">Добавьте %1$d слов</string>
 
     <string name="login_title">Вход</string>
     <string name="username_hint">Имя пользователя</string>
@@ -39,6 +63,10 @@
     <string name="password_reset_too_many_attempts">Слишком много попыток. Запросите новый код через минуту.</string>
     <string name="password_reset_same_password">Новый пароль должен отличаться от текущего.</string>
     <string name="register_title">Создать аккаунт</string>
+    <string name="registration_legal_notice">Продолжая, вы принимаете Условия использования и Политику конфиденциальности: %1$s</string>
+    <string name="registration_legal_notice_short">Продолжая, вы принимаете Политику конфиденциальности</string>
+    <string name="register_subtitle">Создайте профиль и начните первую тренировку</string>
+    <string name="sentence_answer_area_description">Перетащите или добавьте слова сюда, чтобы составить ответ</string>
     <string name="continue_action">Продолжить</string>
     <string name="verify_email_title">Подтвердите почту</string>
     <string name="verification_code_hint">Код из письма</string>
@@ -94,7 +122,7 @@
     <string name="start_duel_search">Найти соперника</string>
     <string name="cancel_duel_search">Отменить поиск</string>
     <string name="searching_for_opponent">Подбираем соперника вашего уровня…</string>
-    <string name="duel_subtitle">Сразитесь в знаниях и поднимитесь в рейтинге</string>
+    <string name="duel_subtitle">Сразитесь в знаниях и поднимитесь в рейтинге · статистика учитывает онлайн-матчи</string>
     <string name="duel_history">История дуэлей</string>
     <string name="duel_stats_title">Ваша игровая форма</string>
     <string name="duels_played">Дуэлей</string>
@@ -115,6 +143,7 @@
     <string name="your_score">Ваш счёт:</string>
     <string name="time_spent">Затраченное время:</string>
     <string name="back_to_menu">Вернуться в меню</string>
+    <string name="duel_review_mistakes">Посмотреть ошибки</string>
 
     <string name="leaderboard_title">Рейтинг игроков</string>
     <string name="leaderboard_loading">Обновляем рейтинг…</string>
@@ -124,6 +153,12 @@
     <string name="players_stat">Игроков</string>
     <string name="rank_next_format">До следующего места: %1$d очков</string>
     <string name="rank_first_place">Вы на вершине рейтинга!</string>
+    <plurals name="rank_hidden_positions">
+        <item quantity="one">⋯ пропущено %d место ⋯</item>
+        <item quantity="few">⋯ пропущено %d места ⋯</item>
+        <item quantity="many">⋯ пропущено %d мест ⋯</item>
+        <item quantity="other">⋯ пропущено %d мест ⋯</item>
+    </plurals>
 
     <string name="learning_title">Обучение</string>
     <string name="learning_subtitle">Выберите формат и продолжайте прогресс</string>
@@ -132,8 +167,37 @@
     <string name="learning_points_zero">0 очков</string>
     <string name="learning_topics_format">%1$d тем доступно</string>
     <string name="learning_topics_loading">Темы загружаются…</string>
+    <string name="learning_path_title">Учебный маршрут</string>
+    <string name="learning_progress_zero">0%</string>
+    <string name="learning_progress_format">%1$d из %2$d · освоено</string>
+    <string name="learning_recommendation_loading">Подбираем следующий урок…</string>
+    <string name="learning_recommendation_format">Далее: %1$s · %2$s</string>
+    <string name="learning_all_complete">Все доступные уровни пройдены</string>
+    <string name="learning_habit_format">Серия %1$d дн. · %2$d/%3$d мин</string>
+    <string name="medium">Средний</string>
     <string name="learning_tests_title">Грамматика и тесты</string>
     <string name="learning_tests_subtitle">Практика по темам и проверка знаний</string>
+    <string name="topic_progress_format">%1$d/%2$d уровней</string>
+    <string name="test_ten_questions">10 вопросов</string>
+    <string name="test_completed">Тест завершён</string>
+    <string name="test_completed_subtitle">10 вопросов · пройдено</string>
+    <string name="test_ready_subtitle">10 вопросов · можно начать</string>
+    <string name="topic_random_description">Смешанная тренировка по изученным темам с выбором сложности</string>
+    <string name="topic_present_simple_description">Привычки, факты и регулярные действия</string>
+    <string name="topic_past_simple_description">Завершённые события в прошлом</string>
+    <string name="topic_future_simple_description">Решения, обещания и прогнозы</string>
+    <string name="topic_present_continuous_description">Действия, происходящие прямо сейчас</string>
+    <string name="topic_present_perfect_description">Опыт и результат к настоящему моменту</string>
+    <string name="topic_modals_description">Возможность, обязанность, совет и вывод</string>
+    <string name="topic_articles_description">Выбор a, an, the и нулевого артикля</string>
+    <string name="topic_prepositions_description">Время, место, направление и устойчивые сочетания</string>
+    <string name="topic_passive_description">Когда важнее действие, а не исполнитель</string>
+    <string name="topic_conditionals_description">Реальные и нереальные условия</string>
+    <string name="topic_reported_description">Передача чужих слов и вопросов</string>
+    <string name="topic_comparatives_description">Сравнение предметов и признаков</string>
+    <string name="topic_adjectives_description">Точное описание предметов и действий</string>
+    <string name="topic_relative_description">Связь частей предложения через who, which и that</string>
+    <string name="topic_generic_description">Три уровня и 10 вопросов в каждом</string>
     <string name="learning_listening_title">Аудирование</string>
     <string name="learning_listening_subtitle">Тренируйте понимание речи на слух</string>
     <string name="learning_vocabulary_title">Словарь</string>
@@ -168,6 +232,22 @@
     <string name="next_action">Далее</string>
     <string name="submit_action">Завершить</string>
     <string name="test_results">Результаты теста</string>
+    <string name="random_test_title">Случайный тест · 10 вопросов</string>
+    <string name="random_test_header_format">Случайный тест · %1$s</string>
+    <string name="random_test_dialog_title">Случайный тест</string>
+    <string name="random_test_dialog_subtitle">Выберите сложность. В каждом варианте ровно 10 вопросов без повторов.</string>
+    <string name="random_test_easy">Лёгкий\nОсновные правила и понятный контекст</string>
+    <string name="random_test_medium">Средний\nБольше деталей и похожих вариантов</string>
+    <string name="random_test_hard">Сложный\nПродвинутые конструкции и исключения</string>
+    <string name="test_header_format">%1$s · %2$s</string>
+    <string name="question_progress_accessibility">Вопрос %1$d из %2$d</string>
+    <string name="test_result_score_format">%1$d/%2$d · %3$d%%</string>
+    <string name="test_result_perfect">Без ошибок! Тема усвоена отлично.</string>
+    <string name="test_result_good">Хороший результат. Просмотрите ошибки, чтобы закрепить тему.</string>
+    <string name="test_result_practice">Это нормальный этап обучения. Разберите ошибки и попробуйте ещё раз.</string>
+    <string name="test_review_mistakes">Просмотреть ошибки</string>
+    <string name="test_try_again">Пройти ещё раз</string>
+    <string name="test_done">Вернуться к темам</string>
     <string name="correct_answers_format">Правильных ответов: %1$d/%2$d</string>
     <string name="enter_answer">Введите ответ</string>
     <string name="sentence_word_bank">Слова для составления:</string>
@@ -225,6 +305,15 @@
     <string name="add_word">Добавить слово</string>
     <string name="words_to_review_format">Слов для повторения: %1$d</string>
     <string name="words_to_review_zero">На сегодня всё повторено</string>
+    <string name="word_added">Слово добавлено</string>
+    <string name="words_loading_error">Не удалось загрузить слова</string>
+    <string name="word_review_save_error">Не удалось сохранить результат повторения</string>
+    <plurals name="words_to_review_count">
+        <item quantity="one">%d слово для повторения</item>
+        <item quantity="few">%d слова для повторения</item>
+        <item quantity="many">%d слов для повторения</item>
+        <item quantity="other">%d слов для повторения</item>
+    </plurals>
     <string name="vocabulary_intro">Личный словарь запоминает, что даётся вам сложнее, и возвращает карточки в подходящий момент.</string>
     <string name="review_words_title">Умное повторение</string>
     <string name="add_word_description">Добавьте слово и перевод в личную коллекцию</string>
@@ -260,7 +349,7 @@
     <string name="decline">Отклонить</string>
     <string name="start_offline_duel">Тренировка без интернета</string>
     <string name="choose_practice_level">Выберите уровень тренировки</string>
-    <string name="offline_practice_subtitle">10 заданий уже в приложении — интернет не нужен</string>
+    <string name="offline_practice_subtitle">Задания уже в приложении — интернет не нужен</string>
     <string name="challenge_to_duel">Вызвать на дуэль</string>
     <string name="duel_challenge_sent">Вызов отправлен</string>
     <string name="duel_challenge_title">Вызов на дуэль</string>
@@ -308,6 +397,21 @@
     <string name="tip_step_one">Выберите один короткий пример по теме совета.</string>
     <string name="tip_step_two">Произнесите его вслух три раза в разном темпе.</string>
     <string name="tip_step_three">Вернитесь к примеру вечером и повторите без подсказки.</string>
+    <string name="tip_audio_one">1. Выберите короткую запись продолжительностью до минуты.</string>
+    <string name="tip_audio_two">2. Прослушайте без текста и запишите то, что удалось понять.</string>
+    <string name="tip_audio_three">3. Сверьтесь с оригиналом и повторите только трудный фрагмент.</string>
+    <string name="tip_word_one">1. Выберите три полезных слова или сочетания по одной теме.</string>
+    <string name="tip_word_two">2. Составьте с каждым собственное предложение.</string>
+    <string name="tip_word_three">3. Добавьте их в словарь и повторите завтра.</string>
+    <string name="tip_read_one">1. Прочитайте заголовок или первый абзац без словаря.</string>
+    <string name="tip_read_two">2. Запишите свой прогноз или главную мысль одним предложением.</string>
+    <string name="tip_read_three">3. Прочитайте продолжение и сравните его со своим предположением.</string>
+    <string name="tip_habit_one">1. Выберите одно действие, которое займёт не больше десяти минут.</string>
+    <string name="tip_habit_two">2. Выполните его сегодня в заранее выбранное время.</string>
+    <string name="tip_habit_three">3. Завершите занятие понятным следующим шагом на завтра.</string>
+    <string name="tip_grammar_one">1. Найдите в примере время, подлежащее и сказуемое.</string>
+    <string name="tip_grammar_two">2. Объясните правило своими словами и измените одну деталь.</string>
+    <string name="tip_grammar_three">3. Составьте утверждение, вопрос или отрицание по тому же правилу.</string>
     <string name="tip_got_it">Понятно, попробую</string>
     <string name="request_waiting">Ожидает подтверждения</string>
     <string name="cancel_request">Отменить заявку</string>
@@ -350,4 +454,16 @@
     <string name="hint_visible_description">Подсказка открыта. Нажмите, чтобы вернуться к вопросу</string>
     <string name="question_with_visible_hint">Вопрос с открытой подсказкой</string>
     <string name="cannot_add_yourself">Нельзя отправить заявку самому себе</string>
+    <string name="onboarding_language_title">Язык приложения</string>
+    <string name="onboarding_language_russian">Русский</string>
+    <string name="onboarding_language_english">English</string>
+    <string name="value_zero" translatable="false">0</string>
+    <string name="value_hundred" translatable="false">100</string>
+    <string name="value_dash" translatable="false">—</string>
+    <string name="duel_timer_initial" translatable="false">02:00</string>
+    <string name="question_counter_initial" translatable="false">0/10</string>
+    <string name="percentage_zero" translatable="false" formatted="false">0%</string>
+    <string name="chevron_next" translatable="false">›</string>
+    <string name="versus_short" translatable="false">VS</string>
+    <string name="login_subtitle">Продолжите обучение и вернитесь к своим дуэлям</string>
 </resources>

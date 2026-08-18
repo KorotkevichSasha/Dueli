@@ -30,6 +30,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import com.example.duelingo.utils.openTopLevel
+import com.example.duelingo.utils.ConnectivityRetry
+import com.google.android.material.snackbar.Snackbar
 
 class RankActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRankBinding
@@ -43,6 +45,7 @@ class RankActivity : AppCompatActivity() {
     private lateinit var avatarManager: AvatarManager
     private var refreshJob: Job? = null
     private var leaderboardLoading = false
+    private var offlineSnackbar: Snackbar? = null
     private var leaderboardRendered = false
     private val tokenManager by lazy { TokenManager(this) }
     private val sharedPreferences by lazy { getSharedPreferences("user_prefs", MODE_PRIVATE) }
@@ -58,7 +61,8 @@ class RankActivity : AppCompatActivity() {
         binding.cupIcon.setColorFilter(Color.parseColor("#FF00A5FE"))
         binding.cupTest.setTextColor(Color.parseColor("#FF00A5FE"))
 
-        val cachedLeaderboard = LeaderboardCache.current(tokenManager.getAccessToken())
+        ConnectivityRetry(this, lifecycle) { loadLeaderboard() }
+        val cachedLeaderboard = LeaderboardCache.current(this, tokenManager.getAccessToken())
         leaderboardRecyclerView = binding.rvLeaderboard
         leaderboardRecyclerView.layoutManager = LinearLayoutManager(this)
         leaderboardAdapter = LeaderboardAdapter(
@@ -135,7 +139,7 @@ class RankActivity : AppCompatActivity() {
             totalPages = 0,
             currentPage = 0
         )
-        val emptyUser = UserInLeaderboardResponse("", "", 0, "", 0)
+        val emptyUser = UserInLeaderboardResponse("", "", 0, "", 0, null)
         return LeaderboardResponse(emptyPaginationResponse, emptyUser)
     }
 
@@ -213,10 +217,20 @@ class RankActivity : AppCompatActivity() {
                 leaderboardLoading = true
                 try {
                     val response = ApiClient.leaderboardService.getLeaderboard(tokenWithBearer)
-                    LeaderboardCache.store(accessToken, response)
+                    LeaderboardCache.store(this@RankActivity, accessToken, response)
                     updateUI(response)
+                    offlineSnackbar?.dismiss()
+                    offlineSnackbar = null
                 } catch (e: Exception) {
-                    showToast(UserMessage.from(this@RankActivity, e))
+                    val cached = LeaderboardCache.current(this@RankActivity, accessToken)
+                    if (cached != null) updateUI(cached)
+                    offlineSnackbar?.dismiss()
+                    offlineSnackbar = Snackbar.make(
+                        binding.root,
+                        R.string.offline_showing_saved_data,
+                        Snackbar.LENGTH_INDEFINITE
+                    ).setAction(R.string.retry_connection) { loadLeaderboard() }
+                    offlineSnackbar?.show()
                 } finally {
                     leaderboardLoading = false
                 }
@@ -229,21 +243,26 @@ class RankActivity : AppCompatActivity() {
         binding.leaderboardLoading.visibility = View.GONE
         binding.userContainer.visibility = View.VISIBLE
         val currentUser = response.currentUser
-        if (currentUser != null) {
-            updateCurrentUserInfo(currentUser)
-            binding.tvRankSummary.text = "#${currentUser.rank}"
-            binding.tvPointsSummary.text = currentUser.points.toString()
-            binding.tvPlayersSummary.text = response.top.totalItems.toString()
+        updateCurrentUserInfo(currentUser)
+        binding.tvRankSummary.text = "#${currentUser.rank}"
+        binding.tvPointsSummary.text = currentUser.points.toString()
+        binding.tvPlayersSummary.text = response.top.totalItems.toString()
 
-            val nextPlayer = response.top.content.firstOrNull { it.rank == currentUser.rank - 1 }
-            binding.tvRankProgress.text = if (nextPlayer == null) {
-                getString(R.string.rank_first_place)
-            } else {
-                getString(
-                    R.string.rank_next_format,
-                    (nextPlayer.points - currentUser.points).coerceAtLeast(0)
-                )
-            }
+        binding.tvRankProgress.text = if (currentUser.pointsToNextRank == null) {
+            getString(R.string.rank_first_place)
+        } else {
+            getString(R.string.rank_next_format, currentUser.pointsToNextRank)
+        }
+
+        findViewById<TextView?>(R.id.rankGapIndicator)?.apply {
+            val lastVisibleRank = response.top.content.lastOrNull()?.rank ?: 0
+            val missing = currentUser.rank - lastVisibleRank - 1
+            visibility = if (missing > 0) View.VISIBLE else View.GONE
+            text = resources.getQuantityString(
+                R.plurals.rank_hidden_positions,
+                missing.toInt(),
+                missing.toInt()
+            )
         }
 
         leaderboardAdapter.updateData(response)

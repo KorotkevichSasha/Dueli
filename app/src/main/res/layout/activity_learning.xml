@@ -81,12 +81,96 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
 
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/learningPathCard"
+        android:layout_width="0dp"
+        android:layout_height="136dp"
+        android:layout_marginTop="10dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        app:cardBackgroundColor="?attr/cardBackgroundColor"
+        app:cardCornerRadius="18dp"
+        app:cardElevation="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/learningHeroCard">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/learningPathTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/learning_path_title"
+                android:textColor="?attr/textColor"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@id/learningProgressText"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/learningProgressText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/learning_progress_zero"
+                android:textColor="@color/blue_primary"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintBaseline_toBaselineOf="@id/learningPathTitle"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/learningOverallProgress"
+                android:layout_width="0dp"
+                android:layout_height="8dp"
+                android:layout_marginTop="10dp"
+                android:max="100"
+                android:progress="0"
+                app:indicatorColor="@color/blue_primary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/learningPathTitle"
+                app:trackColor="?attr/backgroundColor"
+                app:trackCornerRadius="4dp" />
+
+            <TextView
+                android:id="@+id/learningRecommendation"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="9dp"
+                android:maxLines="2"
+                android:text="@string/learning_recommendation_loading"
+                android:textColor="?attr/secondaryTextColor"
+                android:textSize="13sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/learningOverallProgress" />
+
+            <TextView
+                android:id="@+id/learningHabit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/blue_primary"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/learningRecommendation" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
 
     <!-- CardView для Listening -->
     <androidx.cardview.widget.CardView
         android:id="@+id/listeningCard"
         android:layout_width="0dp"
-        android:layout_height="88dp"
+        android:layout_height="80dp"
         android:layout_marginTop="10dp"
         app:cardBackgroundColor="?attr/cardBackgroundColor"
         app:cardCornerRadius="12dp"
@@ -104,6 +188,7 @@
                 android:id="@+id/listeningFeatureIcon"
                 android:layout_width="44dp"
                 android:layout_height="44dp"
+                android:contentDescription="@null"
                 android:background="@drawable/bg_feature_icon"
                 android:padding="10dp"
                 android:src="@drawable/ic_headphones"
@@ -144,7 +229,7 @@
                 android:id="@+id/listeningArrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="›"
+                android:text="@string/chevron_next"
                 android:textColor="@color/blue_primary"
                 android:textSize="28sp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -157,14 +242,14 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/testsCard"
         android:layout_width="0dp"
-        android:layout_height="88dp"
+        android:layout_height="80dp"
         android:layout_marginTop="12dp"
         app:cardBackgroundColor="?attr/cardBackgroundColor"
         app:cardCornerRadius="12dp"
         app:cardElevation="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/learningHeroCard">
+        app:layout_constraintTop_toBottomOf="@id/learningPathCard">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -175,6 +260,7 @@
                 android:id="@+id/testsFeatureIcon"
                 android:layout_width="44dp"
                 android:layout_height="44dp"
+                android:contentDescription="@null"
                 android:background="@drawable/bg_feature_icon"
                 android:padding="10dp"
                 android:src="@drawable/graduation24"
@@ -215,7 +301,7 @@
                 android:id="@+id/testsArrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="›"
+                android:text="@string/chevron_next"
                 android:textColor="@color/blue_primary"
                 android:textSize="28sp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -228,7 +314,7 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/vocabularyCard"
         android:layout_width="0dp"
-        android:layout_height="88dp"
+        android:layout_height="80dp"
         android:layout_marginTop="10dp"
         app:cardBackgroundColor="?attr/cardBackgroundColor"
         app:cardCornerRadius="12dp"
@@ -246,6 +332,7 @@
                 android:id="@+id/vocabularyFeatureIcon"
                 android:layout_width="44dp"
                 android:layout_height="44dp"
+                android:contentDescription="@null"
                 android:background="@drawable/bg_feature_icon"
                 android:padding="10dp"
                 android:src="@drawable/ic_book"
@@ -285,7 +372,7 @@
                 android:id="@+id/vocabularyArrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="›"
+                android:text="@string/chevron_next"
                 android:textColor="@color/blue_primary"
                 android:textSize="28sp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -317,6 +404,7 @@
             <ImageView
                 android:layout_width="36dp"
                 android:layout_height="36dp"
+                android:contentDescription="@null"
                 android:padding="6dp"
                 android:src="@drawable/ic_lightbulb"
                 app:tint="@color/blue_primary" />
@@ -375,7 +463,7 @@
                     android:id="@+id/testIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="Тесты"
+                    android:contentDescription="@string/nav_learning"
                     android:src="@drawable/graduation24" />
 
                 <com.airbnb.lottie.LottieAnimationView
@@ -412,7 +500,7 @@
                     android:id="@+id/mainIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="Дуэль"
+                    android:contentDescription="@string/nav_duel"
                     android:src="@drawable/swords24" />
 
                 <com.airbnb.lottie.LottieAnimationView
@@ -449,7 +537,7 @@
                     android:id="@+id/cupIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="Рейтинг"
+                    android:contentDescription="@string/nav_rank"
                     android:src="@drawable/trophy24" />
 
                 <com.airbnb.lottie.LottieAnimationView
@@ -486,7 +574,7 @@
                     android:id="@+id/profileIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:contentDescription="Профиль"
+                    android:contentDescription="@string/nav_profile"
                     android:src="@drawable/profile24" />
 
                 <com.airbnb.lottie.LottieAnimationView

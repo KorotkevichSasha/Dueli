@@ -4,6 +4,7 @@
     >
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
@@ -38,6 +39,11 @@
                 android:value="true" />
         </service>
 
+        <activity
+            android:name=".activity.OnboardingActivity"
+            android:exported="false"
+            android:screenOrientation="unspecified"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".activity.AchievementActivity"
             android:exported="false"

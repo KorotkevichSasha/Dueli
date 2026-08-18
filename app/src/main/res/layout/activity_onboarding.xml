@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/backgroundColor"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/stepIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="?attr/secondaryTextColor"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/skipButton"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:text="@string/onboarding_skip"
+        android:textAllCaps="false"
+        android:textColor="@color/blue_primary"
+        android:textSize="15sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ViewFlipper
+        android:id="@+id/onboardingPages"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:animateFirstView="false"
+        android:inAnimation="@anim/fade_in_fast"
+        android:outAnimation="@anim/fade_out_fast"
+        app:layout_constraintBottom_toTopOf="@id/actionRow"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/skipButton">
+
+        <ScrollView android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:orientation="vertical" android:paddingHorizontal="8dp" android:paddingTop="24dp">
+                <ImageView android:layout_width="112dp" android:layout_height="112dp" android:contentDescription="@string/app_name" android:src="@mipmap/ic_launcher_round" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:gravity="center" android:text="@string/onboarding_welcome_title" android:textColor="?attr/textColor" android:textSize="30sp" android:textStyle="bold" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:gravity="center" android:lineSpacingExtra="4dp" android:text="@string/onboarding_welcome_body" android:textColor="?attr/secondaryTextColor" android:textSize="17sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="22dp"
+                    android:gravity="center"
+                    android:text="@string/onboarding_language_title"
+                    android:textColor="?attr/textColor"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+                <RadioGroup
+                    android:id="@+id/languageGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/languageRussian"
+                        android:layout_width="wrap_content"
+                        android:layout_height="52dp"
+                        android:layout_marginEnd="18dp"
+                        android:buttonTint="@color/blue_primary"
+                        android:paddingHorizontal="8dp"
+                        android:text="@string/onboarding_language_russian"
+                        android:textColor="?attr/textColor"
+                        android:textSize="16sp" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/languageEnglish"
+                        android:layout_width="wrap_content"
+                        android:layout_height="52dp"
+                        android:buttonTint="@color/blue_primary"
+                        android:paddingHorizontal="8dp"
+                        android:text="@string/onboarding_language_english"
+                        android:textColor="?attr/textColor"
+                        android:textSize="16sp" />
+                </RadioGroup>
+                <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="28dp" app:cardBackgroundColor="?attr/cardBackgroundColor" app:cardCornerRadius="20dp" app:strokeColor="@color/blue_primary" app:strokeWidth="1dp">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="20dp" android:text="@string/onboarding_features" android:textColor="?attr/textColor" android:textSize="16sp" />
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+        </ScrollView>
+
+        <ScrollView android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="8dp" android:paddingTop="26dp">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/onboarding_level_title" android:textColor="?attr/textColor" android:textSize="28sp" android:textStyle="bold" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/onboarding_level_body" android:textColor="?attr/secondaryTextColor" android:textSize="16sp" />
+                <RadioGroup android:id="@+id/levelGroup" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:checkedButton="@id/levelBeginner">
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/levelBeginner" android:layout_width="match_parent" android:layout_height="64dp" android:buttonTint="@color/blue_primary" android:padding="12dp" android:text="@string/onboarding_level_beginner" android:textColor="?attr/textColor" android:textSize="17sp" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/levelIntermediate" android:layout_width="match_parent" android:layout_height="64dp" android:buttonTint="@color/blue_primary" android:padding="12dp" android:text="@string/onboarding_level_intermediate" android:textColor="?attr/textColor" android:textSize="17sp" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/levelAdvanced" android:layout_width="match_parent" android:layout_height="64dp" android:buttonTint="@color/blue_primary" android:padding="12dp" android:text="@string/onboarding_level_advanced" android:textColor="?attr/textColor" android:textSize="17sp" />
+                </RadioGroup>
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/onboarding_level_note" android:textColor="?attr/secondaryTextColor" android:textSize="14sp" />
+            </LinearLayout>
+        </ScrollView>
+
+        <ScrollView android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="8dp" android:paddingTop="26dp">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/onboarding_goal_title" android:textColor="?attr/textColor" android:textSize="28sp" android:textStyle="bold" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/onboarding_goal_body" android:textColor="?attr/secondaryTextColor" android:textSize="16sp" />
+                <RadioGroup android:id="@+id/goalGroup" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:checkedButton="@id/goalTen">
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/goalFive" android:layout_width="match_parent" android:layout_height="64dp" android:buttonTint="@color/blue_primary" android:padding="12dp" android:text="@string/onboarding_goal_five" android:textColor="?attr/textColor" android:textSize="17sp" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/goalTen" android:layout_width="match_parent" android:layout_height="64dp" android:buttonTint="@color/blue_primary" android:padding="12dp" android:text="@string/onboarding_goal_ten" android:textColor="?attr/textColor" android:textSize="17sp" />
+                    <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/goalTwenty" android:layout_width="match_parent" android:layout_height="64dp" android:buttonTint="@color/blue_primary" android:padding="12dp" android:text="@string/onboarding_goal_twenty" android:textColor="?attr/textColor" android:textSize="17sp" />
+                </RadioGroup>
+                <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="22dp" app:cardBackgroundColor="?attr/cardBackgroundColor" app:cardCornerRadius="20dp">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="20dp" android:text="@string/onboarding_ready_body" android:textColor="?attr/textColor" android:textSize="16sp" />
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+        </ScrollView>
+    </ViewFlipper>
+
+    <LinearLayout
+        android:id="@+id/actionRow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/backButton"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:contentDescription="@string/back"
+            app:backgroundTint="@android:color/transparent"
+            app:strokeColor="@color/blue_primary"
+            app:strokeWidth="1dp"
+            app:icon="@drawable/ic_arrow_back"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconTint="@color/blue_primary"
+            app:cornerRadius="18dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/nextButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:text="@string/next_action"
+            android:textAllCaps="false"
+            android:textSize="17sp"
+            app:backgroundTint="@color/blue_primary"
+            app:cornerRadius="18dp" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

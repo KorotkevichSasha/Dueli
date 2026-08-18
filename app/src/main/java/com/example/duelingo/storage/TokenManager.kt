@@ -13,6 +13,8 @@ import javax.crypto.spec.GCMParameterSpec
 
 class TokenManager(context: Context) {
 
+    private val applicationContext = context.applicationContext
+
     private val sharedPreferences: SharedPreferences =
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
@@ -22,21 +24,46 @@ class TokenManager(context: Context) {
         private const val KEY_REFRESH_TOKEN = "refresh_token"
         private const val KEYSTORE_ALIAS = "duelingo_token_key"
         private const val TRANSFORMATION = "AES/GCM/NoPadding"
+        @Volatile private var cachedAccessToken: String? = null
+        @Volatile private var cachedRefreshToken: String? = null
+        @Volatile private var accessTokenLoaded = false
+        @Volatile private var refreshTokenLoaded = false
     }
 
-    fun saveTokens(accessToken: String, refreshToken: String) {
+    fun saveTokens(accessToken: String, refreshToken: String, newSession: Boolean = false) {
+        if (newSession) {
+            com.example.duelingo.utils.SessionCache.clear(applicationContext)
+        }
         val editor = sharedPreferences.edit()
         editor.putString(KEY_ACCESS_TOKEN, encrypt(accessToken))
         editor.putString(KEY_REFRESH_TOKEN, encrypt(refreshToken))
         editor.apply()
+        cachedAccessToken = accessToken
+        cachedRefreshToken = refreshToken
+        accessTokenLoaded = true
+        refreshTokenLoaded = true
     }
 
     fun getAccessToken(): String? {
-        return decryptPreference(KEY_ACCESS_TOKEN)
+        if (accessTokenLoaded) return cachedAccessToken
+        return synchronized(TokenManager::class.java) {
+            if (!accessTokenLoaded) {
+                cachedAccessToken = decryptPreference(KEY_ACCESS_TOKEN)
+                accessTokenLoaded = true
+            }
+            cachedAccessToken
+        }
     }
 
     fun getRefreshToken(): String? {
-        return decryptPreference(KEY_REFRESH_TOKEN)
+        if (refreshTokenLoaded) return cachedRefreshToken
+        return synchronized(TokenManager::class.java) {
+            if (!refreshTokenLoaded) {
+                cachedRefreshToken = decryptPreference(KEY_REFRESH_TOKEN)
+                refreshTokenLoaded = true
+            }
+            cachedRefreshToken
+        }
     }
     fun isLoggedIn(): Boolean {
         return getAccessToken()?.isNotEmpty() ?: false
@@ -47,6 +74,11 @@ class TokenManager(context: Context) {
         editor.remove(KEY_ACCESS_TOKEN)
         editor.remove(KEY_REFRESH_TOKEN)
         editor.apply()
+        cachedAccessToken = null
+        cachedRefreshToken = null
+        accessTokenLoaded = true
+        refreshTokenLoaded = true
+        com.example.duelingo.utils.SessionCache.clear(applicationContext)
     }
 
     private fun decryptPreference(key: String): String? {

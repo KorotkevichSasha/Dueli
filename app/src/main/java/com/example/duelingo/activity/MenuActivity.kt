@@ -44,6 +44,9 @@ import com.example.duelingo.utils.OfflineDuelFactory
 import com.example.duelingo.utils.LeaderboardCache
 import com.example.duelingo.utils.UserMessage
 import com.example.duelingo.utils.openTopLevel
+import com.example.duelingo.utils.DuelCache
+import com.example.duelingo.utils.ConnectivityRetry
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -60,6 +63,8 @@ import kotlin.coroutines.resumeWithException
 class MenuActivity : AppCompatActivity() {
     companion object {
         private const val STATE_SEARCHING_FOR_DUEL = "searching_for_duel"
+        const val EXTRA_OPEN_LATEST_HISTORY = "open_latest_duel_history"
+        const val EXTRA_OPEN_HISTORY_ID = "open_duel_history_id"
     }
     private lateinit var binding: ActivityMenuBinding
     private var currentAnimationView: LottieAnimationView? = null
@@ -82,6 +87,9 @@ class MenuActivity : AppCompatActivity() {
     private val startedDuelIds = mutableSetOf<String>()
     private var socketConnectionInProgress = false
     private var contentReady = false
+    private var openLatestHistoryRequested = false
+    private var requestedHistoryId: String? = null
+    private var historyOpenRetryCount = 0
 
     private val scope = CoroutineScope(Dispatchers.Main + Job())
 
@@ -91,6 +99,14 @@ class MenuActivity : AppCompatActivity() {
         Log.d("MenuActivity", "onCreate started")
         binding = ActivityMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        openLatestHistoryRequested = intent.getBooleanExtra(EXTRA_OPEN_LATEST_HISTORY, false)
+        requestedHistoryId = intent.getStringExtra(EXTRA_OPEN_HISTORY_ID)
+        ConnectivityRetry(this, lifecycle) {
+            if (contentReady) {
+                refreshDuelHistory()
+                loadDuelStats()
+            }
+        }
         binding.duelHeroImage.setImageDrawable(null)
         binding.duelHeroImage.setBackgroundResource(R.drawable.bg_feature_icon)
         binding.duelHeroImage.post {
@@ -152,8 +168,17 @@ class MenuActivity : AppCompatActivity() {
         if (contentReady) resumeContent()
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        openLatestHistoryRequested = intent.getBooleanExtra(EXTRA_OPEN_LATEST_HISTORY, false)
+        requestedHistoryId = intent.getStringExtra(EXTRA_OPEN_HISTORY_ID)
+        historyOpenRetryCount = 0
+        if (contentReady && openLatestHistoryRequested) refreshDuelHistory()
+    }
+
     private fun resumeContent() {
-        LeaderboardCache.prefetch(tokenManager.getAccessToken())
+        LeaderboardCache.prefetch(this, tokenManager.getAccessToken())
         refreshDuelHistory()
         loadDuelStats()
         scope.launch {
@@ -537,6 +562,7 @@ class MenuActivity : AppCompatActivity() {
             })
         }
         binding.duelHistoryRecyclerView.adapter = historyAdapter
+        renderHistory(DuelCache.readHistory(this, tokenManager.getAccessToken()))
         binding.duelHistoryRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
@@ -567,12 +593,10 @@ class MenuActivity : AppCompatActivity() {
                 
                 withContext(Dispatchers.Main) {
                     if (currentPage == 0) {
-                        val combinedHistory = OfflineDuelHistoryStore(this@MenuActivity).getAll() + response.content
-                        historyAdapter.replaceItems(combinedHistory)
-                        binding.emptyHistoryContainer.visibility =
-                            if (combinedHistory.isEmpty()) View.VISIBLE else View.GONE
-                        binding.duelHistoryRecyclerView.visibility =
-                            if (combinedHistory.isEmpty()) View.GONE else View.VISIBLE
+                        tokenManager.getAccessToken()?.let {
+                            DuelCache.storeHistory(this@MenuActivity, it, response.content)
+                        }
+                        renderHistory(response.content)
                     } else {
                         historyAdapter.addItems(response.content)
                     }
@@ -582,8 +606,43 @@ class MenuActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 Log.e("MenuActivity", "Error loading duel history", e)
+                if (currentPage == 0) {
+                    renderHistory(DuelCache.readHistory(this@MenuActivity, tokenManager.getAccessToken()))
+                    Snackbar.make(
+                        binding.root,
+                        R.string.offline_showing_saved_data,
+                        Snackbar.LENGTH_LONG
+                    ).setAction(R.string.retry_connection) { refreshDuelHistory() }.show()
+                }
             } finally {
                 isLoading = false
+            }
+        }
+    }
+
+    private fun renderHistory(serverHistory: List<com.example.duelingo.dto.response.DuelInHistoryResponse>) {
+        val combinedHistory = OfflineDuelHistoryStore(this, tokenManager.getAccessToken()).getAll() + serverHistory
+        historyAdapter.replaceItems(combinedHistory)
+        binding.emptyHistoryContainer.visibility = if (combinedHistory.isEmpty()) View.VISIBLE else View.GONE
+        binding.duelHistoryRecyclerView.visibility = if (combinedHistory.isEmpty()) View.GONE else View.VISIBLE
+        if (openLatestHistoryRequested && combinedHistory.isNotEmpty()) {
+            val requested = if (requestedHistoryId == null) {
+                combinedHistory.firstOrNull()
+            } else {
+                combinedHistory.firstOrNull { it.id.toString() == requestedHistoryId }
+            }
+            if (requested != null) {
+                openLatestHistoryRequested = false
+                requestedHistoryId = null
+                historyOpenRetryCount = 0
+                startActivity(Intent(this, DuelHistoryDetailsActivity::class.java).apply {
+                    putExtra(DuelHistoryDetailsActivity.EXTRA_DUEL, Gson().toJson(requested))
+                })
+            } else if (historyOpenRetryCount < 3) {
+                historyOpenRetryCount++
+                binding.root.postDelayed({
+                    if (!isFinishing && openLatestHistoryRequested) refreshDuelHistory()
+                }, 800L)
             }
         }
     }
@@ -649,16 +708,22 @@ class MenuActivity : AppCompatActivity() {
     }
 
     private fun loadDuelStats() {
+        DuelCache.readStats(this, tokenManager.getAccessToken())?.let(::renderDuelStats)
         scope.launch {
             runCatching { duelHistoryService.getUserDuelStats() }
             .onSuccess { stats ->
-                binding.duelsPlayedValue.text = stats.total.toString()
-                binding.duelsWonValue.text = stats.wins.toString()
-                binding.duelWinRateValue.text = "${stats.winRate}%"
+                renderDuelStats(stats)
+                tokenManager.getAccessToken()?.let { DuelCache.storeStats(this@MenuActivity, it, stats) }
             }.onFailure { error ->
                 Log.w("MenuActivity", "Could not load duel statistics", error)
             }
         }
+    }
+
+    private fun renderDuelStats(stats: com.example.duelingo.dto.response.DuelStatsResponse) {
+        binding.duelsPlayedValue.text = stats.total.toString()
+        binding.duelsWonValue.text = stats.wins.toString()
+        binding.duelWinRateValue.text = "${stats.winRate}%"
     }
 
 }

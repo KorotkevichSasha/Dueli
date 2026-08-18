@@ -6,7 +6,7 @@
         <androidx.recyclerview.widget.RecyclerView android:id="@+id/wordsList" android:layout_width="match_parent" android:layout_height="match_parent" android:clipToPadding="false" android:paddingBottom="24dp" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     <LinearLayout android:id="@+id/emptyState" android:layout_width="0dp" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical" android:padding="28dp" android:visibility="gone" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/backButton">
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📚" android:textSize="48sp" />
+        <ImageView android:layout_width="64dp" android:layout_height="64dp" android:background="@drawable/bg_feature_icon" android:contentDescription="@null" android:padding="16dp" android:src="@drawable/ic_book" app:tint="@color/blue_primary" />
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:text="@string/dictionary_empty_title" android:textColor="?attr/textColor" android:textSize="20sp" android:textStyle="bold" />
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center" android:text="@string/dictionary_empty_description" android:textColor="?attr/secondaryTextColor" android:textSize="15sp" />
     </LinearLayout>

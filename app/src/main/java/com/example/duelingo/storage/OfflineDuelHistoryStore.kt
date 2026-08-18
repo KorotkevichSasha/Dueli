@@ -4,13 +4,16 @@ import android.content.Context
 import com.example.duelingo.dto.response.DuelInHistoryResponse
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.example.duelingo.utils.CacheIdentity
 
-class OfflineDuelHistoryStore(context: Context) {
+class OfflineDuelHistoryStore(context: Context, accessToken: String?) {
     private val preferences = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
     private val gson = Gson()
+    private val historyKey = accessToken?.let { "${KEY_HISTORY}_${CacheIdentity.key(it)}" }
 
     fun getAll(): List<DuelInHistoryResponse> {
-        val raw = preferences.getString(KEY_HISTORY, null) ?: return emptyList()
+        val key = historyKey ?: return emptyList()
+        val raw = preferences.getString(key, null) ?: return emptyList()
         return runCatching {
             gson.fromJson<List<DuelInHistoryResponse>>(
                 raw,
@@ -20,8 +23,9 @@ class OfflineDuelHistoryStore(context: Context) {
     }
 
     fun add(duel: DuelInHistoryResponse) {
+        val key = historyKey ?: return
         val updated = (listOf(duel) + getAll().filterNot { it.id == duel.id }).take(MAX_ITEMS)
-        preferences.edit().putString(KEY_HISTORY, gson.toJson(updated)).apply()
+        preferences.edit().putString(key, gson.toJson(updated)).apply()
     }
 
     companion object {
