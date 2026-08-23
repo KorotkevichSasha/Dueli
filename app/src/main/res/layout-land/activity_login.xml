@@ -101,6 +101,26 @@
                 android:text="@string/login_action"
                 android:textColor="@android:color/white" />
 
+            <ProgressBar
+                android:id="@+id/login_progress"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="10dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/login_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center"
+                android:text="@string/login_connecting"
+                android:textColor="?attr/secondaryTextColor"
+                android:textSize="13sp"
+                android:visibility="gone" />
+
             <TextView
                 android:id="@+id/no_account"
                 android:layout_width="match_parent"

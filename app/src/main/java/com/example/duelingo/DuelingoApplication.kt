@@ -20,6 +20,7 @@ class DuelingoApplication : Application() {
         ThemeManager.init(this)
         AuthSessionManager.initialize(this)
         ApiClient.initialize(this)
+        ApiClient.warmUpServer()
         Glide.with(this).load(R.drawable.duel_hero).preload(1024, 500)
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {

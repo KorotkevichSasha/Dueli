@@ -47,6 +47,7 @@
     <string name="password_hint">Пароль</string>
     <string name="confirm_password_hint">Повторите пароль</string>
     <string name="login_action">Войти</string>
+    <string name="login_connecting">Безопасно подключаемся… После простоя бесплатному серверу может потребоваться до двух минут.</string>
     <string name="signup_prompt">Нет аккаунта? Зарегистрироваться</string>
     <string name="forgot_password">Забыли пароль?</string>
     <string name="password_reset_title">Восстановление доступа</string>
@@ -96,7 +97,7 @@
     <string name="error_email_not_verified">Сначала подтвердите адрес электронной почты.</string>
     <string name="error_too_many_attempts">Слишком много попыток. Подождите минуту и попробуйте снова.</string>
     <string name="error_server_unavailable">Сервер временно недоступен. Попробуйте немного позже.</string>
-    <string name="error_timeout">Сервер отвечает слишком долго. Проверьте интернет и повторите попытку.</string>
+    <string name="error_timeout">Сервер ещё запускается или соединение медленное. Подождите немного и повторите попытку.</string>
     <string name="error_network">Не удалось подключиться. Проверьте интернет-соединение.</string>
     <string name="error_generic">Не удалось выполнить действие. Попробуйте ещё раз.</string>
     <string name="error_check_fields">Проверьте правильность заполнения полей.</string>

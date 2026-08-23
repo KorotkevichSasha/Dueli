@@ -2,6 +2,7 @@ package com.example.duelingo.activity.auth
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -16,8 +17,10 @@ import com.example.duelingo.network.AuthSessionManager
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.storage.OnboardingPreferences
 import com.example.duelingo.utils.UserMessage
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import java.io.IOException
 
 class LoginActivity : AppCompatActivity() {
 
@@ -26,6 +29,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private lateinit var binding: ActivityLoginBinding
+    private var loginRunning = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,9 +75,11 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun loginUser(signInRequest: SignInRequest) {
+        if (loginRunning) return
         lifecycleScope.launch {
+            setLoginLoading(true)
             try {
-                val response = ApiClient.authService.signIn(signInRequest)
+                val response = signInWithColdStartRetry(signInRequest)
                 showToast(getString(com.example.duelingo.R.string.login_successful))
 
                 saveTokens(response)
@@ -91,8 +97,35 @@ class LoginActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 showToast(UserMessage.from(this@LoginActivity, e))
+            } finally {
+                setLoginLoading(false)
             }
         }
+    }
+
+    private suspend fun signInWithColdStartRetry(
+        request: SignInRequest
+    ): JwtAuthenticationResponse {
+        var lastError: IOException? = null
+        repeat(2) { attempt ->
+            try {
+                return ApiClient.authService.signIn(request)
+            } catch (error: IOException) {
+                lastError = error
+                if (attempt == 0) {
+                    ApiClient.warmUpServer()
+                    delay(1_200)
+                }
+            }
+        }
+        throw checkNotNull(lastError)
+    }
+
+    private fun setLoginLoading(loading: Boolean) {
+        loginRunning = loading
+        binding.loginBtn.isEnabled = !loading
+        binding.loginProgress.visibility = if (loading) View.VISIBLE else View.GONE
+        binding.loginStatus.visibility = if (loading) View.VISIBLE else View.GONE
     }
     private fun saveTokens(response: JwtAuthenticationResponse) {
         val tokenManager = TokenManager(this)
