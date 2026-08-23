@@ -45,6 +45,7 @@
     <string name="password_hint">Password</string>
     <string name="confirm_password_hint">Confirm password</string>
     <string name="login_action">Log in</string>
+    <string name="login_connecting">Connecting securely… The free server may need up to two minutes to wake after inactivity.</string>
     <string name="signup_prompt">No account? Sign up</string>
     <string name="forgot_password">Forgot password?</string>
     <string name="password_reset_title">Restore access</string>
@@ -94,7 +95,7 @@
     <string name="error_email_not_verified">Verify your email address before signing in.</string>
     <string name="error_too_many_attempts">Too many attempts. Wait a minute and try again.</string>
     <string name="error_server_unavailable">The server is temporarily unavailable. Try again shortly.</string>
-    <string name="error_timeout">The server is taking too long to respond. Check your connection.</string>
+    <string name="error_timeout">The server is still waking up or the connection is slow. Wait a moment and try again.</string>
     <string name="error_network">Could not connect. Check your internet connection.</string>
     <string name="error_generic">Could not complete the action. Please try again.</string>
     <string name="error_check_fields">Check the information you entered.</string>

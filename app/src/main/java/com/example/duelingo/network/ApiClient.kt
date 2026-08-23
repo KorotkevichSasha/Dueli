@@ -4,14 +4,21 @@ import android.content.Context
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.utils.AppConfig
 import kotlinx.coroutines.runBlocking
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.IOException
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 object ApiClient {
     private lateinit var tokenManager: TokenManager
     private val refreshLock = Any()
+    private val warmupRunning = AtomicBoolean(false)
 
     fun initialize(context: Context) {
         tokenManager = TokenManager(context.applicationContext)
@@ -26,6 +33,26 @@ object ApiClient {
     }
 
     val authService: AuthService by lazy { publicRetrofit.create(AuthService::class.java) }
+
+    /** Starts waking a sleeping production service without delaying navigation. */
+    fun warmUpServer() {
+        if (!warmupRunning.compareAndSet(false, true)) return
+
+        val request = Request.Builder()
+            .url("${AppConfig.BASE_URL}actuator/health/liveness")
+            .get()
+            .build()
+        baseClient().newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                warmupRunning.set(false)
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.close()
+                warmupRunning.set(false)
+            }
+        })
+    }
 
     private val authenticatedClient: OkHttpClient by lazy {
         check(::tokenManager.isInitialized) { "ApiClient.initialize must be called from Application" }
