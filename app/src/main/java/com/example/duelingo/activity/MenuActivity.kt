@@ -612,7 +612,10 @@ class MenuActivity : AppCompatActivity() {
                         binding.root,
                         R.string.offline_showing_saved_data,
                         Snackbar.LENGTH_LONG
-                    ).setAction(R.string.retry_connection) { refreshDuelHistory() }.show()
+                    )
+                        .setAnchorView(binding.linearLayout2)
+                        .setAction(R.string.retry_connection) { refreshDuelHistory() }
+                        .show()
                 }
             } finally {
                 isLoading = false
