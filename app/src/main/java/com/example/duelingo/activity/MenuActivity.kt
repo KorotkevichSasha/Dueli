@@ -698,7 +698,10 @@ class MenuActivity : AppCompatActivity() {
                         binding.root,
                         UserMessage.from(this@MenuActivity, e),
                         Snackbar.LENGTH_LONG
-                    ).setAction(R.string.retry_connection) { refreshDuelHistory() }.show()
+                    )
+                        .setAnchorView(binding.linearLayout2)
+                        .setAction(R.string.retry_connection) { refreshDuelHistory() }
+                        .show()
                 }
             } finally {
                 isLoading = false

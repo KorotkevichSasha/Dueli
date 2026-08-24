@@ -229,8 +229,10 @@ class RankActivity : AppCompatActivity() {
                     offlineSnackbar = Snackbar.make(
                         binding.root,
                         UserMessage.from(this@RankActivity, e),
-                        Snackbar.LENGTH_INDEFINITE
-                    ).setAction(R.string.retry_connection) { loadLeaderboard() }
+                        Snackbar.LENGTH_LONG
+                    )
+                        .setAnchorView(binding.bottomNavigation)
+                        .setAction(R.string.retry_connection) { loadLeaderboard() }
                     offlineSnackbar?.show()
                 } finally {
                     leaderboardLoading = false

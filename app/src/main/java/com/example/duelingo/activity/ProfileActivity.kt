@@ -382,8 +382,10 @@ class ProfileActivity : AppCompatActivity() {
                     } else {
                         UserMessage.from(this@ProfileActivity, e)
                     },
-                    Snackbar.LENGTH_INDEFINITE
-                ).setAction(R.string.retry_connection) { loadProfile() }
+                    Snackbar.LENGTH_LONG
+                )
+                    .setAnchorView(binding.bottomNavigation)
+                    .setAction(R.string.retry_connection) { loadProfile() }
                 offlineSnackbar?.show()
             } finally {
                 profileLoading = false
