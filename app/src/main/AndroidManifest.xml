@@ -49,6 +49,11 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name=".activity.StoreActivity"
+            android:exported="false"
+            android:screenOrientation="unspecified"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".activity.LearningActivity"
             android:exported="false"
             android:launchMode="singleTop"

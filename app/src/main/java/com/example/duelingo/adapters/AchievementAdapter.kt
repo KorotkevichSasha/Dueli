@@ -17,9 +17,11 @@ import com.example.duelingo.dto.response.AchievementLevel
 import com.example.duelingo.dto.response.AchievementType
 import com.example.duelingo.dto.response.UserAchievementResponse
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.button.MaterialButton
 
 class AchievementsAdapter(
-    private var achievements: List<UserAchievementResponse>
+    private var achievements: List<UserAchievementResponse>,
+    private val onClaimReward: (UserAchievementResponse) -> Unit
 ) : RecyclerView.Adapter<AchievementsAdapter.AchievementViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AchievementViewHolder {
@@ -30,7 +32,7 @@ class AchievementsAdapter(
 
     override fun onBindViewHolder(holder: AchievementViewHolder, position: Int) {
         val achievement = achievements[position]
-        holder.bind(achievement)
+        holder.bind(achievement, onClaimReward)
     }
 
     override fun getItemCount(): Int = achievements.size
@@ -48,9 +50,10 @@ class AchievementsAdapter(
         private val ivStatus: ImageView = itemView.findViewById(R.id.achievementStatus)
         private val progressBar: ProgressBar = itemView.findViewById(R.id.achievementProgressBar)
         private val card: MaterialCardView = itemView.findViewById(R.id.achievementCard)
+        private val rewardButton: MaterialButton = itemView.findViewById(R.id.achievementRewardButton)
 
         @SuppressLint("SetTextI18n")
-        fun bind(achievement: UserAchievementResponse) {
+        fun bind(achievement: UserAchievementResponse, onClaimReward: (UserAchievementResponse) -> Unit) {
             val english = itemView.resources.configuration.locales[0].language == "en"
             tvTitle.text = if (english) englishTitle(achievement) else achievement.title
             tvDescription.text = if (english) englishDescription(achievement) else achievement.description
@@ -74,6 +77,7 @@ class AchievementsAdapter(
             ivIcon.setImageResource(when (achievement.type) {
                 AchievementType.DUELS -> R.drawable.swords24
                 AchievementType.FRIENDS -> R.drawable.ic_add_friend
+                AchievementType.INVITES -> R.drawable.ic_invite
                 AchievementType.TESTS -> R.drawable.graduation24
                 AchievementType.WORDS -> R.drawable.add
             })
@@ -91,6 +95,20 @@ class AchievementsAdapter(
                     ColorStateList.valueOf(ContextCompat.getColor(itemView.context, R.color.gray))
                 )
             }
+
+            rewardButton.text = when {
+                achievement.rewardClaimed -> itemView.context.getString(
+                    R.string.achievement_reward_claimed, achievement.rewardGold)
+                achievement.isAchieved -> itemView.context.getString(
+                    R.string.achievement_reward_claim, achievement.rewardGold)
+                else -> itemView.context.getString(
+                    R.string.achievement_reward, achievement.rewardGold)
+            }
+            rewardButton.isEnabled = achievement.isAchieved && !achievement.rewardClaimed
+            rewardButton.alpha = if (rewardButton.isEnabled) 1f else 0.68f
+            rewardButton.setOnClickListener {
+                if (achievement.isAchieved && !achievement.rewardClaimed) onClaimReward(achievement)
+            }
         }
 
         private fun englishTitle(achievement: UserAchievementResponse): String = when (achievement.type) {
@@ -105,6 +123,13 @@ class AchievementsAdapter(
                 in 2..10 -> "Learning circle"
                 in 11..35 -> "Language club"
                 else -> "Community leader"
+            }
+            AchievementType.INVITES -> when (achievement.requiredValue) {
+                1 -> "First invite"
+                2 -> "Duo assembled"
+                in 3..5 -> "Your own squad"
+                in 6..10 -> "Club captain"
+                else -> "Community founder"
             }
             AchievementType.TESTS -> when (achievement.requiredValue) {
                 1 -> "First ten"
@@ -123,6 +148,11 @@ class AchievementsAdapter(
         private fun englishDescription(achievement: UserAchievementResponse): String = when (achievement.type) {
             AchievementType.DUELS -> itemView.context.getString(R.string.achievement_duels_description, achievement.requiredValue)
             AchievementType.FRIENDS -> itemView.context.getString(R.string.achievement_friends_description, achievement.requiredValue)
+            AchievementType.INVITES -> itemView.context.resources.getQuantityString(
+                R.plurals.achievement_invites_description,
+                achievement.requiredValue,
+                achievement.requiredValue
+            )
             AchievementType.TESTS -> itemView.context.getString(R.string.achievement_tests_description, achievement.requiredValue)
             AchievementType.WORDS -> itemView.context.getString(R.string.achievement_words_description, achievement.requiredValue)
         }
