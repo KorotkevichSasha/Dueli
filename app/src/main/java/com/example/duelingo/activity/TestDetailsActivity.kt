@@ -18,6 +18,7 @@ import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.storage.LearningHabitTracker
 import com.example.duelingo.utils.UserMessage
 import kotlinx.coroutines.launch
+import com.example.duelingo.dto.response.LearningRewardResponse
 
 class TestDetailsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTestDetailsBinding
@@ -29,6 +30,8 @@ class TestDetailsActivity : AppCompatActivity() {
     private var questions: List<QuestionDetailedResponse>? = null
     private var isRandomTest: Boolean = false
     private var resultsShown = false
+    private var learningReward: LearningRewardResponse? = null
+    private var resultsBinding: DialogTestResultsBinding? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,6 +69,8 @@ class TestDetailsActivity : AppCompatActivity() {
                     val response = ApiClient.testService.markTestAsPassed(tokenWithBearer, testId)
                     if (response.isSuccessful) {
                         Log.d("TestCompletion", "Test marked as passed successfully")
+                        learningReward = response.body()
+                        resultsBinding?.let(::renderLearningReward)
                     } else {
                         Log.e("TestCompletion", "Failed to mark test as passed: ${response.errorBody()?.string()}")
                     }
@@ -245,6 +250,7 @@ class TestDetailsActivity : AppCompatActivity() {
         .replace(Regex("\\s+"), " ")
     private fun showResultsDialog(correct: Int, checkedQuestions: List<QuestionDetailedResponse>) {
         val content = DialogTestResultsBinding.inflate(layoutInflater)
+        resultsBinding = content
         val dialog = android.app.Dialog(this).apply {
             requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
             setContentView(content.root)
@@ -266,6 +272,7 @@ class TestDetailsActivity : AppCompatActivity() {
                 else -> R.string.test_result_practice
             }
         )
+        renderLearningReward(content)
         val firstMistake = checkedQuestions.indices.firstOrNull { index ->
             !answersMatch(checkedQuestions[index], userAnswers[index].orEmpty())
         }
@@ -286,6 +293,19 @@ class TestDetailsActivity : AppCompatActivity() {
             finish()
         }
         dialog.show()
+    }
+
+    private fun renderLearningReward(content: DialogTestResultsBinding) {
+        val reward = learningReward ?: run {
+            content.learningRewardContainer.visibility = android.view.View.GONE
+            return
+        }
+        content.learningRewardContainer.visibility = android.view.View.VISIBLE
+        content.learningRewardText.text = if (reward.goldAwarded > 0) {
+            getString(R.string.learning_gold_reward, reward.goldAwarded)
+        } else {
+            getString(R.string.learning_reward_claimed)
+        }
     }
     private fun updateTestInfo(test: TestDetailedResponse) {
         binding.tvTestInfo.text = getString(

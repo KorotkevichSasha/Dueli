@@ -3,6 +3,7 @@ package com.example.duelingo.network
 import com.example.duelingo.dto.response.FriendResponse
 import com.example.duelingo.dto.response.PaginationResponse
 import com.example.duelingo.dto.response.UserProfileResponse
+import com.example.duelingo.dto.response.EconomyResponse
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.http.GET
@@ -16,6 +17,17 @@ import retrofit2.http.Query
 import retrofit2.http.PUT
 
 interface UserService {
+
+    @GET("/users/economy")
+    suspend fun getEconomy(
+        @Header("Authorization") token: String
+    ): EconomyResponse
+
+    @POST("/users/economy/rush-packs/{packId}")
+    suspend fun purchaseRushPack(
+        @Header("Authorization") token: String,
+        @Path("packId") packId: String
+    ): EconomyResponse
 
     @DELETE("/users/me")
     suspend fun deleteAccount(

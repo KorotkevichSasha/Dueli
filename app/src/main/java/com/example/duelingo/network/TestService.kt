@@ -10,6 +10,7 @@ import kotlin.Unit
 import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
+import com.example.duelingo.dto.response.LearningRewardResponse
 
 
 interface TestService {
@@ -39,5 +40,5 @@ interface TestService {
     suspend fun markTestAsPassed(
         @Header("Authorization") authHeader: String,
         @Path("testId") testId: String
-    ): Response<Unit>
+    ): Response<LearningRewardResponse>
 }

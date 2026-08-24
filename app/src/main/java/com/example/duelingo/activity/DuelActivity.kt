@@ -241,6 +241,13 @@ class DuelActivity : AppCompatActivity() {
                 putExtra("is_winner", event.winner != opponentName && event.winner != "Draw")
                 putExtra("is_draw", event.winner == "Draw")
                 putExtra("opponent_forfeited", event.forfeitedBy == opponentName)
+                putExtra("gold_awarded", event.goldAwarded)
+                putExtra("rating_delta", event.ratingDelta)
+                putExtra("league_id", event.leagueId)
+                putExtra("league_promoted", event.leaguePromoted)
+                putExtra("previous_league_id", event.previousLeagueId)
+                putExtra("league_bonus_gold", event.leagueBonusGold)
+                putExtra("friendly_duel", duelInfo.friendChallenge)
             }
             startActivity(intent)
             finish()
@@ -410,6 +417,7 @@ class DuelActivity : AppCompatActivity() {
                 putExtra("opponent_score", opponentScore)
                 putExtra("is_winner", correctAnswers > opponentScore)
                 putExtra("is_draw", correctAnswers == opponentScore)
+                putExtra("friendly_duel", false)
             }
             startActivity(intent)
             finish()

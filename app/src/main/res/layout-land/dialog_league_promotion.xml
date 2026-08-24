@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/promotionCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardBackgroundColor="?attr/cardBackgroundColor"
+    app:cardCornerRadius="28dp"
+    app:cardElevation="10dp"
+    app:strokeColor="@color/blue_primary"
+    app:strokeWidth="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="22dp">
+
+        <FrameLayout
+            android:layout_width="156dp"
+            android:layout_height="156dp">
+
+            <ImageView
+                android:id="@+id/promotionParticleLeft"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="start|center_vertical"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_gold_coin" />
+
+            <ImageView
+                android:id="@+id/promotionParticleTop"
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+                android:layout_gravity="top|center_horizontal"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_rush_spark" />
+
+            <ImageView
+                android:id="@+id/promotionParticleRight"
+                android:layout_width="29dp"
+                android:layout_height="29dp"
+                android:layout_gravity="end|center_vertical"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_gold_coin" />
+
+            <ImageView
+                android:id="@+id/promotionLeagueIcon"
+                android:layout_width="106dp"
+                android:layout_height="106dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/league_title"
+                android:src="@drawable/league_copper" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.12"
+                android:text="@string/league_promotion_label"
+                android:textColor="@color/blue_primary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="@string/league_promotion_title"
+                android:textColor="?attr/textColor"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/promotionLeagueName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/league_copper"
+                android:textColor="@color/blue_primary"
+                android:textSize="19sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/promotionJourney"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:textColor="?attr/secondaryTextColor"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/promotionGold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_feature_icon"
+                android:drawableStart="@drawable/ic_gold_coin"
+                android:drawablePadding="8dp"
+                android:gravity="center"
+                android:minHeight="44dp"
+                android:paddingHorizontal="15dp"
+                android:textColor="?attr/textColor"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:maxLines="2"
+                android:text="@string/league_promotion_once"
+                android:textColor="?attr/secondaryTextColor"
+                android:textSize="11sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/promotionContinue"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:text="@string/continue_label"
+                android:textAllCaps="false"
+                android:textSize="15sp"
+                app:backgroundTint="@color/blue_primary"
+                app:cornerRadius="16dp" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

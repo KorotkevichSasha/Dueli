@@ -6,5 +6,6 @@ data class UserProfileResponse(
     val email: String,
     val points: Int,
     val avatarUrl: String,
-    val lastLogin: String
+    val lastLogin: String,
+    val economy: EconomyResponse? = null
 )

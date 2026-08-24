@@ -58,6 +58,7 @@ import com.example.duelingo.network.UserService
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.utils.RefreshEvents
 import com.example.duelingo.utils.UserMessage
+import com.example.duelingo.utils.LeagueVisuals
 import com.example.duelingo.utils.ProfileCache
 import com.example.duelingo.utils.ConnectivityRetry
 import com.example.duelingo.utils.LeaderboardCache
@@ -286,6 +287,14 @@ class ProfileActivity : AppCompatActivity() {
         val cachedGap = LeaderboardCache.current(this, tokenManager.getAccessToken())
             ?.currentUser?.pointsToNextRank
         binding.profileGoalValue.text = cachedGap?.toString() ?: "—"
+        response.economy?.let { economy ->
+            binding.profileGoldValue.text = getString(R.string.gold_balance, economy.gold)
+            binding.profileRushValue.text = getString(
+                R.string.rush_sparks_balance, economy.rushCharges, economy.maxRushCharges)
+            val visual = LeagueVisuals.forId(economy.league.id)
+            binding.profileLeagueIcon.setImageResource(visual.icon)
+            binding.profileLeagueName.text = getString(R.string.league_title_format, getString(visual.name))
+        }
         avatarManager.loadAvatar(response.id, binding.profileImage, response.avatarUrl)
     }
 
@@ -369,9 +378,9 @@ class ProfileActivity : AppCompatActivity() {
                 offlineSnackbar = Snackbar.make(
                     binding.root,
                     if (ProfileCache.read(this@ProfileActivity, accessToken) != null) {
-                        R.string.offline_showing_saved_data
+                        UserMessage.from(this@ProfileActivity, e)
                     } else {
-                        R.string.error_network
+                        UserMessage.from(this@ProfileActivity, e)
                     },
                     Snackbar.LENGTH_LONG
                 )
