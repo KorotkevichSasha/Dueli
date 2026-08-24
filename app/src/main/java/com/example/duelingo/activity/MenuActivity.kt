@@ -27,10 +27,12 @@ import com.example.duelingo.adapters.DuelHistoryAdapter
 import com.example.duelingo.databinding.ActivityMenuBinding
 import com.example.duelingo.databinding.DialogDuelDifficultyBinding
 import com.example.duelingo.databinding.DialogDuelChallengeBinding
+import com.example.duelingo.databinding.DialogRushStoreBinding
 import com.example.duelingo.dto.event.DuelFoundEvent
 import com.example.duelingo.dto.event.DuelResultEvent
 import com.example.duelingo.dto.event.MatchmakingFailedEvent
 import com.example.duelingo.dto.event.DuelChallengeEvent
+import com.example.duelingo.dto.response.EconomyResponse
 import com.example.duelingo.manager.AvatarManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.network.DuelHistoryService
@@ -59,6 +61,9 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import kotlin.coroutines.resumeWithException
+import java.time.Duration
+import java.time.LocalDateTime
+import kotlin.math.ceil
 
 class MenuActivity : AppCompatActivity() {
     companion object {
@@ -90,6 +95,8 @@ class MenuActivity : AppCompatActivity() {
     private var openLatestHistoryRequested = false
     private var requestedHistoryId: String? = null
     private var historyOpenRetryCount = 0
+    private var economy: EconomyResponse? = null
+    private var economyLoading = false
 
     private val scope = CoroutineScope(Dispatchers.Main + Job())
 
@@ -105,6 +112,7 @@ class MenuActivity : AppCompatActivity() {
             if (contentReady) {
                 refreshDuelHistory()
                 loadDuelStats()
+                loadEconomy()
             }
         }
         binding.duelHeroImage.setImageDrawable(null)
@@ -126,6 +134,8 @@ class MenuActivity : AppCompatActivity() {
         stompManager = StompManager(tokenManager)
         setupDuelButton()
         binding.btnOfflineDuel.setOnClickListener { showDifficultyDialog(offline = true) }
+        binding.refillRushButton.setOnClickListener { showRushStore() }
+        binding.duelEconomyCard.setOnClickListener { showRushStore() }
 
         binding.btnCancelSearch.setOnClickListener {
             Log.d("MenuActivity", "Cancel search button clicked")
@@ -181,6 +191,7 @@ class MenuActivity : AppCompatActivity() {
         LeaderboardCache.prefetch(this, tokenManager.getAccessToken())
         refreshDuelHistory()
         loadDuelStats()
+        loadEconomy()
         scope.launch {
             if (!stompManager.isConnected() && !socketConnectionInProgress) {
                 socketConnectionInProgress = true
@@ -214,7 +225,12 @@ class MenuActivity : AppCompatActivity() {
                     cancelDuelSearch()
                 } else {
                     Log.d("MenuActivity", "Starting duel search")
-                    showDifficultyDialog()
+                    if (economy?.rushCharges == 0) {
+                        Toast.makeText(this@MenuActivity, R.string.rush_not_enough, Toast.LENGTH_LONG).show()
+                        showRushStore()
+                    } else {
+                        showDifficultyDialog()
+                    }
                 }
             }
         }
@@ -274,6 +290,76 @@ class MenuActivity : AppCompatActivity() {
                 }
             }.forEach { it.await() }
         }
+    }
+
+    private fun loadEconomy() {
+        if (economyLoading) return
+        val token = tokenManager.getAccessToken() ?: return
+        scope.launch {
+            economyLoading = true
+            runCatching { userService.getEconomy("Bearer $token") }
+                .onSuccess(::renderEconomy)
+                .onFailure { Log.w("MenuActivity", "Could not refresh economy", it) }
+            economyLoading = false
+        }
+    }
+
+    private fun renderEconomy(value: EconomyResponse) {
+        economy = value
+        binding.rushBalanceText.text = getString(
+            R.string.rush_sparks_balance, value.rushCharges, value.maxRushCharges)
+        binding.goldBalanceText.text = getString(R.string.gold_balance, value.gold)
+        binding.rushTimerText.text = if (value.rushCharges >= value.maxRushCharges || value.nextRushChargeAt == null) {
+            getString(R.string.rush_sparks_ready)
+        } else {
+            val minutes = runCatching {
+                ceil(Duration.between(LocalDateTime.now(), LocalDateTime.parse(value.nextRushChargeAt))
+                    .seconds.coerceAtLeast(0) / 60.0).toInt().coerceAtLeast(1)
+            }.getOrDefault(value.minutesPerCharge)
+            getString(R.string.rush_sparks_next, minutes)
+        }
+    }
+
+    private fun showRushStore() {
+        val content = DialogRushStoreBinding.inflate(layoutInflater)
+        val dialog = Dialog(this).apply {
+            requestWindowFeature(Window.FEATURE_NO_TITLE)
+            setContentView(content.root)
+            window?.setBackgroundDrawableResource(android.R.color.transparent)
+            setOnShowListener {
+                val width = (resources.displayMetrics.widthPixels - 32 * resources.displayMetrics.density).toInt()
+                    .coerceAtMost((520 * resources.displayMetrics.density).toInt())
+                window?.setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT)
+            }
+        }
+        fun refreshBalance() {
+            val value = economy
+            content.storeBalance.text = if (value == null) getString(R.string.rush_sparks)
+            else "${getString(R.string.rush_sparks_balance, value.rushCharges, value.maxRushCharges)}  ·  ${getString(R.string.gold_balance, value.gold)}"
+        }
+        fun buy(pack: String) {
+            val token = tokenManager.getAccessToken() ?: return
+            listOf(content.pocketPack, content.boostPack, content.vaultPack).forEach { it.isEnabled = false }
+            scope.launch {
+                runCatching { userService.purchaseRushPack("Bearer $token", pack) }
+                    .onSuccess {
+                        renderEconomy(it)
+                        refreshBalance()
+                        Toast.makeText(this@MenuActivity, R.string.rush_pack_purchased, Toast.LENGTH_SHORT).show()
+                    }
+                    .onFailure {
+                        Toast.makeText(this@MenuActivity, UserMessage.from(this@MenuActivity, it), Toast.LENGTH_LONG).show()
+                    }
+                listOf(content.pocketPack, content.boostPack, content.vaultPack).forEach { it.isEnabled = true }
+            }
+        }
+        content.closeButton.setOnClickListener { dialog.dismiss() }
+        content.pocketPack.setOnClickListener { buy("POCKET") }
+        content.boostPack.setOnClickListener { buy("BOOST") }
+        content.vaultPack.setOnClickListener { buy("VAULT") }
+        refreshBalance()
+        dialog.show()
+        if (economy == null) loadEconomy()
     }
 
     private suspend fun startDuelSearch() {
@@ -610,7 +696,7 @@ class MenuActivity : AppCompatActivity() {
                     renderHistory(DuelCache.readHistory(this@MenuActivity, tokenManager.getAccessToken()))
                     Snackbar.make(
                         binding.root,
-                        R.string.offline_showing_saved_data,
+                        UserMessage.from(this@MenuActivity, e),
                         Snackbar.LENGTH_LONG
                     ).setAction(R.string.retry_connection) { refreshDuelHistory() }.show()
                 }

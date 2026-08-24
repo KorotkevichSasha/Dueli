@@ -25,6 +25,29 @@
                     android:scaleType="centerCrop" />
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/duelEconomyCard"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="6dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="?attr/cardBackgroundColor"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="12dp">
+                    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:contentDescription="@string/rush_sparks" android:src="@drawable/ic_rush_spark" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="7dp" android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:id="@+id/rushBalanceText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="25/25" android:textColor="?attr/textColor" android:textSize="15sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/rushTimerText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="1" android:text="@string/rush_sparks_ready" android:textColor="?attr/secondaryTextColor" android:textSize="10sp" />
+                    </LinearLayout>
+                    <ImageView android:layout_width="22dp" android:layout_height="22dp" android:contentDescription="@null" android:src="@drawable/ic_gold_coin" />
+                    <TextView android:id="@+id/goldBalanceText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="5dp" android:text="@string/value_zero" android:textColor="?attr/textColor" android:textSize="15sp" android:textStyle="bold" />
+                    <ImageButton android:id="@+id/refillRushButton" android:layout_width="36dp" android:layout_height="36dp" android:layout_marginStart="5dp" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/rush_store_title" android:padding="8dp" android:src="@drawable/add" app:tint="@color/blue_primary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <com.google.android.material.button.MaterialButton android:id="@+id/btnDuel"
                 android:layout_width="match_parent" android:layout_height="54dp" android:layout_marginTop="8dp"
                 android:text="@string/start_duel_search" android:textStyle="bold"

@@ -32,6 +32,7 @@ import kotlinx.coroutines.isActive
 import com.example.duelingo.utils.openTopLevel
 import com.example.duelingo.utils.ConnectivityRetry
 import com.google.android.material.snackbar.Snackbar
+import com.example.duelingo.utils.LeagueVisuals
 
 class RankActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRankBinding
@@ -227,7 +228,7 @@ class RankActivity : AppCompatActivity() {
                     offlineSnackbar?.dismiss()
                     offlineSnackbar = Snackbar.make(
                         binding.root,
-                        R.string.offline_showing_saved_data,
+                        UserMessage.from(this@RankActivity, e),
                         Snackbar.LENGTH_INDEFINITE
                     ).setAction(R.string.retry_connection) { loadLeaderboard() }
                     offlineSnackbar?.show()
@@ -248,10 +249,22 @@ class RankActivity : AppCompatActivity() {
         binding.tvPointsSummary.text = currentUser.points.toString()
         binding.tvPlayersSummary.text = response.top.totalItems.toString()
 
-        binding.tvRankProgress.text = if (currentUser.pointsToNextRank == null) {
-            getString(R.string.rank_first_place)
-        } else {
-            getString(R.string.rank_next_format, currentUser.pointsToNextRank)
+        currentUser.league?.let { league ->
+            val visual = LeagueVisuals.forId(league.id)
+            binding.leagueIcon.setImageResource(visual.icon)
+            binding.leagueName.text = getString(R.string.league_title_format, getString(visual.name))
+            binding.leagueProgress.setProgressCompat(league.progressPercent, true)
+            binding.tvRankProgress.text = league.pointsToNextLeague?.let {
+                getString(R.string.league_points_to_next, it)
+            } ?: getString(R.string.league_max_reached)
+        }
+
+        if (currentUser.league == null) {
+            binding.tvRankProgress.text = if (currentUser.pointsToNextRank == null) {
+                getString(R.string.rank_first_place)
+            } else {
+                getString(R.string.rank_next_format, currentUser.pointsToNextRank)
+            }
         }
 
         findViewById<TextView?>(R.id.rankGapIndicator)?.apply {

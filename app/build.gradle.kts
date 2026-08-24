@@ -11,7 +11,7 @@ val apiBaseUrl = providers.gradleProperty("API_BASE_URL")
     .orElse(if (buildingRelease) "" else "http://127.0.0.1:8082")
     .get()
 val applicationIdValue = providers.gradleProperty("APPLICATION_ID")
-    .orElse("com.example.duelingo")
+    .orElse("com.duelrush.app")
     .get()
 val privacyPolicyUrl = providers.gradleProperty("PRIVACY_POLICY_URL")
     .orElse(if (buildingRelease) "" else "http://127.0.0.1:5173/privacy")
@@ -28,7 +28,7 @@ if (buildingRelease) {
         "Release builds require -PAPI_BASE_URL=https://your-production-api"
     }
     require(!applicationIdValue.startsWith("com.example.")) {
-        "Release builds require a permanent package id via -PAPPLICATION_ID=com.yourcompany.app"
+        "Release builds require the permanent package id com.duelrush.app"
     }
     require(keystorePropertiesFile.exists()) {
         "Release builds require keystore.properties; copy keystore.properties.example and add the upload key"
@@ -83,6 +83,7 @@ android {
     }
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -107,6 +108,7 @@ android {
 }
 
 dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.appcompat)

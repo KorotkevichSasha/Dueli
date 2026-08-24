@@ -16,6 +16,7 @@ import com.example.duelingo.dto.response.UserInLeaderboardResponse
 import com.example.duelingo.manager.AvatarManager
 import com.google.android.material.color.MaterialColors
 import de.hdodenhof.circleimageview.CircleImageView
+import com.example.duelingo.utils.LeagueVisuals
 
 class LeaderboardAdapter(private var users: LeaderboardResponse, private val avatarManager: AvatarManager) :
     RecyclerView.Adapter<LeaderboardAdapter.ViewHolder>() {
@@ -25,6 +26,7 @@ class LeaderboardAdapter(private var users: LeaderboardResponse, private val ava
         val avatarImage: CircleImageView = view.findViewById(R.id.avatarImage)
         val usernameText: TextView = view.findViewById(R.id.usernameText)
         val pointsText: TextView = view.findViewById(R.id.pointsText)
+        val leagueIcon: ImageView = view.findViewById(R.id.rowLeagueIcon)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -38,6 +40,7 @@ class LeaderboardAdapter(private var users: LeaderboardResponse, private val ava
         holder.rankText.text = user.rank.toString()
         holder.usernameText.text = user.username
         holder.pointsText.text = user.points.toString()
+        holder.leagueIcon.setImageResource(LeagueVisuals.forId(user.league?.id).icon)
 
         when (user.rank) {
             1L -> {

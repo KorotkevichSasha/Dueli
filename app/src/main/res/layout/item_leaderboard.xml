@@ -43,9 +43,20 @@
         android:textColor="?attr/textColor"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="@id/avatarImage"
-        app:layout_constraintEnd_toStartOf="@id/pointsText"
+        app:layout_constraintEnd_toStartOf="@id/rowLeagueIcon"
         app:layout_constraintStart_toEndOf="@id/avatarImage"
         app:layout_constraintTop_toTopOf="@id/avatarImage"/>
+
+    <ImageView
+        android:id="@+id/rowLeagueIcon"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginEnd="8dp"
+        android:contentDescription="@null"
+        android:src="@drawable/league_ember"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/pointsText"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Очки -->
     <TextView
@@ -60,7 +71,6 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/avatarImage"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/usernameText"
         app:layout_constraintTop_toTopOf="@id/avatarImage"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
