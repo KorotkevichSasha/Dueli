@@ -27,7 +27,6 @@ import com.example.duelingo.adapters.DuelHistoryAdapter
 import com.example.duelingo.databinding.ActivityMenuBinding
 import com.example.duelingo.databinding.DialogDuelDifficultyBinding
 import com.example.duelingo.databinding.DialogDuelChallengeBinding
-import com.example.duelingo.databinding.DialogRushStoreBinding
 import com.example.duelingo.dto.event.DuelFoundEvent
 import com.example.duelingo.dto.event.DuelResultEvent
 import com.example.duelingo.dto.event.MatchmakingFailedEvent
@@ -321,45 +320,7 @@ class MenuActivity : AppCompatActivity() {
     }
 
     private fun showRushStore() {
-        val content = DialogRushStoreBinding.inflate(layoutInflater)
-        val dialog = Dialog(this).apply {
-            requestWindowFeature(Window.FEATURE_NO_TITLE)
-            setContentView(content.root)
-            window?.setBackgroundDrawableResource(android.R.color.transparent)
-            setOnShowListener {
-                val width = (resources.displayMetrics.widthPixels - 32 * resources.displayMetrics.density).toInt()
-                    .coerceAtMost((520 * resources.displayMetrics.density).toInt())
-                window?.setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT)
-            }
-        }
-        fun refreshBalance() {
-            val value = economy
-            content.storeBalance.text = if (value == null) getString(R.string.rush_sparks)
-            else "${getString(R.string.rush_sparks_balance, value.rushCharges, value.maxRushCharges)}  ·  ${getString(R.string.gold_balance, value.gold)}"
-        }
-        fun buy(pack: String) {
-            val token = tokenManager.getAccessToken() ?: return
-            listOf(content.pocketPack, content.boostPack, content.vaultPack).forEach { it.isEnabled = false }
-            scope.launch {
-                runCatching { userService.purchaseRushPack("Bearer $token", pack) }
-                    .onSuccess {
-                        renderEconomy(it)
-                        refreshBalance()
-                        Toast.makeText(this@MenuActivity, R.string.rush_pack_purchased, Toast.LENGTH_SHORT).show()
-                    }
-                    .onFailure {
-                        Toast.makeText(this@MenuActivity, UserMessage.from(this@MenuActivity, it), Toast.LENGTH_LONG).show()
-                    }
-                listOf(content.pocketPack, content.boostPack, content.vaultPack).forEach { it.isEnabled = true }
-            }
-        }
-        content.closeButton.setOnClickListener { dialog.dismiss() }
-        content.pocketPack.setOnClickListener { buy("POCKET") }
-        content.boostPack.setOnClickListener { buy("BOOST") }
-        content.vaultPack.setOnClickListener { buy("VAULT") }
-        refreshBalance()
-        dialog.show()
-        if (economy == null) loadEconomy()
+        startActivity(Intent(this, StoreActivity::class.java))
     }
 
     private suspend fun startDuelSearch() {

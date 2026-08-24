@@ -32,14 +32,14 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="40dp" android:layout_marginTop="4dp" app:cardBackgroundColor="?attr/cardBackgroundColor" app:cardCornerRadius="15dp" app:cardElevation="1dp">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/profileEconomyCard" android:layout_width="match_parent" android:layout_height="40dp" android:layout_marginTop="4dp" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground" app:cardBackgroundColor="?attr/cardBackgroundColor" app:cardCornerRadius="15dp" app:cardElevation="1dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="10dp">
                     <ImageView android:id="@+id/profileLeagueIcon" android:layout_width="30dp" android:layout_height="30dp" android:contentDescription="@string/league_title" android:src="@drawable/league_ember" />
                     <TextView android:id="@+id/profileLeagueName" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:text="@string/league_ember" android:textColor="?attr/textColor" android:textSize="13sp" android:textStyle="bold" />
                     <ImageView android:layout_width="20dp" android:layout_height="20dp" android:contentDescription="@null" android:src="@drawable/ic_gold_coin" />
                     <TextView android:id="@+id/profileGoldValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:minWidth="28dp" android:text="@string/value_zero" android:textColor="?attr/textColor" android:textStyle="bold" />
                     <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_marginStart="8dp" android:contentDescription="@string/rush_sparks" android:src="@drawable/ic_rush_spark" />
-                    <TextView android:id="@+id/profileRushValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:text="25/25" android:textColor="?attr/textColor" android:textStyle="bold" />
+                    <TextView android:id="@+id/profileRushValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:text="10/10" android:textColor="?attr/textColor" android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

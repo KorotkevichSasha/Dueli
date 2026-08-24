@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/backgroundColor">
+
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/back"
+        android:padding="12dp"
+        android:src="@drawable/ic_arrow_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="?attr/textColor" />
+
+    <TextView
+        android:id="@+id/storeTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="20dp"
+        android:text="@string/store_title"
+        android:textColor="?attr/textColor"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/backButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/backButton"
+        app:layout_constraintTop_toTopOf="@id/backButton" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:paddingBottom="28dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/backButton">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="8dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/blue_primary"
+                app:cardCornerRadius="26dp"
+                app:cardElevation="3dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="20dp">
+
+                    <ImageView
+                        android:layout_width="58dp"
+                        android:layout_height="58dp"
+                        android:background="@drawable/bg_feature_icon"
+                        android:contentDescription="@null"
+                        android:padding="13dp"
+                        android:src="@drawable/ic_store" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/store_balance_title"
+                            android:textColor="@color/white"
+                            android:textSize="13sp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_gold_coin" />
+
+                            <TextView
+                                android:id="@+id/goldBalance"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="7dp"
+                                android:text="@string/store_gold_placeholder"
+                                android:textColor="@color/white"
+                                android:textSize="22sp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_marginStart="20dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_rush_spark" />
+
+                            <TextView
+                                android:id="@+id/rushBalance"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="7dp"
+                                android:text="@string/store_sparks_placeholder"
+                                android:textColor="@color/white"
+                                android:textSize="22sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/rushTimer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/rush_sparks_ready"
+                            android:textColor="#D9FFFFFF"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/store_sparks_section"
+                android:textColor="?attr/textColor"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/store_sparks_description"
+                android:textColor="?attr/secondaryTextColor"
+                android:textSize="14sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/pocketPack"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="58dp"
+                android:layout_marginTop="15dp"
+                android:gravity="center_vertical"
+                android:text="@string/rush_pack_pocket_offer"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                app:cornerRadius="17dp"
+                app:icon="@drawable/ic_rush_spark"
+                app:iconGravity="textStart"
+                app:iconPadding="10dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/boostPack"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="58dp"
+                android:layout_marginTop="9dp"
+                android:gravity="center_vertical"
+                android:text="@string/rush_pack_boost_offer"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                app:cornerRadius="17dp"
+                app:icon="@drawable/ic_rush_spark"
+                app:iconGravity="textStart"
+                app:iconPadding="10dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/vaultPack"
+                android:layout_width="match_parent"
+                android:layout_height="58dp"
+                android:layout_marginTop="9dp"
+                android:gravity="center_vertical"
+                android:text="@string/rush_pack_vault_offer"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                app:backgroundTint="@color/blue_primary"
+                app:cornerRadius="17dp"
+                app:icon="@drawable/ic_rush_spark"
+                app:iconGravity="textStart"
+                app:iconPadding="10dp"
+                app:iconTint="@color/white" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="25dp"
+                android:text="@string/store_gold_section"
+                android:textColor="?attr/textColor"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/adRewardCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="?attr/cardBackgroundColor"
+                app:cardCornerRadius="20dp"
+                app:strokeColor="@color/blue_primary"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="17dp">
+
+                    <TextView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_feature_icon"
+                        android:gravity="center"
+                        android:text="@string/store_ad_badge"
+                        android:textColor="@color/blue_primary"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/store_rewarded_ad_title"
+                            android:textColor="?attr/textColor"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:text="@string/store_rewarded_ad_description"
+                            android:textColor="?attr/secondaryTextColor"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:text="@string/store_rewarded_ad_reward"
+                        android:textColor="@color/blue_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:cardBackgroundColor="?attr/cardBackgroundColor"
+                app:cardCornerRadius="20dp"
+                app:strokeColor="?attr/dividerColor"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="17dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/store_gold_packs_title"
+                        android:textColor="?attr/textColor"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/store_billing_pending"
+                        android:textColor="?attr/secondaryTextColor"
+                        android:textSize="13sp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="12dp"
+                        android:enabled="false"
+                        android:text="@string/store_gold_pack_small"
+                        android:textAllCaps="false"
+                        app:cornerRadius="15dp"
+                        app:icon="@drawable/ic_gold_coin" />
+
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="7dp"
+                        android:enabled="false"
+                        android:text="@string/store_gold_pack_medium"
+                        android:textAllCaps="false"
+                        app:cornerRadius="15dp"
+                        app:icon="@drawable/ic_gold_coin" />
+
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="7dp"
+                        android:enabled="false"
+                        android:text="@string/store_gold_pack_large"
+                        android:textAllCaps="false"
+                        app:cornerRadius="15dp"
+                        app:icon="@drawable/ic_gold_coin" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:gravity="center"
+                android:text="@string/store_fair_play_note"
+                android:textColor="?attr/secondaryTextColor"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

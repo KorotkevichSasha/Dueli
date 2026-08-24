@@ -46,9 +46,32 @@ class AchievementActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        adapter = AchievementsAdapter(emptyList())
+        adapter = AchievementsAdapter(emptyList(), ::claimReward)
         binding.achievementRecycler.layoutManager = LinearLayoutManager(this)
         binding.achievementRecycler.adapter = adapter
+    }
+
+    private fun claimReward(achievement: com.example.duelingo.dto.response.UserAchievementResponse) {
+        val token = TokenManager(this).getAccessToken() ?: return
+        lifecycleScope.launch {
+            runCatching {
+                ApiClient.achievementService.claimReward(
+                    "Bearer $token",
+                    achievement.achievementId.toString()
+                )
+            }.onSuccess { result ->
+                if (result.claimedGold > 0) {
+                    Toast.makeText(
+                        this@AchievementActivity,
+                        getString(R.string.achievement_reward_received, result.claimedGold, result.totalGold),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                loadAchievements()
+            }.onFailure {
+                showToast(UserMessage.from(this@AchievementActivity, it))
+            }
+        }
     }
 
     private fun loadAchievements() {
@@ -62,7 +85,9 @@ class AchievementActivity : AppCompatActivity() {
                     val achievements = ApiClient.achievementService.getUserAchievements(bearerToken)
                     adapter.updateData(
                         achievements.sortedWith(
-                            compareByDescending<com.example.duelingo.dto.response.UserAchievementResponse> { it.isAchieved }
+                            compareByDescending<com.example.duelingo.dto.response.UserAchievementResponse> {
+                                it.isAchieved && !it.rewardClaimed
+                            }.thenByDescending { it.isAchieved }
                                 .thenByDescending {
                                     it.currentValue.toFloat() / it.requiredValue.coerceAtLeast(1)
                                 }
