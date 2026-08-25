@@ -111,7 +111,7 @@ class ProfileActivity : AppCompatActivity() {
         binding.uploadPhotoButton.setOnClickListener { showAvatarPicker() }
         binding.shareProfileButton.setOnClickListener { shareProfile() }
         binding.profileEconomyCard?.setOnClickListener {
-            startActivity(Intent(this, StoreActivity::class.java))
+            openTopLevel(StoreActivity::class.java)
         }
 
         binding.achievementsButton.setOnClickListener{ startActivity(Intent(this@ProfileActivity, AchievementActivity::class.java)) }

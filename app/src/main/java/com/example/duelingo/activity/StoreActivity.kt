@@ -11,6 +11,7 @@ import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.utils.UserMessage
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
 import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.math.ceil
@@ -25,7 +26,6 @@ class StoreActivity : AppCompatActivity() {
         binding = ActivityStoreBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.backButton.setOnClickListener { finish() }
         binding.pocketPack.setOnClickListener { purchase("POCKET") }
         binding.boostPack.setOnClickListener { purchase("BOOST") }
         binding.vaultPack.setOnClickListener { purchase("VAULT") }
@@ -64,12 +64,9 @@ class StoreActivity : AppCompatActivity() {
     }
 
     private fun render(economy: EconomyResponse) {
-        binding.goldBalance.text = getString(R.string.store_gold_value, economy.gold)
-        binding.rushBalance.text = getString(
-            R.string.store_sparks_value,
-            economy.rushCharges,
-            economy.maxRushCharges
-        )
+        binding.goldBalance.text = NumberFormat.getIntegerInstance(resources.configuration.locales[0])
+            .format(economy.gold)
+        binding.rushBalance.text = "${economy.rushCharges}/${economy.maxRushCharges}"
         binding.rushTimer.text = if (economy.rushCharges >= economy.maxRushCharges || economy.nextRushChargeAt == null) {
             getString(R.string.rush_sparks_ready)
         } else {

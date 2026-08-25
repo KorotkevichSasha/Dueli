@@ -320,7 +320,7 @@ class MenuActivity : AppCompatActivity() {
     }
 
     private fun showRushStore() {
-        startActivity(Intent(this, StoreActivity::class.java))
+        openTopLevel(StoreActivity::class.java)
     }
 
     private suspend fun startDuelSearch() {

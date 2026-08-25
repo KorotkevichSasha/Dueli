@@ -29,6 +29,7 @@
     <string name="nav_duel">Duel</string>
     <string name="nav_rank">Ranking</string>
     <string name="nav_profile">Profile</string>
+    <string name="nav_store">Store</string>
     <string name="achievements">Achievements</string>
     <string name="achievements_subtitle">Earn rewards for learning, duels and new friendships</string>
     <string name="achievements_summary_title">Your collection</string>
@@ -505,6 +506,8 @@
     </plurals>
     <string name="store_title">Store</string>
     <string name="store_balance_title">Your balance</string>
+    <string name="store_gold_label">Gold</string>
+    <string name="store_sparks_label">Sparks</string>
     <string name="store_gold_value">%1$d gold</string>
     <string name="store_sparks_value">%1$d/%2$d Sparks</string>
     <string name="store_gold_placeholder">— gold</string>
