@@ -11,7 +11,10 @@ import android.os.SystemClock
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.ViewGroup
+import android.view.Gravity
+import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.graphics.ColorUtils
 import com.airbnb.lottie.LottieAnimationView
@@ -21,6 +24,7 @@ import com.example.duelingo.activity.LearningActivity
 import com.example.duelingo.activity.MenuActivity
 import com.example.duelingo.activity.ProfileActivity
 import com.example.duelingo.activity.RankActivity
+import com.example.duelingo.activity.StoreActivity
 import com.example.duelingo.activity.TestActivity
 import com.example.duelingo.activity.TopicsActivity
 import com.google.android.material.color.MaterialColors
@@ -30,7 +34,7 @@ object BottomNavigationController {
     private const val CLICK_DEBOUNCE_MS = 220L
     private var lastNavigationAt = 0L
 
-    private enum class Destination { LEARNING, DUEL, RANK, PROFILE }
+    private enum class Destination { LEARNING, DUEL, RANK, PROFILE, STORE }
 
     private data class Item(
         val destination: Destination,
@@ -43,6 +47,7 @@ object BottomNavigationController {
 
     fun sync(activity: Activity) {
         val active = destinationFor(activity) ?: return
+        ensureStoreItem(activity)
         val items = findItems(activity) ?: return
         val primary = MaterialColors.getColor(items.first().container, com.google.android.material.R.attr.colorPrimary)
         val onSurface = MaterialColors.getColor(items.first().container, com.google.android.material.R.attr.colorOnSurface)
@@ -109,6 +114,7 @@ object BottomNavigationController {
             Destination.DUEL -> MenuActivity::class.java
             Destination.RANK -> RankActivity::class.java
             Destination.PROFILE -> ProfileActivity::class.java
+            Destination.STORE -> StoreActivity::class.java
         }
         activity.openTopLevel(destination)
     }
@@ -186,8 +192,52 @@ object BottomNavigationController {
             item(Destination.RANK, R.id.leaderboard, R.id.cupIcon, R.id.cupTest,
                 R.id.cupAnimation, R.drawable.trophy24),
             item(Destination.PROFILE, R.id.profile, R.id.profileIcon, R.id.profileTest,
-                R.id.profAnimation, R.drawable.profile24)
-        ).takeIf { it.size == 4 }
+                R.id.profAnimation, R.drawable.profile24),
+            item(Destination.STORE, R.id.store, R.id.storeIcon, R.id.storeTest,
+                0, R.drawable.ic_store)
+        ).takeIf { it.size == 5 }
+    }
+
+    /** Adds the fifth destination to legacy screens without duplicating navigation XML. */
+    private fun ensureStoreItem(activity: Activity) {
+        if (activity.findViewById<View>(R.id.store) != null) return
+        val bar = activity.findViewById<View>(R.id.tests)?.parent as? LinearLayout ?: return
+
+        val item = LinearLayout(activity).apply {
+            id = R.id.store
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            isClickable = true
+            isFocusable = true
+            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f)
+        }
+        val iconFrame = FrameLayout(activity).apply {
+            layoutParams = LinearLayout.LayoutParams(activity.dp(24f).toInt(), activity.dp(24f).toInt())
+        }
+        val icon = ImageView(activity).apply {
+            id = R.id.storeIcon
+            setImageResource(R.drawable.ic_store)
+            contentDescription = activity.getString(R.string.nav_store)
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
+        iconFrame.addView(icon)
+        val label = TextView(activity).apply {
+            id = R.id.storeTest
+            text = activity.getString(R.string.nav_store)
+            textSize = 12f
+            gravity = Gravity.CENTER
+            maxLines = 1
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        }
+        item.addView(iconFrame)
+        item.addView(label)
+        bar.addView(item)
     }
 
     private fun destinationFor(activity: Activity): Destination? = when (activity) {
@@ -196,6 +246,7 @@ object BottomNavigationController {
         is MenuActivity -> Destination.DUEL
         is RankActivity -> Destination.RANK
         is ProfileActivity -> Destination.PROFILE
+        is StoreActivity -> Destination.STORE
         else -> null
     }
 
@@ -204,6 +255,7 @@ object BottomNavigationController {
         Destination.DUEL -> activity is MenuActivity
         Destination.RANK -> activity is RankActivity
         Destination.PROFILE -> activity is ProfileActivity
+        Destination.STORE -> activity is StoreActivity
     }
 
     private fun Activity.dp(value: Float): Float = value * resources.displayMetrics.density

@@ -51,6 +51,7 @@
         <activity
             android:name=".activity.StoreActivity"
             android:exported="false"
+            android:launchMode="singleTop"
             android:screenOrientation="unspecified"
             android:windowSoftInputMode="adjustResize" />
         <activity

@@ -30,6 +30,7 @@
     <string name="nav_duel">Дуэль</string>
     <string name="nav_rank">Рейтинг</string>
     <string name="nav_profile">Профиль</string>
+    <string name="nav_store">Магазин</string>
     <string name="achievements">Достижения</string>
     <string name="achievements_subtitle">Собирайте награды за обучение, дуэли и новые знакомства</string>
     <string name="achievements_summary_title">Ваша коллекция</string>
@@ -527,6 +528,8 @@
     </plurals>
     <string name="store_title">Магазин</string>
     <string name="store_balance_title">Ваш баланс</string>
+    <string name="store_gold_label">Золото</string>
+    <string name="store_sparks_label">Искры</string>
     <string name="store_gold_value">%1$d золота</string>
     <string name="store_sparks_value">%1$d/%2$d искр</string>
     <string name="store_gold_placeholder">— золота</string>
