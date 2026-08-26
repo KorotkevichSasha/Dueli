@@ -27,12 +27,17 @@ class DuelingoApplication : Application() {
                 activity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
                 activity.window.decorView.post {
                     activity.findViewById<android.view.View>(android.R.id.content)?.let(KeyboardInsets::apply)
+                    // onActivityResumed can be delivered before the first layout pass on some
+                    // vendor builds (notably EMUI). In that case the fifth item cannot yet be
+                    // attached to the legacy navigation row. Repeat the idempotent sync once
+                    // the content view is laid out so every device always gets all five tabs.
+                    BottomNavigationController.sync(activity)
                 }
             }
 
             override fun onActivityStarted(activity: Activity) = Unit
             override fun onActivityResumed(activity: Activity) {
-                BottomNavigationController.sync(activity)
+                activity.window.decorView.post { BottomNavigationController.sync(activity) }
             }
             override fun onActivityPaused(activity: Activity) = Unit
             override fun onActivityStopped(activity: Activity) = Unit

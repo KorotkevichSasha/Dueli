@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <!-- Margin -->
     <dimen name="margin_8">8dp</dimen>
     <dimen name="margin_12">12dp</dimen>
@@ -30,4 +29,7 @@
     <dimen name="text_size_22_result_message">22sp</dimen>
     <dimen name="text_size_50_question_word">50sp</dimen>
 
+    <!-- Responsive question layout -->
+    <dimen name="question_card_min_height">132dp</dimen>
+    <dimen name="question_card_padding">20dp</dimen>
 </resources>

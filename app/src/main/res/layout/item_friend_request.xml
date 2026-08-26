@@ -1,56 +1,77 @@
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="16dp">
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="5dp"
+    app:cardBackgroundColor="?attr/cardBackgroundColor"
+    app:cardCornerRadius="18dp"
+    app:strokeColor="?attr/dividerColor"
+    app:strokeWidth="1dp">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/avatarImage"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@drawable/default_profile"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-
-    <TextView
-        android:id="@+id/usernameText"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="5dp"
-        android:text="@string/username_hint"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toStartOf="@id/btnAccept"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/avatarImage"
-        app:layout_constraintTop_toTopOf="@id/avatarImage" />
+        android:orientation="vertical"
+        android:padding="14dp">
 
-    <Button
-        android:id="@+id/btnAccept"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/accept"
-        android:backgroundTint="@color/green"
-        android:textColor="@color/white"
-        android:textSize="15sp"
-        app:layout_constraintEnd_toStartOf="@id/btnReject"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/btnReject"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/reject"
-        android:backgroundTint="@color/red"
-        android:textColor="@color/white"
-        android:textSize="15sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/avatarImage"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/default_profile" />
 
+            <TextView
+                android:id="@+id/usernameText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/username_hint"
+                android:textColor="?attr/textColor"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAccept"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:text="@string/accept"
+                android:textAllCaps="false"
+                android:textSize="15sp"
+                app:backgroundTint="@color/green" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnReject"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="5dp"
+                android:layout_weight="1"
+                android:text="@string/reject"
+                android:textAllCaps="false"
+                android:textColor="@color/red"
+                android:textSize="15sp"
+                app:strokeColor="@color/red" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
