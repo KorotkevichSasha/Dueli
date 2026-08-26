@@ -21,7 +21,7 @@ class DuelingoApplication : Application() {
         AuthSessionManager.initialize(this)
         ApiClient.initialize(this)
         ApiClient.warmUpServer()
-        Glide.with(this).load(R.drawable.duel_hero).preload(1024, 500)
+        Glide.with(this).load(R.drawable.duel_hero_wide).preload(1536, 512)
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
                 activity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)

@@ -119,7 +119,7 @@ class MenuActivity : AppCompatActivity() {
         binding.duelHeroImage.setImageDrawable(null)
         binding.duelHeroImage.setBackgroundResource(R.drawable.bg_feature_icon)
         binding.duelHeroImage.post {
-            Glide.with(this).load(R.drawable.duel_hero).dontAnimate().centerCrop().into(binding.duelHeroImage)
+            Glide.with(this).load(R.drawable.duel_hero_wide).dontAnimate().fitCenter().into(binding.duelHeroImage)
         }
         Log.d("MenuActivity", "Initializing AvatarManager")
         avatarManager = AvatarManager(this, tokenManager, getSharedPreferences("user_prefs", MODE_PRIVATE))

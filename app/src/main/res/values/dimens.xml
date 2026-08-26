@@ -32,4 +32,18 @@
     <!-- Responsive question layout -->
     <dimen name="question_card_min_height">132dp</dimen>
     <dimen name="question_card_padding">20dp</dimen>
+
+    <!-- Store balance card; compact overrides keep short landscape screens useful. -->
+    <dimen name="store_title_height">56dp</dimen>
+    <dimen name="store_content_horizontal_padding">20dp</dimen>
+    <dimen name="store_content_top_padding">8dp</dimen>
+    <dimen name="store_balance_padding">20dp</dimen>
+    <dimen name="store_balance_icon_size">42dp</dimen>
+    <dimen name="store_balance_icon_padding">10dp</dimen>
+    <dimen name="store_balance_title_size">20sp</dimen>
+    <dimen name="store_balance_stats_margin">16dp</dimen>
+    <dimen name="store_balance_stat_padding">14dp</dimen>
+    <dimen name="store_balance_stat_icon_size">24dp</dimen>
+    <dimen name="store_balance_timer_margin">11dp</dimen>
+    <dimen name="store_balance_timer_size">13sp</dimen>
 </resources>
