@@ -89,7 +89,8 @@
                 app:cornerRadius="14dp"
                 app:icon="@drawable/ic_gold_coin"
                 app:iconPadding="7dp"
-                app:iconSize="19dp" />
+                app:iconSize="19dp"
+                app:iconTint="@null" />
         </LinearLayout>
 
         <ImageView

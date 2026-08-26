@@ -25,6 +25,7 @@ import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.utils.UserMessage
 import com.example.duelingo.utils.openTopLevel
+import com.example.duelingo.utils.LearningCatalogCache
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -93,33 +94,43 @@ class TopicsActivity : AppCompatActivity() {
 
         if (accessToken != null) {
             val tokenWithBearer = "Bearer $accessToken"
+            val cached = LearningCatalogCache.read(this, accessToken)
+            if (cached.isNotEmpty()) renderTopics(cached)
+            binding.catalogState.visibility = if (cached.isEmpty()) View.VISIBLE else View.GONE
+            binding.catalogProgress.visibility = View.VISIBLE
+            binding.catalogMessage.setText(R.string.loading_learning_catalog)
 
             lifecycleScope.launch {
                 try {
-                    val topicsDeferred = async { ApiClient.testService.getUniqueTestTopics(tokenWithBearer) }
-                    val testsDeferred = topicsDeferred.await().map { topic ->
-                        async {
-                            val tests = ApiClient.testService.getTestsForTopic(tokenWithBearer, topic)
-                            topic to tests.groupBy { it.difficulty }
-                                .mapValues { (_, testsInDifficulty) ->
-                                    testsInDifficulty.all { it.isCompleted }
-                                }
-                        }
-                    }
-
-                    val results = testsDeferred.awaitAll()
-                    val completionStatus = results.toMap()
-
-                    val randomTestTopic = "Random Test"
-                    val updatedTopics = listOf(randomTestTopic) + topicsDeferred.await()
-
-                    topicsAdapter.updateData(updatedTopics, completionStatus)
+                    val allTests = ApiClient.testService.getAllTests(tokenWithBearer)
+                    LearningCatalogCache.store(this@TopicsActivity, accessToken, allTests)
+                    renderTopics(allTests)
                 } catch (e: Exception) {
-                    showToast(UserMessage.from(this@TopicsActivity, e))
+                    if (cached.isEmpty()) {
+                        binding.catalogState.visibility = View.VISIBLE
+                        binding.catalogProgress.visibility = View.GONE
+                        binding.catalogMessage.text = getString(R.string.catalog_retry_message)
+                        binding.catalogState.setOnClickListener { loadTopics() }
+                    } else showToast(UserMessage.from(this@TopicsActivity, e))
                 }
             }
         } else {
             showToast(getString(R.string.session_expired))
+        }
+    }
+
+    private fun renderTopics(tests: List<com.example.duelingo.dto.response.TestSummaryResponse>) {
+        val topics = tests.map { it.topic }.distinct()
+        val completion = topics.associateWith { topic ->
+            tests.filter { it.topic == topic }.groupBy { it.difficulty }
+                .mapValues { (_, values) -> values.all { it.isCompleted } }
+        }
+        topicsAdapter.updateData(listOf("Random Test") + topics, completion)
+        binding.catalogState.visibility = if (topics.isEmpty()) View.VISIBLE else View.GONE
+        binding.rvTopics.visibility = if (topics.isEmpty()) View.GONE else View.VISIBLE
+        if (topics.isEmpty()) {
+            binding.catalogProgress.visibility = View.GONE
+            binding.catalogMessage.setText(R.string.no_questions_available)
         }
     }
 

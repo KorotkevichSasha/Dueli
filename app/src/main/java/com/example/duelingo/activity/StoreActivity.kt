@@ -10,6 +10,7 @@ import com.example.duelingo.dto.response.EconomyResponse
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.utils.UserMessage
+import com.example.duelingo.utils.EconomyCache
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.time.Duration
@@ -25,6 +26,7 @@ class StoreActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityStoreBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        EconomyCache.read(this)?.let(::render)
 
         binding.pocketPack.setOnClickListener { purchase("POCKET") }
         binding.boostPack.setOnClickListener { purchase("BOOST") }
@@ -64,6 +66,7 @@ class StoreActivity : AppCompatActivity() {
     }
 
     private fun render(economy: EconomyResponse) {
+        EconomyCache.store(this, economy)
         binding.goldBalance.text = NumberFormat.getIntegerInstance(resources.configuration.locales[0])
             .format(economy.gold)
         binding.rushBalance.text = "${economy.rushCharges}/${economy.maxRushCharges}"

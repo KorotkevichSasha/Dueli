@@ -12,6 +12,8 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:gravity="center_vertical"
+        android:background="?attr/backgroundColor"
+        android:elevation="6dp"
         android:text="@string/store_title"
         android:textColor="?attr/textColor"
         android:textSize="25sp"
@@ -21,10 +23,12 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/storeScroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:fillViewport="true"
+        android:overScrollMode="never"
         android:paddingBottom="28dp"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
         app:layout_constraintEnd_toEndOf="parent"
@@ -41,13 +45,14 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/blue_primary"
+                app:cardBackgroundColor="@android:color/transparent"
                 app:cardCornerRadius="26dp"
                 app:cardElevation="3dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/bg_premium_gradient"
                     android:orientation="vertical"
                     android:padding="20dp">
 
@@ -319,6 +324,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
+                        android:drawableStart="@drawable/ic_gold_coin"
+                        android:drawablePadding="5dp"
                         android:text="@string/store_rewarded_ad_reward"
                         android:textColor="@color/blue_primary"
                         android:textSize="15sp"
@@ -354,6 +361,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="@string/store_billing_pending"
+                        android:visibility="gone"
                         android:textColor="?attr/secondaryTextColor"
                         android:textSize="13sp" />
 
@@ -365,7 +373,9 @@
                         android:text="@string/store_gold_pack_small"
                         android:textAllCaps="false"
                         app:cornerRadius="15dp"
-                        app:icon="@drawable/ic_gold_coin" />
+                        app:icon="@drawable/ic_gold_coin"
+                        app:iconGravity="textStart"
+                        app:iconTint="@null" />
 
                     <com.google.android.material.button.MaterialButton
                         style="@style/Widget.Material3.Button.OutlinedButton"
@@ -376,7 +386,9 @@
                         android:text="@string/store_gold_pack_medium"
                         android:textAllCaps="false"
                         app:cornerRadius="15dp"
-                        app:icon="@drawable/ic_gold_coin" />
+                        app:icon="@drawable/ic_gold_coin"
+                        app:iconGravity="textStart"
+                        app:iconTint="@null" />
 
                     <com.google.android.material.button.MaterialButton
                         style="@style/Widget.Material3.Button.OutlinedButton"
@@ -387,7 +399,9 @@
                         android:text="@string/store_gold_pack_large"
                         android:textAllCaps="false"
                         app:cornerRadius="15dp"
-                        app:icon="@drawable/ic_gold_coin" />
+                        app:icon="@drawable/ic_gold_coin"
+                        app:iconGravity="textStart"
+                        app:iconTint="@null" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

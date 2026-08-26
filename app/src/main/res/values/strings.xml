@@ -205,6 +205,8 @@
     <string name="learning_vocabulary_title">Словарь</string>
     <string name="learning_vocabulary_subtitle">Карточки слов и интервальное повторение</string>
     <string name="learning_tip_title">Совет на сегодня</string>
+    <string name="tip_gold_received">Совет изучен · +%1$d золота</string>
+    <string name="listening_gold_reward">\n+%1$d золота за точность</string>
     <string name="learning_tip_text">Короткие занятия каждый день эффективнее одной длинной тренировки в неделю.</string>
     <string name="learning_tip_details_format">%1$s\n\nКак применить сегодня:\n1. Выберите одно короткое упражнение на 5–10 минут.\n2. Сразу составьте собственный пример.\n3. Повторите его вслух вечером — так знание перейдёт из пассивного в активное.</string>
 
@@ -213,9 +215,14 @@
     <string name="profile_progress_format">До следующей сотни: %1$d очков</string>
     <string name="profile_points_format">Очки: %1$d</string>
     <string name="profile_goal">До цели</string>
+    <string name="league_stat">Лига</string>
+    <string name="place_format">№%1$d</string>
     <string name="friends">Друзья</string>
+    <string name="friends_section_subtitle">Общайтесь, вызывайте на дуэль и следите за заявками</string>
+    <string name="share_friend_invite">Пригласить по ссылке</string>
+    <string name="friend_invite_share_text">Присоединяйся ко мне в DuelRush! Установи игру: %2$s — затем найди меня по нику %1$s.</string>
     <string name="share_profile">Поделиться профилем</string>
-    <string name="share_profile_text">Я набрал %1$d очков в DuelRush. Сможешь больше?</string>
+    <string name="share_profile_text">Сыграй со мной в DuelRush! Мой ник: %1$s, у меня уже %2$d очков. Скачать игру: %3$s</string>
     <string name="friends_empty_title">Добавьте первого друга</string>
     <string name="friends_empty_text">Добавьте друзей или дождитесь новых заявок — список обновится автоматически.</string>
 
@@ -248,6 +255,13 @@
     <string name="test_result_good">Хороший результат. Просмотрите ошибки, чтобы закрепить тему.</string>
     <string name="test_result_practice">Это нормальный этап обучения. Разберите ошибки и попробуйте ещё раз.</string>
     <string name="test_review_mistakes">Просмотреть ошибки</string>
+    <string name="test_mistake_review_item">%1$d. %2$s\nВаш ответ: %3$s\nПравильно: %4$s</string>
+    <string name="no_answer">Нет ответа</string>
+    <string name="option_not_sure">Не уверен</string>
+    <string name="loading_learning_catalog">Загружаем направления обучения…</string>
+    <string name="loading_tests">Готовим тесты…</string>
+    <string name="catalog_retry_message">Не удалось загрузить. Нажмите, чтобы повторить.</string>
+    <string name="topic_random_title">Случайный тест</string>
     <string name="test_try_again">Пройти ещё раз</string>
     <string name="test_done">Вернуться к темам</string>
     <string name="correct_answers_format">Правильных ответов: %1$d/%2$d</string>

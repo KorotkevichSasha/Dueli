@@ -47,6 +47,7 @@ import com.example.duelingo.utils.UserMessage
 import com.example.duelingo.utils.openTopLevel
 import com.example.duelingo.utils.DuelCache
 import com.example.duelingo.utils.ConnectivityRetry
+import com.example.duelingo.utils.EconomyCache
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -105,6 +106,7 @@ class MenuActivity : AppCompatActivity() {
         Log.d("MenuActivity", "onCreate started")
         binding = ActivityMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        EconomyCache.read(this)?.let(::renderEconomy)
         openLatestHistoryRequested = intent.getBooleanExtra(EXTRA_OPEN_LATEST_HISTORY, false)
         requestedHistoryId = intent.getStringExtra(EXTRA_OPEN_HISTORY_ID)
         ConnectivityRetry(this, lifecycle) {
@@ -305,6 +307,7 @@ class MenuActivity : AppCompatActivity() {
 
     private fun renderEconomy(value: EconomyResponse) {
         economy = value
+        EconomyCache.store(this, value)
         binding.rushBalanceText.text = getString(
             R.string.rush_sparks_balance, value.rushCharges, value.maxRushCharges)
         binding.goldBalanceText.text = getString(R.string.gold_balance, value.gold)
@@ -603,6 +606,9 @@ class MenuActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         binding.duelHistoryRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.duelHistoryRecyclerView.itemAnimator = null
+        binding.duelHistoryRecyclerView.setHasFixedSize(true)
+        binding.duelHistoryRecyclerView.setItemViewCacheSize(8)
         historyAdapter = DuelHistoryAdapter(mutableListOf(), avatarManager) { duel ->
             startActivity(Intent(this, DuelHistoryDetailsActivity::class.java).apply {
                 putExtra(DuelHistoryDetailsActivity.EXTRA_DUEL, Gson().toJson(duel))

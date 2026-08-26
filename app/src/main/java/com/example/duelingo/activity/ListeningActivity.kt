@@ -161,6 +161,7 @@ class ListeningActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         binding.submittedAnswerText.text = lastRecognizedText.orEmpty()
         binding.correctAnswerText.text = question
         binding.listeningResultCard.visibility = if (checked) View.VISIBLE else View.GONE
+        if (checked) binding.submitButton.isEnabled = false
         return true
     }
 
@@ -343,7 +344,7 @@ class ListeningActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private fun updatePlaybackState(playing: Boolean) {
         isPlaying = playing
         binding.playAudioIcon.setImageResource(
-            if (playing) R.drawable.record_square else R.drawable.record
+            if (playing) R.drawable.record_square else R.drawable.ic_play_clean
         )
         binding.playbackStatus.setText(
             if (playing) R.string.listening_playing else R.string.listening_tap_to_play
@@ -409,6 +410,7 @@ class ListeningActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     private fun checkAnswer(userAnswer: String) {
         val expected = currentQuestionText ?: return
+        binding.submitButton.isEnabled = false
         val similarity = sentenceSimilarity(expected, userAnswer)
         val percent = (similarity * 100).toInt()
         // Speech recognition often drops articles or short endings. Sixty
@@ -423,8 +425,24 @@ class ListeningActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         binding.correctAnswerText.text = expected
         binding.listeningResultCard.visibility = View.VISIBLE
         binding.nextListeningButton.visibility = View.VISIBLE
+        claimListeningReward(percent)
         binding.listeningContent.post {
             binding.listeningContent.smoothScrollTo(0, binding.listeningResultCard.bottom)
+        }
+    }
+
+    private fun claimListeningReward(percent: Int) {
+        val token = tokenManager.getAccessToken() ?: return
+        lifecycleScope.launch {
+            runCatching {
+                ApiClient.userService.claimListeningReward("Bearer $token", percent)
+            }.onSuccess { reward ->
+                if (reward.goldAwarded > 0) {
+                    binding.feedbackText.append(
+                        getString(R.string.listening_gold_reward, reward.goldAwarded)
+                    )
+                }
+            }
         }
     }
 
@@ -515,7 +533,7 @@ class ListeningActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         isPlaying = false
         recognitionInProgress = false
         if (::binding.isInitialized) {
-            binding.playAudioIcon.setImageResource(R.drawable.record)
+            binding.playAudioIcon.setImageResource(R.drawable.ic_play_clean)
             binding.recordAudioIcon.setImageResource(R.drawable.microphone)
             binding.recordAudioIcon.scaleX = 1f
             binding.recordAudioIcon.scaleY = 1f

@@ -19,6 +19,8 @@ import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.utils.UserMessage
 import com.example.duelingo.utils.openTopLevel
+import com.example.duelingo.utils.NavigationBadgeStore
+import com.example.duelingo.utils.BottomNavigationController
 import kotlinx.coroutines.launch
 
 class AchievementActivity : AppCompatActivity() {
@@ -94,6 +96,11 @@ class AchievementActivity : AppCompatActivity() {
                         )
                     )
                     val unlocked = achievements.count { it.isAchieved }
+                    NavigationBadgeStore.setClaimableAchievements(
+                        this@AchievementActivity,
+                        achievements.count { it.isAchieved && !it.rewardClaimed }
+                    )
+                    BottomNavigationController.sync(this@AchievementActivity)
                     binding.achievementSummaryValue.text = getString(
                         R.string.achievements_summary_format,
                         unlocked,

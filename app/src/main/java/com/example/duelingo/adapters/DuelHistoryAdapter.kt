@@ -29,11 +29,8 @@ class DuelHistoryAdapter(
         val duel = duelsList[position]
         holder.bind(duel, avatarManager)
         holder.itemView.setOnClickListener { onDuelClick(duel) }
-        holder.itemView.apply {
-            alpha = 0f
-            translationY = 24f
-            animate().alpha(1f).translationY(0f).setDuration(260).start()
-        }
+        holder.itemView.alpha = 1f
+        holder.itemView.translationY = 0f
     }
 
     override fun getItemCount(): Int = duelsList.size

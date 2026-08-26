@@ -31,6 +31,7 @@
     <color name="achievement_icon_background">#EAF4FF</color>
     <color name="hint_background">#EEF6FF</color>
     <color name="hint_stroke">#B9D9FF</color>
+    <color name="avatar_ripple_color">#221687F8</color>
 
     <color name="card_front_color">#80DEEA</color>
     <color name="card_back_color">#D1C4E9</color>

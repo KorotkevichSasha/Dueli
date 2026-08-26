@@ -139,8 +139,33 @@ class LearningActivity : AppCompatActivity() {
         content.tipStepTwo.setText(details[1])
         content.tipStepThree.setText(details[2])
         content.closeButton.setOnClickListener { dialog.dismiss() }
-        content.doneButton.setOnClickListener { dialog.dismiss() }
+        content.doneButton.setOnClickListener {
+            dialog.dismiss()
+            claimTipReward()
+        }
         dialog.show()
+    }
+
+    private fun claimTipReward() {
+        val token = tokenManager.getAccessToken() ?: return
+        lifecycleScope.launch {
+            runCatching { ApiClient.userService.claimDailyTipReward("Bearer $token") }
+                .onSuccess { reward ->
+                    if (reward.goldAwarded > 0) {
+                        binding.learningTipCard.animate().cancel()
+                        binding.learningTipCard.animate().scaleX(1.025f).scaleY(1.025f)
+                            .setDuration(130).withEndAction {
+                                binding.learningTipCard.animate().scaleX(1f).scaleY(1f)
+                                    .setDuration(170).start()
+                            }.start()
+                        android.widget.Toast.makeText(
+                            this@LearningActivity,
+                            getString(R.string.tip_gold_received, reward.goldAwarded),
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+        }
     }
 
     private fun tipDetails(tip: String): IntArray {
