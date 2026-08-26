@@ -254,7 +254,8 @@
                             android:text="@string/listening_replay_correct"
                             android:textAllCaps="false"
                             app:cornerRadius="15dp"
-                            app:icon="@drawable/record"
+                            app:icon="@drawable/ic_play_clean"
+                            app:iconSize="20dp"
                             app:iconTint="@color/blue_primary"
                             app:strokeColor="@color/blue_primary" />
                     </LinearLayout>

@@ -220,11 +220,16 @@
                 android:gravity="center_vertical"
                 android:text="@string/rush_pack_pocket_offer"
                 android:textAllCaps="false"
+                android:textColor="?attr/textColor"
                 android:textSize="16sp"
+                app:backgroundTint="?attr/cardBackgroundColor"
                 app:cornerRadius="17dp"
                 app:icon="@drawable/ic_rush_spark"
                 app:iconGravity="textStart"
-                app:iconPadding="10dp" />
+                app:iconPadding="10dp"
+                app:iconTint="@color/blue_primary"
+                app:strokeColor="?attr/dividerColor"
+                app:strokeWidth="1dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/boostPack"
@@ -235,11 +240,16 @@
                 android:gravity="center_vertical"
                 android:text="@string/rush_pack_boost_offer"
                 android:textAllCaps="false"
+                android:textColor="?attr/textColor"
                 android:textSize="16sp"
+                app:backgroundTint="?attr/cardBackgroundColor"
                 app:cornerRadius="17dp"
                 app:icon="@drawable/ic_rush_spark"
                 app:iconGravity="textStart"
-                app:iconPadding="10dp" />
+                app:iconPadding="10dp"
+                app:iconTint="@color/blue_primary"
+                app:strokeColor="?attr/dividerColor"
+                app:strokeWidth="1dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/vaultPack"

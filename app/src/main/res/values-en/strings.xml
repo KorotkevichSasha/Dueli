@@ -31,7 +31,7 @@
     <string name="nav_profile">Profile</string>
     <string name="nav_store">Store</string>
     <string name="achievements">Achievements</string>
-    <string name="achievements_subtitle">Earn rewards for learning, duels and new friendships</string>
+    <string name="achievements_subtitle">Earn rewards for learning, duels and battles with friends</string>
     <string name="achievements_summary_title">Your collection</string>
     <string name="achievements_summary_caption">Keep going — your next reward is close</string>
     <string name="achievements_summary_empty">—</string>
@@ -246,7 +246,7 @@
     <string name="test_review_mistakes">Review mistakes</string>
     <string name="test_mistake_review_item">%1$d. %2$s\nYour answer: %3$s\nCorrect: %4$s</string>
     <string name="no_answer">No answer</string>
-    <string name="option_not_sure">Not sure</string>
+    <string name="option_not_sure">None of the above</string>
     <string name="loading_learning_catalog">Loading learning paths…</string>
     <string name="loading_tests">Preparing tests…</string>
     <string name="catalog_retry_message">Could not load this section. Tap to retry.</string>
@@ -540,4 +540,7 @@
     <string name="store_gold_pack_medium">500 gold · coming soon</string>
     <string name="store_gold_pack_large">1200 gold · coming soon</string>
     <string name="store_fair_play_note">Purchases do not affect question difficulty or guarantee a win.</string>
+    <string name="test_review_mistakes_caption">Review each answer and remember the correct version</string>
+    <string name="your_answer_label">Your answer</string>
+    <string name="correct_answer_label">Correct answer</string>
 </resources>

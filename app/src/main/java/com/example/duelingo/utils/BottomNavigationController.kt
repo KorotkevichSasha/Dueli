@@ -277,14 +277,25 @@ object BottomNavigationController {
     private fun renderProfileBadge(activity: Activity, item: Item) {
         val count = NavigationBadgeStore.pendingProfileCount(activity)
         val frame = item.icon.parent as? FrameLayout ?: return
+        frame.clipChildren = false
+        frame.clipToPadding = false
+        frame.layoutParams = frame.layoutParams.apply {
+            width = activity.dp(32f).toInt()
+            height = activity.dp(28f).toInt()
+        }
+        item.icon.layoutParams = (item.icon.layoutParams as? FrameLayout.LayoutParams)?.apply {
+            width = activity.dp(24f).toInt()
+            height = activity.dp(24f).toInt()
+            gravity = Gravity.CENTER
+        }
         val badge = (frame.findViewById<TextView>(R.id.navProfileBadge) ?: TextView(activity).also {
             it.id = R.id.navProfileBadge
             it.gravity = Gravity.CENTER
             it.setTextColor(Color.WHITE)
             it.setTypeface(it.typeface, Typeface.BOLD)
             it.textSize = 10f
-            it.minWidth = activity.dp(17f).toInt()
-            it.minHeight = activity.dp(17f).toInt()
+            it.minWidth = activity.dp(19f).toInt()
+            it.minHeight = activity.dp(19f).toInt()
             it.setPadding(activity.dp(4f).toInt(), 0, activity.dp(4f).toInt(), 0)
             it.background = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
@@ -293,13 +304,14 @@ object BottomNavigationController {
             }
             frame.addView(it, FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                activity.dp(18f).toInt(),
+                activity.dp(20f).toInt(),
                 Gravity.TOP or Gravity.END
             ).apply {
-                marginEnd = -activity.dp(9f).toInt()
-                topMargin = -activity.dp(7f).toInt()
+                marginEnd = -activity.dp(3f).toInt()
+                topMargin = -activity.dp(4f).toInt()
             })
         })
+        badge.elevation = activity.dp(18f)
         badge.text = count.coerceAtMost(99).toString()
         badge.visibility = if (count > 0) View.VISIBLE else View.GONE
     }

@@ -1,0 +1,22 @@
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    app:cardBackgroundColor="?attr/cardBackgroundColor" app:cardCornerRadius="26dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/test_review_mistakes" android:textColor="?attr/textColor"
+            android:textSize="22sp" android:textStyle="bold" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" android:text="@string/test_review_mistakes_caption"
+            android:textColor="?attr/secondaryTextColor" android:textSize="13sp" />
+        <ScrollView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="14dp" android:maxHeight="430dp" android:overScrollMode="never"
+            android:scrollbars="none">
+            <LinearLayout android:id="@+id/mistakesContainer" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical" />
+        </ScrollView>
+        <com.google.android.material.button.MaterialButton android:id="@+id/closeMistakesButton"
+            android:layout_width="match_parent" android:layout_height="50dp" android:layout_marginTop="14dp"
+            android:text="@string/close" android:textAllCaps="false" app:cornerRadius="16dp" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
