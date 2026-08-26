@@ -19,6 +19,7 @@ import com.example.duelingo.storage.LearningHabitTracker
 import com.example.duelingo.utils.UserMessage
 import kotlinx.coroutines.launch
 import com.example.duelingo.dto.response.LearningRewardResponse
+import com.example.duelingo.utils.AnswerEvaluator
 
 class TestDetailsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTestDetailsBinding
@@ -234,20 +235,8 @@ class TestDetailsActivity : AppCompatActivity() {
 
 
     private fun answersMatch(question: QuestionDetailedResponse, userAnswer: String): Boolean {
-        if (question.correctAnswers.isEmpty()) return false
-        val normalizedUser = normalize(userAnswer)
-        return if (question.type == "SENTENCE_CONSTRUCTION") {
-            normalize(question.correctAnswers.joinToString(" ")) == normalizedUser
-        } else {
-            question.correctAnswers.any { normalize(it) == normalizedUser }
-        }
+        return AnswerEvaluator.matches(question, userAnswer)
     }
-
-    private fun normalize(input: String): String = input
-        .lowercase(java.util.Locale.ROOT)
-        .replace(Regex("[^\\p{L}\\p{N}']+"), " ")
-        .trim()
-        .replace(Regex("\\s+"), " ")
     private fun showResultsDialog(correct: Int, checkedQuestions: List<QuestionDetailedResponse>) {
         val content = DialogTestResultsBinding.inflate(layoutInflater)
         resultsBinding = content
@@ -279,13 +268,12 @@ class TestDetailsActivity : AppCompatActivity() {
         content.reviewButton.visibility = if (firstMistake == null) android.view.View.GONE else android.view.View.VISIBLE
         content.reviewButton.setOnClickListener {
             dialog.dismiss()
-            firstMistake?.let { binding.viewPager.setCurrentItem(it, true) }
-            resultsShown = false
+            showMistakesReview(checkedQuestions)
         }
         content.retryButton.setOnClickListener {
+            dialog.dismiss()
             startActivity(Intent(this, TestDetailsActivity::class.java).putExtras(intent))
             finish()
-            dialog.dismiss()
         }
         content.doneButton.setOnClickListener {
             setResult(RESULT_OK)
@@ -293,6 +281,27 @@ class TestDetailsActivity : AppCompatActivity() {
             finish()
         }
         dialog.show()
+    }
+
+    private fun showMistakesReview(checkedQuestions: List<QuestionDetailedResponse>) {
+        val mistakes = checkedQuestions.mapIndexedNotNull { index, question ->
+            val answer = userAnswers[index].orEmpty()
+            if (answersMatch(question, answer)) null else Triple(index + 1, question, answer)
+        }
+        val text = mistakes.joinToString("\n\n") { (number, question, answer) ->
+            getString(
+                R.string.test_mistake_review_item,
+                number,
+                com.example.duelingo.utils.QuestionPromptParser.parse(question.questionText).text,
+                answer.ifBlank { getString(R.string.no_answer) },
+                question.correctAnswers.joinToString(" / ")
+            )
+        }
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.test_review_mistakes)
+            .setMessage(text)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     private fun renderLearningReward(content: DialogTestResultsBinding) {

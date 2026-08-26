@@ -83,12 +83,12 @@
 
                     <ImageButton
                         android:id="@+id/playAudioIcon"
-                        android:layout_width="88dp"
-                        android:layout_height="88dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:layout_width="68dp"
+                        android:layout_height="68dp"
+                        android:background="@drawable/bg_audio_control"
                         android:contentDescription="@string/listening_play_sentence"
-                        android:padding="6dp"
-                        android:src="@drawable/record" />
+                        android:padding="20dp"
+                        android:src="@drawable/ic_play_clean" />
 
                     <ProgressBar
                         android:id="@+id/questionLoading"
@@ -148,11 +148,11 @@
 
                     <ImageButton
                         android:id="@+id/recordAudioIcon"
-                        android:layout_width="88dp"
-                        android:layout_height="88dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:layout_width="68dp"
+                        android:layout_height="68dp"
+                        android:background="@drawable/bg_audio_control"
                         android:contentDescription="@string/listening_record_voice"
-                        android:padding="6dp"
+                        android:padding="18dp"
                         android:src="@drawable/microphone" />
 
                     <TextView

@@ -28,6 +28,7 @@ import com.example.duelingo.storage.OfflineDuelHistoryStore
 import com.example.duelingo.storage.LearningHabitTracker
 import com.example.duelingo.utils.RefreshEvents
 import com.example.duelingo.utils.UserMessage
+import com.example.duelingo.utils.AnswerEvaluator
 import com.google.gson.Gson
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
@@ -282,17 +283,7 @@ class DuelActivity : AppCompatActivity() {
                 if (binding.btnNext.text == getString(R.string.check_answer)) {
                     val answer = currentFragment.getAnswer()
                     if (answer.isNotEmpty()) {
-                        val isCorrect = when (currentFragment.getQuestion().type) {
-                            "FILL_IN_CHOICE", "FILL_IN_INPUT" ->
-                                currentFragment.getQuestion().correctAnswers.any {
-                                    normalizeAnswer(it) == normalizeAnswer(answer)
-                                }
-                            "SENTENCE_CONSTRUCTION" -> {
-                                val correctAnswer = currentFragment.getQuestion().correctAnswers.joinToString(" ")
-                                normalizeAnswer(answer) == normalizeAnswer(correctAnswer)
-                            }
-                            else -> false
-                        }
+                        val isCorrect = AnswerEvaluator.matches(currentFragment.getQuestion(), answer)
                         if (isCorrect) correctAnswers++
                         submittedAnswers[currentFragment.getQuestion().id] = answer.trim()
                         currentFragment.showFeedback(isCorrect)
@@ -526,16 +517,8 @@ class DuelActivity : AppCompatActivity() {
     )
 
     private fun answerForDisplay(question: QuestionDetailedResponse): String =
-        if (question.type == "SENTENCE_CONSTRUCTION") {
-            question.correctAnswers.joinToString(" ")
-        } else {
-            question.correctAnswers.joinToString(" / ")
-        }
+        question.correctAnswers.joinToString(" / ")
 
     private fun answerIsCorrect(question: QuestionDetailedResponse, answer: String): Boolean =
-        if (question.type == "SENTENCE_CONSTRUCTION") {
-            normalizeAnswer(answer) == normalizeAnswer(question.correctAnswers.joinToString(" "))
-        } else {
-            question.correctAnswers.any { normalizeAnswer(it) == normalizeAnswer(answer) }
-        }
+        AnswerEvaluator.matches(question, answer)
 }

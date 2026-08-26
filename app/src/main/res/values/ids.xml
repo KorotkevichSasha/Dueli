@@ -3,4 +3,6 @@
     <item name="store" type="id" />
     <item name="storeIcon" type="id" />
     <item name="storeTest" type="id" />
+    <item name="navProfileBadge" type="id" />
+    <item name="navDuelAccent" type="id" />
 </resources>

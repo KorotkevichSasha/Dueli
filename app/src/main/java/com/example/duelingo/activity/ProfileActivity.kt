@@ -62,6 +62,8 @@ import com.example.duelingo.utils.LeagueVisuals
 import com.example.duelingo.utils.ProfileCache
 import com.example.duelingo.utils.ConnectivityRetry
 import com.example.duelingo.utils.LeaderboardCache
+import com.example.duelingo.utils.NavigationBadgeStore
+import com.example.duelingo.utils.EconomyCache
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -110,11 +112,8 @@ class ProfileActivity : AppCompatActivity() {
         binding.profileImage.setOnClickListener { showAvatarPicker() }
         binding.uploadPhotoButton.setOnClickListener { showAvatarPicker() }
         binding.shareProfileButton.setOnClickListener { shareProfile() }
-        binding.profileEconomyCard?.setOnClickListener {
-            openTopLevel(StoreActivity::class.java)
-        }
-
         binding.achievementsButton.setOnClickListener{ startActivity(Intent(this@ProfileActivity, AchievementActivity::class.java)) }
+        loadAchievementBadge()
 
         setupFriendsSection()
 
@@ -164,7 +163,7 @@ class ProfileActivity : AppCompatActivity() {
             // Inflate custom tab layout
             val customTab = layoutInflater.inflate(R.layout.custom_tab_layout, null) as RelativeLayout
             val tabText = customTab.findViewById<TextView>(R.id.tab_text)
-            val notificationDot = customTab.findViewById<View>(R.id.notification_dot)
+            val notificationDot = customTab.findViewById<TextView>(R.id.notification_dot)
             
             // Set tab text
             tabText.text = when (position) {
@@ -199,20 +198,36 @@ class ProfileActivity : AppCompatActivity() {
         })
     }
 
-    private fun checkFriendRequests(notificationDot: View) {
+    private fun checkFriendRequests(notificationDot: TextView) {
         lifecycleScope.launch {
             try {
                 val response = ApiClient.relationshipService.getIncomingRequests(
                     "Bearer ${tokenManager.getAccessToken()}"
                 )
                 if (response.isSuccessful && !response.body().isNullOrEmpty()) {
+                    notificationDot.text = response.body()!!.size.coerceAtMost(99).toString()
                     notificationDot.visibility = View.VISIBLE
                 } else {
                     notificationDot.visibility = View.GONE
                 }
+                NavigationBadgeStore.setFriendRequests(this@ProfileActivity, response.body()?.size ?: 0)
             } catch (e: Exception) {
                 notificationDot.visibility = View.GONE
             }
+        }
+    }
+
+    private fun loadAchievementBadge() {
+        val token = tokenManager.getAccessToken() ?: return
+        lifecycleScope.launch {
+            runCatching { ApiClient.achievementService.getUserAchievements("Bearer $token") }
+                .onSuccess { achievements ->
+                    val count = achievements.count { it.isAchieved && !it.rewardClaimed }
+                    NavigationBadgeStore.setClaimableAchievements(this@ProfileActivity, count)
+                    binding.achievementBadge.text = count.coerceAtMost(99).toString()
+                    binding.achievementBadge.visibility = if (count > 0) View.VISIBLE else View.GONE
+                    com.example.duelingo.utils.BottomNavigationController.sync(this@ProfileActivity)
+                }
         }
     }
 
@@ -287,16 +302,11 @@ class ProfileActivity : AppCompatActivity() {
         binding.playerEmail.text = response.email
         binding.pointCount.text = getString(R.string.profile_points_format, response.points)
         binding.profilePointsValue.text = response.points.toString()
-        val cachedGap = LeaderboardCache.current(this, tokenManager.getAccessToken())
-            ?.currentUser?.pointsToNextRank
-        binding.profileGoalValue.text = cachedGap?.toString() ?: "—"
         response.economy?.let { economy ->
-            binding.profileGoldValue.text = getString(R.string.gold_balance, economy.gold)
-            binding.profileRushValue.text = getString(
-                R.string.rush_sparks_balance, economy.rushCharges, economy.maxRushCharges)
+            EconomyCache.store(this, economy)
             val visual = LeagueVisuals.forId(economy.league.id)
             binding.profileLeagueIcon.setImageResource(visual.icon)
-            binding.profileLeagueName.text = getString(R.string.league_title_format, getString(visual.name))
+            binding.profileLeagueName.text = getString(visual.name)
         }
         avatarManager.loadAvatar(response.id, binding.profileImage, response.avatarUrl)
     }
@@ -324,7 +334,7 @@ class ProfileActivity : AppCompatActivity() {
                 contentDescription = getString(R.string.default_avatar_number, index)
                 isClickable = true
                 isFocusable = true
-                foreground = ContextCompat.getDrawable(this@ProfileActivity, android.R.drawable.list_selector_background)
+                foreground = ContextCompat.getDrawable(this@ProfileActivity, R.drawable.avatar_ripple)
                 setOnClickListener {
                     avatarManager.selectDefaultAvatar(index, { profile ->
                         updateUI(profile); dialog.dismiss()
@@ -397,6 +407,7 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun logout() {
+        EconomyCache.clear(this)
         tokenManager.clearTokens()
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -409,22 +420,23 @@ class ProfileActivity : AppCompatActivity() {
         runCatching { ApiClient.leaderboardService.getLeaderboard(authHeader) }
             .onSuccess { leaderboard ->
                 LeaderboardCache.store(this, accessToken, leaderboard)
-                binding.profileRankValue.text = "#${leaderboard.currentUser.rank}"
-                binding.profileGoalValue.text =
-                    (leaderboard.currentUser.pointsToNextRank ?: 0).toString()
+                binding.profileRankValue.text = getString(R.string.place_format, leaderboard.currentUser.rank)
             }
             .onFailure {
                 LeaderboardCache.current(this, accessToken)?.let { cached ->
-                    binding.profileRankValue.text = "#${cached.currentUser.rank}"
-                    binding.profileGoalValue.text =
-                        (cached.currentUser.pointsToNextRank ?: 0).toString()
+                    binding.profileRankValue.text = getString(R.string.place_format, cached.currentUser.rank)
                 }
                 Log.w("ProfileActivity", "Could not load profile rank", it)
             }
     }
 
     private fun shareProfile() {
-        val text = getString(R.string.share_profile_text, currentProfilePoints)
+        val text = getString(
+            R.string.share_profile_text,
+            currentProfileUsername,
+            currentProfilePoints,
+            "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
+        )
         startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_SUBJECT, currentProfileUsername.ifBlank { getString(R.string.app_name) })
@@ -434,7 +446,10 @@ class ProfileActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (::binding.isInitialized) loadProfile()
+        if (::binding.isInitialized) {
+            loadProfile()
+            loadAchievementBadge()
+        }
     }
 
     private fun confirmAccountDeletion() {
@@ -524,6 +539,7 @@ class ProfileActivity : AppCompatActivity() {
 
         val editUsername = rootView.findViewById<EditText>(R.id.editUsername)
         val btnSearch = rootView.findViewById<Button>(R.id.btnSearch)
+        val shareInvite = rootView.findViewById<Button>(R.id.shareInviteButton)
         val progressBar = rootView.findViewById<ProgressBar>(R.id.progressBar)
         val userContainer = rootView.findViewById<LinearLayout>(R.id.userContainer)
         val resultsScroll = rootView.findViewById<NestedScrollView>(R.id.resultsScroll)
@@ -543,6 +559,14 @@ class ProfileActivity : AppCompatActivity() {
             } else {
                 showToast(getString(R.string.error_username_required))
             }
+        }
+        shareInvite?.setOnClickListener {
+            val playUrl = "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
+            val text = getString(R.string.friend_invite_share_text, currentProfileUsername, playUrl)
+            startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, text)
+            }, getString(R.string.share_friend_invite)))
         }
 
         dialog.setOnShowListener {

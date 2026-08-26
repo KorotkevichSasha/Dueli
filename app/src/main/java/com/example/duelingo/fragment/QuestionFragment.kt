@@ -93,7 +93,7 @@ class QuestionFragment : Fragment() {
             binding.tvFeedback.text = getString(R.string.incorrect_answer)
             binding.tvFeedback.setBackgroundResource(R.drawable.bg_feedback_incorrect)
 
-            val formattedAnswer = question.correctAnswers.joinToString(" ")
+            val formattedAnswer = question.correctAnswers.joinToString(" / ")
             binding.tvCorrectAnswer.text = getString(R.string.correct_answer_format, formattedAnswer)
         }
 
@@ -123,7 +123,12 @@ class QuestionFragment : Fragment() {
     }
 
     private fun setupChoiceQuestion() {
-        val optionsAdapter = OptionsAdapter(question.options) { option ->
+        val displayOptions = if (question.options.size == 3) {
+            question.options + getString(R.string.option_not_sure)
+        } else {
+            question.options
+        }
+        val optionsAdapter = OptionsAdapter(displayOptions) { option ->
             onOptionSelected(option)
         }
         binding.rvOptions.layoutManager = GridLayoutManager(requireContext(), 2)

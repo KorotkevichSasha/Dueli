@@ -4,6 +4,7 @@ import com.example.duelingo.dto.response.FriendResponse
 import com.example.duelingo.dto.response.PaginationResponse
 import com.example.duelingo.dto.response.UserProfileResponse
 import com.example.duelingo.dto.response.EconomyResponse
+import com.example.duelingo.dto.response.LearningRewardResponse
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.http.GET
@@ -28,6 +29,17 @@ interface UserService {
         @Header("Authorization") token: String,
         @Path("packId") packId: String
     ): EconomyResponse
+
+    @POST("/users/economy/daily-tip")
+    suspend fun claimDailyTipReward(
+        @Header("Authorization") token: String
+    ): LearningRewardResponse
+
+    @POST("/users/economy/listening-reward")
+    suspend fun claimListeningReward(
+        @Header("Authorization") token: String,
+        @Query("similarityPercent") similarityPercent: Int
+    ): LearningRewardResponse
 
     @DELETE("/users/me")
     suspend fun deleteAccount(

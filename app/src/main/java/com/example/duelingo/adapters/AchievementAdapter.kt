@@ -55,8 +55,8 @@ class AchievementsAdapter(
         @SuppressLint("SetTextI18n")
         fun bind(achievement: UserAchievementResponse, onClaimReward: (UserAchievementResponse) -> Unit) {
             val english = itemView.resources.configuration.locales[0].language == "en"
-            tvTitle.text = if (english) englishTitle(achievement) else achievement.title
-            tvDescription.text = if (english) englishDescription(achievement) else achievement.description
+            tvTitle.text = if (english) englishTitle(achievement) else russianTitle(achievement)
+            tvDescription.text = if (english) englishDescription(achievement) else russianDescription(achievement)
             tvProgressText.text = "${achievement.currentValue} / ${achievement.requiredValue}"
 
             progressBar.max = achievement.requiredValue.coerceAtLeast(1)
@@ -107,8 +107,57 @@ class AchievementsAdapter(
             rewardButton.isEnabled = achievement.isAchieved && !achievement.rewardClaimed
             rewardButton.alpha = if (rewardButton.isEnabled) 1f else 0.68f
             rewardButton.setOnClickListener {
-                if (achievement.isAchieved && !achievement.rewardClaimed) onClaimReward(achievement)
+                if (achievement.isAchieved && !achievement.rewardClaimed) {
+                    rewardButton.isEnabled = false
+                    rewardButton.animate().scaleX(1.06f).scaleY(1.06f).setDuration(110)
+                        .withEndAction {
+                            rewardButton.animate().scaleX(1f).scaleY(1f).setDuration(150).start()
+                            onClaimReward(achievement)
+                        }.start()
+                }
             }
+        }
+
+        private fun russianTitle(achievement: UserAchievementResponse): String = when (achievement.type) {
+            AchievementType.DUELS -> when (achievement.requiredValue) {
+                1 -> "Первый вызов"
+                in 2..25 -> "Разогрев арены"
+                in 26..100 -> "Опытный дуэлянт"
+                else -> "Легенда DuelRush"
+            }
+            AchievementType.FRIENDS -> when (achievement.requiredValue) {
+                1 -> "Первое знакомство"
+                in 2..10 -> "Круг единомышленников"
+                in 11..35 -> "Языковой клуб"
+                else -> "Лидер сообщества"
+            }
+            AchievementType.INVITES -> when (achievement.requiredValue) {
+                1 -> "Первый шаг навстречу"
+                2 -> "Начало компании"
+                in 3..5 -> "Собираем друзей"
+                in 6..10 -> "Связующее звено"
+                else -> "Душа сообщества"
+            }
+            AchievementType.TESTS -> when (achievement.requiredValue) {
+                1 -> "Первая десятка"
+                in 2..10 -> "Точный ученик"
+                in 11..35 -> "Навигатор грамматики"
+                else -> "Архитектор языка"
+            }
+            AchievementType.WORDS -> when (achievement.requiredValue) {
+                1 -> "Первое слово"
+                in 2..25 -> "Карманный словарь"
+                in 26..200 -> "Коллекционер смыслов"
+                else -> "Живая энциклопедия"
+            }
+        }
+
+        private fun russianDescription(achievement: UserAchievementResponse): String = when (achievement.type) {
+            AchievementType.DUELS -> "Завершите ${achievement.requiredValue} дуэлей"
+            AchievementType.FRIENDS -> "Добавьте ${achievement.requiredValue} друзей"
+            AchievementType.INVITES -> "Начните знакомство с ${achievement.requiredValue} игроками, которые приняли вашу заявку"
+            AchievementType.TESTS -> "Пройдите ${achievement.requiredValue} тестов"
+            AchievementType.WORDS -> "Добавьте ${achievement.requiredValue} слов в личный словарь"
         }
 
         private fun englishTitle(achievement: UserAchievementResponse): String = when (achievement.type) {
@@ -148,11 +197,7 @@ class AchievementsAdapter(
         private fun englishDescription(achievement: UserAchievementResponse): String = when (achievement.type) {
             AchievementType.DUELS -> itemView.context.getString(R.string.achievement_duels_description, achievement.requiredValue)
             AchievementType.FRIENDS -> itemView.context.getString(R.string.achievement_friends_description, achievement.requiredValue)
-            AchievementType.INVITES -> itemView.context.resources.getQuantityString(
-                R.plurals.achievement_invites_description,
-                achievement.requiredValue,
-                achievement.requiredValue
-            )
+            AchievementType.INVITES -> "Start a friendship with ${achievement.requiredValue} players who accept your request"
             AchievementType.TESTS -> itemView.context.getString(R.string.achievement_tests_description, achievement.requiredValue)
             AchievementType.WORDS -> itemView.context.getString(R.string.achievement_words_description, achievement.requiredValue)
         }

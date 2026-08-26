@@ -101,7 +101,10 @@ class QuestionsAdapter(
             binding.tvQuestionText.text = question.questionText
             binding.rvOptions.removeAllViews()
 
-            question.options.forEachIndexed { index, option ->
+            val displayOptions = if (question.options.size == 3) {
+                question.options + binding.root.context.getString(R.string.option_not_sure)
+            } else question.options
+            displayOptions.forEachIndexed { index, option ->
                 RadioButton(binding.root.context).apply {
                     text = option
                     id = index

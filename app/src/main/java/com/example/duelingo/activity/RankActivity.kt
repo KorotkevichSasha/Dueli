@@ -247,7 +247,7 @@ class RankActivity : AppCompatActivity() {
         binding.userContainer.visibility = View.VISIBLE
         val currentUser = response.currentUser
         updateCurrentUserInfo(currentUser)
-        binding.tvRankSummary.text = "#${currentUser.rank}"
+        binding.tvRankSummary.text = getString(R.string.place_format, currentUser.rank)
         binding.tvPointsSummary.text = currentUser.points.toString()
         binding.tvPlayersSummary.text = response.top.totalItems.toString()
 

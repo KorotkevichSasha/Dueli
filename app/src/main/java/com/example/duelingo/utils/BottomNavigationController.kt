@@ -34,7 +34,7 @@ object BottomNavigationController {
     private const val CLICK_DEBOUNCE_MS = 220L
     private var lastNavigationAt = 0L
 
-    private enum class Destination { LEARNING, DUEL, RANK, PROFILE, STORE }
+    private enum class Destination { STORE, LEARNING, DUEL, RANK, PROFILE }
 
     private data class Item(
         val destination: Destination,
@@ -48,6 +48,7 @@ object BottomNavigationController {
     fun sync(activity: Activity) {
         val active = destinationFor(activity) ?: return
         ensureStoreItem(activity)
+        enforceDestinationOrder(activity)
         val items = findItems(activity) ?: return
         val primary = MaterialColors.getColor(items.first().container, com.google.android.material.R.attr.colorPrimary)
         val onSurface = MaterialColors.getColor(items.first().container, com.google.android.material.R.attr.colorOnSurface)
@@ -63,15 +64,16 @@ object BottomNavigationController {
             item.icon.apply {
                 visibility = View.VISIBLE
                 setImageResource(item.iconResource)
-                setColorFilter(if (selected) primary else ColorUtils.setAlphaComponent(onSurface, 155))
+                setColorFilter(if (selected) primary else onSurface)
                 animate().cancel()
-                scaleX = if (selected) 1.08f else 1f
-                scaleY = if (selected) 1.08f else 1f
-                translationY = if (selected) -activity.dp(1f) else 0f
+                val emphasized = item.destination == Destination.DUEL
+                scaleX = if (emphasized) 1.13f else if (selected) 1.07f else 1f
+                scaleY = if (emphasized) 1.13f else if (selected) 1.07f else 1f
+                translationY = if (emphasized) -activity.dp(3f) else if (selected) -activity.dp(1f) else 0f
             }
             item.label.apply {
                 animate().cancel()
-                setTextColor(if (selected) primary else ColorUtils.setAlphaComponent(onSurface, 165))
+                setTextColor(if (selected) primary else ColorUtils.setAlphaComponent(onSurface, 205))
                 setTypeface(typeface, if (selected) Typeface.BOLD else Typeface.NORMAL)
                 alpha = if (selected) 1f else 0.88f
             }
@@ -79,12 +81,19 @@ object BottomNavigationController {
                 animate().cancel()
                 scaleX = 1f
                 scaleY = 1f
-                background = navigationBackground(activity, primary, selected)
+                background = navigationBackground(
+                    activity,
+                    primary,
+                    selected,
+                    item.destination == Destination.DUEL
+                )
                 isSelected = selected
                 isEnabled = true
                 setOnClickListener { navigate(activity, item, active) }
             }
         }
+
+        renderProfileBadge(activity, items.first { it.destination == Destination.PROFILE })
 
         items.first { it.destination == active }.container.apply {
             scaleX = 0.97f
@@ -119,12 +128,27 @@ object BottomNavigationController {
         activity.openTopLevel(destination)
     }
 
-    private fun navigationBackground(activity: Activity, primary: Int, selected: Boolean): InsetDrawable {
+    private fun navigationBackground(
+        activity: Activity,
+        primary: Int,
+        selected: Boolean,
+        emphasized: Boolean
+    ): InsetDrawable {
         val content = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
-            cornerRadius = activity.dp(18f)
-            setColor(if (selected) ColorUtils.setAlphaComponent(primary, 30) else Color.TRANSPARENT)
-            if (selected) setStroke(activity.dp(1f).toInt(), ColorUtils.setAlphaComponent(primary, 48))
+            cornerRadius = activity.dp(if (emphasized) 22f else 18f)
+            setColor(
+                when {
+                    emphasized && selected -> ColorUtils.setAlphaComponent(primary, 48)
+                    emphasized -> ColorUtils.setAlphaComponent(primary, 20)
+                    selected -> ColorUtils.setAlphaComponent(primary, 30)
+                    else -> Color.TRANSPARENT
+                }
+            )
+            if (selected || emphasized) setStroke(
+                activity.dp(1f).toInt(),
+                ColorUtils.setAlphaComponent(primary, if (selected) 74 else 34)
+            )
         }
         val ripple = RippleDrawable(
             ColorStateList.valueOf(ColorUtils.setAlphaComponent(primary, 42)),
@@ -238,6 +262,46 @@ object BottomNavigationController {
         item.addView(iconFrame)
         item.addView(label)
         bar.addView(item)
+    }
+
+    /** Keeps the primary action in the visual centre on every legacy screen. */
+    private fun enforceDestinationOrder(activity: Activity) {
+        val bar = activity.findViewById<View>(R.id.tests)?.parent as? LinearLayout ?: return
+        val desired = listOf(R.id.store, R.id.tests, R.id.duel, R.id.leaderboard, R.id.profile)
+        val views = desired.mapNotNull { id -> bar.findViewById<View>(id) }
+        if (views.size != desired.size) return
+        views.forEach { bar.removeView(it) }
+        views.forEach { bar.addView(it) }
+    }
+
+    private fun renderProfileBadge(activity: Activity, item: Item) {
+        val count = NavigationBadgeStore.pendingProfileCount(activity)
+        val frame = item.icon.parent as? FrameLayout ?: return
+        val badge = (frame.findViewById<TextView>(R.id.navProfileBadge) ?: TextView(activity).also {
+            it.id = R.id.navProfileBadge
+            it.gravity = Gravity.CENTER
+            it.setTextColor(Color.WHITE)
+            it.setTypeface(it.typeface, Typeface.BOLD)
+            it.textSize = 10f
+            it.minWidth = activity.dp(17f).toInt()
+            it.minHeight = activity.dp(17f).toInt()
+            it.setPadding(activity.dp(4f).toInt(), 0, activity.dp(4f).toInt(), 0)
+            it.background = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = activity.dp(9f)
+                setColor(Color.rgb(230, 65, 82))
+            }
+            frame.addView(it, FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                activity.dp(18f).toInt(),
+                Gravity.TOP or Gravity.END
+            ).apply {
+                marginEnd = -activity.dp(9f).toInt()
+                topMargin = -activity.dp(7f).toInt()
+            })
+        })
+        badge.text = count.coerceAtMost(99).toString()
+        badge.visibility = if (count > 0) View.VISIBLE else View.GONE
     }
 
     private fun destinationFor(activity: Activity): Destination? = when (activity) {

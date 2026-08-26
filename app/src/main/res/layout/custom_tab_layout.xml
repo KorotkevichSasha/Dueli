@@ -15,14 +15,18 @@
         android:textSize="14sp"
         android:textStyle="bold"/>
 
-    <View
+    <TextView
         android:id="@+id/notification_dot"
-        android:layout_width="8dp"
-        android:layout_height="8dp"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
         android:layout_toEndOf="@id/tab_text"
         android:layout_alignTop="@id/tab_text"
         android:layout_marginStart="2dp"
-        android:background="@drawable/notification_dot"
+        android:background="@drawable/bg_notification_badge"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="9sp"
+        android:textStyle="bold"
         android:visibility="gone"/>
 
 </RelativeLayout>

@@ -59,8 +59,8 @@ class TopicsAdapter(
         private val progressBar: LinearProgressIndicator = itemView.findViewById(R.id.topicProgressBar)
 
         fun bind(topic: String, isEasyCompleted: Boolean, isMediumCompleted: Boolean, isHardCompleted: Boolean) {
-            tvTopicTitle.text = topic
             val random = topic == "Random Test"
+            tvTopicTitle.text = if (random) itemView.context.getString(R.string.topic_random_title) else topic
             val completed = listOf(isEasyCompleted, isMediumCompleted, isHardCompleted).count { it }
             description.text = topicDescription(itemView.context, topic)
             progressText.text = if (random) {

@@ -20,6 +20,7 @@ import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.utils.UserMessage
 import com.example.duelingo.utils.openTopLevel
+import com.example.duelingo.utils.LearningCatalogCache
 import kotlinx.coroutines.launch
 
 class TestActivity : AppCompatActivity() {
@@ -94,17 +95,37 @@ class TestActivity : AppCompatActivity() {
 
         if (accessToken != null && topic.isNotEmpty()) {
             val tokenWithBearer = "Bearer $accessToken"
+            val cached = LearningCatalogCache.read(this, accessToken).filter { it.topic == topic }
+            if (cached.isNotEmpty()) renderTests(cached)
+            binding.catalogState.visibility = if (cached.isEmpty()) View.VISIBLE else View.GONE
+            binding.catalogProgress.visibility = View.VISIBLE
+            binding.catalogMessage.setText(R.string.loading_tests)
 
             lifecycleScope.launch {
                 try {
                     val tests = ApiClient.testService.getTestsForTopic(tokenWithBearer, topic)
-                    testsAdapter.updateData(tests)
+                    renderTests(tests)
                 } catch (e: Exception) {
-                    showToast(UserMessage.from(this@TestActivity, e))
+                    if (cached.isEmpty()) {
+                        binding.catalogState.visibility = View.VISIBLE
+                        binding.catalogProgress.visibility = View.GONE
+                        binding.catalogMessage.text = getString(R.string.catalog_retry_message)
+                        binding.catalogState.setOnClickListener { loadTests() }
+                    } else showToast(UserMessage.from(this@TestActivity, e))
                 }
             }
         } else {
             showToast(getString(R.string.session_expired))
+        }
+    }
+
+    private fun renderTests(tests: List<com.example.duelingo.dto.response.TestSummaryResponse>) {
+        testsAdapter.updateData(tests)
+        binding.catalogState.visibility = if (tests.isEmpty()) View.VISIBLE else View.GONE
+        binding.rvTests.visibility = if (tests.isEmpty()) View.GONE else View.VISIBLE
+        if (tests.isEmpty()) {
+            binding.catalogProgress.visibility = View.GONE
+            binding.catalogMessage.setText(R.string.no_questions_available)
         }
     }
     private fun showToast(message: String) {

@@ -19,6 +19,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import com.example.duelingo.utils.RefreshEvents
+import com.example.duelingo.utils.NavigationBadgeStore
+import com.example.duelingo.utils.BottomNavigationController
 import java.util.UUID
 
 class FriendRequestsFragment : Fragment() {
@@ -74,6 +76,8 @@ class FriendRequestsFragment : Fragment() {
                 )
                 if (response.isSuccessful) {
                     response.body()?.let { requests ->
+                        NavigationBadgeStore.setFriendRequests(requireContext(), requests.size)
+                        activity?.let(BottomNavigationController::sync)
                         adapter.submitList(requests)
                         recyclerView.visibility = if (requests.isEmpty()) View.GONE else View.VISIBLE
                         emptyState.visibility = if (requests.isEmpty()) View.VISIBLE else View.GONE

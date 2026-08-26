@@ -20,7 +20,7 @@
         android:layout_width="0dp"
         android:layout_height="132dp"
         android:layout_marginTop="16dp"
-        app:cardBackgroundColor="@color/blue_primary"
+        app:cardBackgroundColor="@android:color/transparent"
         app:cardCornerRadius="24dp"
         app:cardElevation="6dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -30,6 +30,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@drawable/bg_premium_gradient"
             android:padding="20dp">
 
             <ImageView
