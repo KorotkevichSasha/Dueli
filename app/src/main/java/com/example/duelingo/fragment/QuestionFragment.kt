@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.duelingo.R
+import com.example.duelingo.utils.ChoiceOptions
 import com.example.duelingo.activity.DuelActivity
 import com.example.duelingo.adapters.OptionsAdapter
 import com.example.duelingo.databinding.FragmentQuestionBinding
@@ -123,11 +124,10 @@ class QuestionFragment : Fragment() {
     }
 
     private fun setupChoiceQuestion() {
-        val displayOptions = if (question.options.size == 3) {
-            question.options + getString(R.string.option_not_sure)
-        } else {
-            question.options
-        }
+        val displayOptions = ChoiceOptions.withFourthDistractor(
+            question.options,
+            question.correctAnswers
+        )
         val optionsAdapter = OptionsAdapter(displayOptions) { option ->
             onOptionSelected(option)
         }

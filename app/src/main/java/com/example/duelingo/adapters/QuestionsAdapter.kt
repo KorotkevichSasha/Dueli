@@ -10,6 +10,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.RecyclerView
 import androidx.core.content.ContextCompat
 import com.example.duelingo.R
+import com.example.duelingo.utils.ChoiceOptions
 import com.example.duelingo.databinding.ItemQuestionFillInChoiceBinding
 import com.example.duelingo.databinding.ItemQuestionFillInInputBinding
 import com.example.duelingo.databinding.ItemQuestionSentenceConstructionBinding
@@ -101,9 +102,10 @@ class QuestionsAdapter(
             binding.tvQuestionText.text = question.questionText
             binding.rvOptions.removeAllViews()
 
-            val displayOptions = if (question.options.size == 3) {
-                question.options + binding.root.context.getString(R.string.option_not_sure)
-            } else question.options
+            val displayOptions = ChoiceOptions.withFourthDistractor(
+                question.options,
+                question.correctAnswers
+            )
             displayOptions.forEachIndexed { index, option ->
                 RadioButton(binding.root.context).apply {
                     text = option
