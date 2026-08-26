@@ -192,10 +192,10 @@ class TopicsActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
                     val randomQuestions = ApiClient.questionService.getRandomQuestions(
-                        tokenWithBearer,
-                        difficulty,
-                        null,
-                        10
+                        token = tokenWithBearer,
+                        topic = null,
+                        difficulty = difficulty,
+                        size = 10
                     )
 
                     if (randomQuestions.isNotEmpty()) {

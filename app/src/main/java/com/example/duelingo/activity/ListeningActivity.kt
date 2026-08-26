@@ -22,6 +22,7 @@ import com.example.duelingo.databinding.ActivityListeningBinding
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.storage.LearningHabitTracker
+import com.example.duelingo.utils.SpeechTextNormalizer
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -462,11 +463,7 @@ class ListeningActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         return (wordScore * 0.45 + editScore * 0.55).coerceIn(0.0, 1.0)
     }
 
-    private fun normalize(text: String): String = text
-        .lowercase(Locale.US)
-        .replace(Regex("[^a-z0-9']+"), " ")
-        .trim()
-        .replace(Regex("\\s+"), " ")
+    private fun normalize(text: String): String = SpeechTextNormalizer.normalize(text)
 
     private fun levenshtein(first: String, second: String): Int {
         var previous = IntArray(second.length + 1) { it }

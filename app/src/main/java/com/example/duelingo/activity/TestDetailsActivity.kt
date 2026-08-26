@@ -288,20 +288,27 @@ class TestDetailsActivity : AppCompatActivity() {
             val answer = userAnswers[index].orEmpty()
             if (answersMatch(question, answer)) null else Triple(index + 1, question, answer)
         }
-        val text = mistakes.joinToString("\n\n") { (number, question, answer) ->
-            getString(
-                R.string.test_mistake_review_item,
-                number,
-                com.example.duelingo.utils.QuestionPromptParser.parse(question.questionText).text,
-                answer.ifBlank { getString(R.string.no_answer) },
+        val dialog = android.app.Dialog(this)
+        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.dialog_mistakes_review)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        val container = dialog.findViewById<android.widget.LinearLayout>(R.id.mistakesContainer)
+        mistakes.forEach { (number, question, answer) ->
+            val item = layoutInflater.inflate(R.layout.item_mistake_review, container, false)
+            item.findViewById<android.widget.TextView>(R.id.mistakeQuestion).text =
+                "$number. ${com.example.duelingo.utils.QuestionPromptParser.parse(question.questionText).text}"
+            item.findViewById<android.widget.TextView>(R.id.mistakeUserAnswer).text =
+                answer.ifBlank { getString(R.string.no_answer) }
+            item.findViewById<android.widget.TextView>(R.id.mistakeCorrectAnswer).text =
                 question.correctAnswers.joinToString(" / ")
-            )
+            container.addView(item)
         }
-        androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle(R.string.test_review_mistakes)
-            .setMessage(text)
-            .setPositiveButton(android.R.string.ok, null)
-            .show()
+        dialog.findViewById<android.view.View>(R.id.closeMistakesButton).setOnClickListener { dialog.dismiss() }
+        dialog.show()
+        dialog.window?.setLayout(
+            (resources.displayMetrics.widthPixels - 32 * resources.displayMetrics.density).toInt(),
+            android.view.WindowManager.LayoutParams.WRAP_CONTENT
+        )
     }
 
     private fun renderLearningReward(content: DialogTestResultsBinding) {

@@ -18,7 +18,11 @@ import com.google.android.material.color.MaterialColors
 import de.hdodenhof.circleimageview.CircleImageView
 import com.example.duelingo.utils.LeagueVisuals
 
-class LeaderboardAdapter(private var users: LeaderboardResponse, private val avatarManager: AvatarManager) :
+class LeaderboardAdapter(
+    private var users: LeaderboardResponse,
+    private val avatarManager: AvatarManager,
+    private val onUserClick: (UserInLeaderboardResponse) -> Unit
+) :
     RecyclerView.Adapter<LeaderboardAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -71,6 +75,7 @@ class LeaderboardAdapter(private var users: LeaderboardResponse, private val ava
         holder.avatarImage.setImageResource(R.drawable.default_profile)
 
         avatarManager.loadAvatar(user.id, holder.avatarImage)
+        holder.itemView.setOnClickListener { onUserClick(user) }
 
     }
 

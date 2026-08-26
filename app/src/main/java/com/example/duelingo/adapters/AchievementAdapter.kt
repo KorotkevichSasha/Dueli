@@ -106,6 +106,14 @@ class AchievementsAdapter(
             }
             rewardButton.isEnabled = achievement.isAchieved && !achievement.rewardClaimed
             rewardButton.alpha = if (rewardButton.isEnabled) 1f else 0.68f
+            rewardButton.strokeColor = ColorStateList.valueOf(
+                if (rewardButton.isEnabled) accentColor
+                else ColorUtils.setAlphaComponent(accentColor, 95)
+            )
+            rewardButton.setTextColor(
+                if (rewardButton.isEnabled) accentColor
+                else ColorUtils.setAlphaComponent(accentColor, 130)
+            )
             rewardButton.setOnClickListener {
                 if (achievement.isAchieved && !achievement.rewardClaimed) {
                     rewardButton.isEnabled = false
@@ -132,11 +140,11 @@ class AchievementsAdapter(
                 else -> "Лидер сообщества"
             }
             AchievementType.INVITES -> when (achievement.requiredValue) {
-                1 -> "Первый шаг навстречу"
-                2 -> "Начало компании"
-                in 3..5 -> "Собираем друзей"
-                in 6..10 -> "Связующее звено"
-                else -> "Душа сообщества"
+                1 -> "Первый бой плечом к плечу"
+                2 -> "Дружеский реванш"
+                in 3..5 -> "Проверенная команда"
+                in 6..10 -> "Боевые товарищи"
+                else -> "Легенды дружеских дуэлей"
             }
             AchievementType.TESTS -> when (achievement.requiredValue) {
                 1 -> "Первая десятка"
@@ -155,7 +163,7 @@ class AchievementsAdapter(
         private fun russianDescription(achievement: UserAchievementResponse): String = when (achievement.type) {
             AchievementType.DUELS -> "Завершите ${achievement.requiredValue} дуэлей"
             AchievementType.FRIENDS -> "Добавьте ${achievement.requiredValue} друзей"
-            AchievementType.INVITES -> "Начните знакомство с ${achievement.requiredValue} игроками, которые приняли вашу заявку"
+            AchievementType.INVITES -> "Завершите ${achievement.requiredValue} дуэлей с друзьями"
             AchievementType.TESTS -> "Пройдите ${achievement.requiredValue} тестов"
             AchievementType.WORDS -> "Добавьте ${achievement.requiredValue} слов в личный словарь"
         }
@@ -174,11 +182,11 @@ class AchievementsAdapter(
                 else -> "Community leader"
             }
             AchievementType.INVITES -> when (achievement.requiredValue) {
-                1 -> "First invite"
-                2 -> "Duo assembled"
-                in 3..5 -> "Your own squad"
-                in 6..10 -> "Club captain"
-                else -> "Community founder"
+                1 -> "First friendly duel"
+                2 -> "Friendly rematch"
+                in 3..5 -> "Proven team"
+                in 6..10 -> "Battle companions"
+                else -> "Friendly duel legends"
             }
             AchievementType.TESTS -> when (achievement.requiredValue) {
                 1 -> "First ten"
@@ -197,7 +205,7 @@ class AchievementsAdapter(
         private fun englishDescription(achievement: UserAchievementResponse): String = when (achievement.type) {
             AchievementType.DUELS -> itemView.context.getString(R.string.achievement_duels_description, achievement.requiredValue)
             AchievementType.FRIENDS -> itemView.context.getString(R.string.achievement_friends_description, achievement.requiredValue)
-            AchievementType.INVITES -> "Start a friendship with ${achievement.requiredValue} players who accept your request"
+            AchievementType.INVITES -> "Complete ${achievement.requiredValue} duels with friends"
             AchievementType.TESTS -> itemView.context.getString(R.string.achievement_tests_description, achievement.requiredValue)
             AchievementType.WORDS -> itemView.context.getString(R.string.achievement_words_description, achievement.requiredValue)
         }

@@ -334,8 +334,10 @@ class ProfileActivity : AppCompatActivity() {
                 contentDescription = getString(R.string.default_avatar_number, index)
                 isClickable = true
                 isFocusable = true
-                foreground = ContextCompat.getDrawable(this@ProfileActivity, R.drawable.avatar_ripple)
                 setOnClickListener {
+                    animate().scaleX(0.9f).scaleY(0.9f).setDuration(70).withEndAction {
+                        animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+                    }.start()
                     avatarManager.selectDefaultAvatar(index, { profile ->
                         updateUI(profile); dialog.dismiss()
                     }, ::showToast)

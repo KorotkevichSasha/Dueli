@@ -32,7 +32,7 @@
     <string name="nav_profile">Профиль</string>
     <string name="nav_store">Магазин</string>
     <string name="achievements">Достижения</string>
-    <string name="achievements_subtitle">Собирайте награды за обучение, дуэли и новые знакомства</string>
+    <string name="achievements_subtitle">Собирайте награды за обучение, дуэли и сражения с друзьями</string>
     <string name="achievements_summary_title">Ваша коллекция</string>
     <string name="achievements_summary_caption">Продолжайте — следующая награда уже близко</string>
     <string name="achievements_summary_empty">—</string>
@@ -257,7 +257,7 @@
     <string name="test_review_mistakes">Просмотреть ошибки</string>
     <string name="test_mistake_review_item">%1$d. %2$s\nВаш ответ: %3$s\nПравильно: %4$s</string>
     <string name="no_answer">Нет ответа</string>
-    <string name="option_not_sure">Не уверен</string>
+    <string name="option_not_sure">Ни один из вариантов</string>
     <string name="loading_learning_catalog">Загружаем направления обучения…</string>
     <string name="loading_tests">Готовим тесты…</string>
     <string name="catalog_retry_message">Не удалось загрузить. Нажмите, чтобы повторить.</string>
@@ -562,4 +562,7 @@
     <string name="store_gold_pack_medium">500 золота · скоро</string>
     <string name="store_gold_pack_large">1200 золота · скоро</string>
     <string name="store_fair_play_note">Покупки не влияют на сложность вопросов и не гарантируют победу.</string>
+    <string name="test_review_mistakes_caption">Разберите каждый ответ и запомните правильный вариант</string>
+    <string name="your_answer_label">Ваш ответ</string>
+    <string name="correct_answer_label">Правильный ответ</string>
 </resources>

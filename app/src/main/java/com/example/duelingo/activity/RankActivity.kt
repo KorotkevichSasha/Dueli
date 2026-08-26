@@ -8,6 +8,10 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import android.app.Dialog
+import android.graphics.drawable.ColorDrawable
+import android.view.Window
+import de.hdodenhof.circleimageview.CircleImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -68,7 +72,8 @@ class RankActivity : AppCompatActivity() {
         leaderboardRecyclerView.layoutManager = LinearLayoutManager(this)
         leaderboardAdapter = LeaderboardAdapter(
             cachedLeaderboard ?: createEmptyLeaderboardResponse(),
-            avatarManager
+            avatarManager,
+            ::showLeaderboardProfile
         )
         leaderboardRecyclerView.adapter = leaderboardAdapter
         if (cachedLeaderboard != null) {
@@ -297,6 +302,29 @@ class RankActivity : AppCompatActivity() {
         binding.tvUserPoints.text = currentUser.points.toString()
 
         avatarManager.loadAvatar(currentUser.id, binding.ivUserAvatar)
+    }
+    private fun showLeaderboardProfile(user: UserInLeaderboardResponse) {
+        val dialog = Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.dialog_leaderboard_profile)
+        dialog.window?.apply {
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setLayout((resources.displayMetrics.widthPixels * 0.9f).toInt(), android.view.WindowManager.LayoutParams.WRAP_CONTENT)
+        }
+        dialog.findViewById<TextView>(R.id.dialogLeaderboardName).text = user.username
+        dialog.findViewById<TextView>(R.id.dialogLeaderboardRank).text = getString(R.string.place_format, user.rank)
+        dialog.findViewById<TextView>(R.id.dialogLeaderboardPoints).text = user.points.toString()
+        val visual = LeagueVisuals.forId(user.league?.id)
+        dialog.findViewById<ImageView>(R.id.dialogLeaderboardLeagueIcon).setImageResource(visual.icon)
+        dialog.findViewById<TextView>(R.id.dialogLeaderboardLeague).text =
+            getString(R.string.league_title_format, getString(visual.name))
+        dialog.findViewById<TextView>(R.id.dialogLeaderboardProgress).text =
+            user.league?.pointsToNextLeague?.let { getString(R.string.league_points_to_next, it) }
+                ?: getString(R.string.league_max_reached)
+        avatarManager.loadAvatar(user.id, dialog.findViewById<CircleImageView>(R.id.dialogLeaderboardAvatar))
+        dialog.findViewById<View>(R.id.dialogLeaderboardClose).setOnClickListener { dialog.dismiss() }
+        dialog.show()
+        dialog.window?.setLayout((resources.displayMetrics.widthPixels * 0.9f).toInt(), android.view.WindowManager.LayoutParams.WRAP_CONTENT)
     }
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
