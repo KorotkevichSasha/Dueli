@@ -1,120 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/backgroundColor"
-    android:padding="20dp">
+    android:padding="12dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:baselineAligned="false"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingHorizontal="48dp">
-
-        <FrameLayout
-            android:id="@+id/cardContainer"
-            android:layout_width="0dp"
-            android:layout_height="220dp"
-            android:layout_marginEnd="32dp"
-            android:layout_weight="1">
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardFront"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:cardBackgroundColor="@color/card_front_color"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="6dp">
-                <TextView
-                    android:id="@+id/cardFrontText"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:padding="16dp"
-                    android:textColor="@color/card_text_color"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardBack"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="invisible"
-                app:cardBackgroundColor="@color/card_back_color"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="6dp">
-                <TextView
-                    android:id="@+id/cardBackText"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:padding="16dp"
-                    android:textColor="@color/card_text_color"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
-            </androidx.cardview.widget.CardView>
-        </FrameLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/nextReviewDate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:gravity="center"
-                android:textColor="?attr/secondaryTextColor"
-                android:textSize="14sp" />
-
-            <Button
-                android:id="@+id/btnAgain"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:backgroundTint="#FF5252"
-                android:text="@string/again"
-                android:textColor="#FFFFFF" />
-            <Button
-                android:id="@+id/btnHard"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="6dp"
-                android:backgroundTint="#FF9800"
-                android:text="@string/hard"
-                android:textColor="#FFFFFF" />
-            <Button
-                android:id="@+id/btnGood"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="6dp"
-                android:backgroundTint="#4CAF50"
-                android:text="@string/good"
-                android:textColor="#FFFFFF" />
-            <Button
-                android:id="@+id/btnEasy"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="6dp"
-                android:backgroundTint="#2196F3"
-                android:text="@string/easy"
-                android:textColor="#FFFFFF" />
-        </LinearLayout>
+    <LinearLayout android:id="@+id/reviewHeader" android:layout_width="0dp" android:layout_height="48dp" android:gravity="center_vertical" android:orientation="horizontal" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
+        <com.google.android.material.button.MaterialButton android:id="@+id/backButton" style="@style/Widget.Material3.Button.IconButton" android:layout_width="48dp" android:layout_height="48dp" android:contentDescription="@string/back" app:icon="@drawable/ic_arrow_back" app:iconTint="?attr/textColor" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:layout_weight="1" android:text="@string/review_words_title" android:textColor="?attr/textColor" android:textSize="22sp" android:textStyle="bold" />
     </LinearLayout>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/backButton"
-        style="@style/Widget.Material3.Button.IconButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="start|top"
-        android:contentDescription="@string/back"
-        app:icon="@drawable/ic_arrow_back"
-        app:iconTint="?attr/textColor" />
-</FrameLayout>
+    <LinearLayout android:layout_width="0dp" android:layout_height="0dp" android:baselineAligned="false" android:gravity="center_vertical" android:orientation="horizontal" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/reviewHeader">
+        <FrameLayout android:id="@+id/cardContainer" android:layout_width="0dp" android:layout_height="match_parent" android:layout_marginEnd="18dp" android:layout_weight="1" android:paddingVertical="8dp">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/cardFront" android:layout_width="match_parent" android:layout_height="match_parent" app:cardBackgroundColor="?attr/cardBackgroundColor" app:cardCornerRadius="22dp" app:cardElevation="2dp" app:strokeColor="@color/word_chip_stroke" app:strokeWidth="1dp">
+                <TextView android:id="@+id/cardFrontText" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:padding="20dp" android:textColor="?attr/textColor" android:textSize="26sp" android:textStyle="bold" />
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView android:id="@+id/cardBack" android:layout_width="match_parent" android:layout_height="match_parent" android:visibility="invisible" app:cardBackgroundColor="?attr/cardBackgroundColor" app:cardCornerRadius="22dp" app:cardElevation="2dp" app:strokeColor="@color/blue_primary" app:strokeWidth="2dp">
+                <TextView android:id="@+id/cardBackText" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:padding="20dp" android:textColor="?attr/textColor" android:textSize="24sp" android:textStyle="bold" />
+            </com.google.android.material.card.MaterialCardView>
+        </FrameLayout>
+
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+            <TextView android:id="@+id/nextReviewDate" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="?attr/secondaryTextColor" android:textSize="13sp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:gravity="center" android:text="@string/word_review_prompt" android:textColor="?attr/secondaryTextColor" android:textSize="13sp" />
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="9dp" android:baselineAligned="false" android:orientation="horizontal">
+                <com.google.android.material.card.MaterialCardView android:id="@+id/btnAgain" android:layout_width="0dp" android:layout_height="68dp" android:layout_marginEnd="5dp" android:layout_weight="1" android:clickable="true" android:focusable="true" app:cardBackgroundColor="?attr/cardBackgroundColor" app:cardCornerRadius="17dp" app:cardElevation="0dp" app:rippleColor="@color/avatar_ripple_color" app:strokeColor="@color/review_again" app:strokeWidth="1dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="10dp"><ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/bg_achievement_icon" android:contentDescription="@null" android:padding="7dp" android:src="@drawable/ic_review_again" app:tint="@color/review_again"/><LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:layout_weight="1" android:orientation="vertical"><TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/again" android:textColor="?attr/textColor" android:textSize="14sp" android:textStyle="bold"/><TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1" android:text="@string/review_again_hint" android:textColor="?attr/secondaryTextColor" android:textSize="10sp"/></LinearLayout></LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+                <com.google.android.material.card.MaterialCardView android:id="@+id/btnHard" android:layout_width="0dp" android:layout_height="68dp" android:layout_marginStart="5dp" android:layout_weight="1" android:clickable="true" android:focusable="true" app:cardBackgroundColor="?attr/cardBackgroundColor" app:cardCornerRadius="17dp" app:cardElevation="0dp" app:rippleColor="@color/avatar_ripple_color" app:strokeColor="@color/review_hard" app:strokeWidth="1dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="10dp"><ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/bg_achievement_icon" android:contentDescription="@null" android:padding="7dp" android:src="@drawable/ic_review_hard" app:tint="@color/review_hard"/><LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:layout_weight="1" android:orientation="vertical"><TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/hard" android:textColor="?attr/textColor" android:textSize="14sp" android:textStyle="bold"/><TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1" android:text="@string/review_hard_hint" android:textColor="?attr/secondaryTextColor" android:textSize="10sp"/></LinearLayout></LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:baselineAligned="false" android:orientation="horizontal">
+                <com.google.android.material.card.MaterialCardView android:id="@+id/btnGood" android:layout_width="0dp" android:layout_height="68dp" android:layout_marginEnd="5dp" android:layout_weight="1" android:clickable="true" android:focusable="true" app:cardBackgroundColor="?attr/cardBackgroundColor" app:cardCornerRadius="17dp" app:cardElevation="0dp" app:rippleColor="@color/avatar_ripple_color" app:strokeColor="@color/review_good" app:strokeWidth="1dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="10dp"><ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/bg_achievement_icon" android:contentDescription="@null" android:padding="7dp" android:src="@drawable/ic_review_good" app:tint="@color/review_good"/><LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:layout_weight="1" android:orientation="vertical"><TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/good" android:textColor="?attr/textColor" android:textSize="14sp" android:textStyle="bold"/><TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1" android:text="@string/review_good_hint" android:textColor="?attr/secondaryTextColor" android:textSize="10sp"/></LinearLayout></LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+                <com.google.android.material.card.MaterialCardView android:id="@+id/btnEasy" android:layout_width="0dp" android:layout_height="68dp" android:layout_marginStart="5dp" android:layout_weight="1" android:clickable="true" android:focusable="true" app:cardBackgroundColor="?attr/cardBackgroundColor" app:cardCornerRadius="17dp" app:cardElevation="0dp" app:rippleColor="@color/avatar_ripple_color" app:strokeColor="@color/review_easy" app:strokeWidth="1dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="10dp"><ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/bg_achievement_icon" android:contentDescription="@null" android:padding="7dp" android:src="@drawable/ic_review_easy" app:tint="@color/review_easy"/><LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:layout_weight="1" android:orientation="vertical"><TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/easy" android:textColor="?attr/textColor" android:textSize="14sp" android:textStyle="bold"/><TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1" android:text="@string/review_easy_hint" android:textColor="?attr/secondaryTextColor" android:textSize="10sp"/></LinearLayout></LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
