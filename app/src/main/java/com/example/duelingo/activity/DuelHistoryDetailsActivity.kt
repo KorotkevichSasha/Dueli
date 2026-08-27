@@ -10,6 +10,7 @@ import com.example.duelingo.databinding.ActivityDuelHistoryDetailsBinding
 import com.example.duelingo.dto.response.DuelAnswerReviewResponse
 import com.example.duelingo.dto.response.DuelInHistoryResponse
 import com.google.gson.Gson
+import com.example.duelingo.utils.AnswerDisplayFormatter
 
 class DuelHistoryDetailsActivity : AppCompatActivity() {
 
@@ -65,11 +66,12 @@ class DuelHistoryDetailsActivity : AppCompatActivity() {
                 )
                 row.findViewById<TextView>(R.id.submittedAnswer).text = getString(
                     R.string.duel_submitted_answer_format,
-                    error.submittedAnswer.ifBlank { getString(R.string.duel_no_answer) }
+                    AnswerDisplayFormatter.canonicalLegacy(error.submittedAnswer)
+                        .ifBlank { getString(R.string.duel_no_answer) }
                 )
                 row.findViewById<TextView>(R.id.correctAnswer).text = getString(
                     R.string.duel_correct_answer_format,
-                    error.correctAnswer
+                    AnswerDisplayFormatter.canonicalLegacy(error.correctAnswer)
                 )
                 container.addView(row)
             }

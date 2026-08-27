@@ -300,7 +300,10 @@ class TestDetailsActivity : AppCompatActivity() {
             item.findViewById<android.widget.TextView>(R.id.mistakeUserAnswer).text =
                 answer.ifBlank { getString(R.string.no_answer) }
             item.findViewById<android.widget.TextView>(R.id.mistakeCorrectAnswer).text =
-                question.correctAnswers.joinToString(" / ")
+                com.example.duelingo.utils.AnswerDisplayFormatter.canonical(
+                    question.correctAnswers,
+                    answer
+                )
             container.addView(item)
         }
         dialog.findViewById<android.view.View>(R.id.closeMistakesButton).setOnClickListener { dialog.dismiss() }

@@ -21,6 +21,7 @@ import com.example.duelingo.adapters.OptionsAdapter
 import com.example.duelingo.databinding.FragmentQuestionBinding
 import com.example.duelingo.dto.response.QuestionDetailedResponse
 import com.example.duelingo.utils.QuestionPromptParser
+import com.example.duelingo.utils.AnswerDisplayFormatter
 import com.google.android.material.chip.Chip
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
@@ -94,7 +95,10 @@ class QuestionFragment : Fragment() {
             binding.tvFeedback.text = getString(R.string.incorrect_answer)
             binding.tvFeedback.setBackgroundResource(R.drawable.bg_feedback_incorrect)
 
-            val formattedAnswer = question.correctAnswers.joinToString(" / ")
+            val formattedAnswer = AnswerDisplayFormatter.canonical(
+                question.correctAnswers,
+                getAnswer()
+            )
             binding.tvCorrectAnswer.text = getString(R.string.correct_answer_format, formattedAnswer)
         }
 

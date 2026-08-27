@@ -121,7 +121,7 @@
     <string name="unknown_opponent">Соперник</string>
     <string name="opponent_name_format">Соперник: %1$s</string>
 
-    <string name="start_duel_search">Найти соперника</string>
+    <string name="start_duel_search">Найти соперника · 1 искра</string>
     <string name="cancel_duel_search">Отменить поиск</string>
     <string name="searching_for_opponent">Подбираем соперника вашего уровня…</string>
     <string name="duel_subtitle">Сразитесь в знаниях и поднимитесь в рейтинге · статистика учитывает онлайн-матчи</string>

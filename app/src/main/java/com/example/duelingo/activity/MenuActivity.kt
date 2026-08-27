@@ -118,9 +118,11 @@ class MenuActivity : AppCompatActivity() {
         }
         binding.duelHeroImage.setImageDrawable(null)
         binding.duelHeroImage.setBackgroundResource(R.drawable.bg_feature_icon)
-        binding.duelHeroImage.post {
-            Glide.with(this).load(R.drawable.duel_hero_wide).dontAnimate().fitCenter().into(binding.duelHeroImage)
-        }
+        Glide.with(this)
+            .load(R.drawable.duel_hero_wide)
+            .dontAnimate()
+            .fitCenter()
+            .into(binding.duelHeroImage)
         Log.d("MenuActivity", "Initializing AvatarManager")
         avatarManager = AvatarManager(this, tokenManager, getSharedPreferences("user_prefs", MODE_PRIVATE))
 
@@ -145,12 +147,10 @@ class MenuActivity : AppCompatActivity() {
 
         Log.d("MenuActivity", "Setting up navigation buttons")
         setupNavigationButtons()
-        binding.root.post {
-            if (isFinishing || isDestroyed) return@post
-            setupRecyclerView()
-            contentReady = true
-            if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) resumeContent()
-        }
+        // Render cached history during the first layout pass. Posting this work
+        // made the duel screen briefly look empty on every tab switch.
+        setupRecyclerView()
+        contentReady = true
         // Matchmaking is always an explicit user action. Restoring it after a
         // configuration change could unexpectedly enqueue a new duel when the
         // user returns from the result screen.
