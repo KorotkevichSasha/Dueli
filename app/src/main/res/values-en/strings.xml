@@ -346,6 +346,10 @@
     <string name="vocabulary_method_description">Reveal the translation, then rate the difficulty honestly. Difficult words return sooner and familiar words later, so you focus on what needs practice.</string>
     <string name="word_card_progress">Card %1$d of %2$d · tap to reveal the translation</string>
     <string name="word_review_prompt">How easily did you remember the translation?</string>
+    <string name="review_again_hint">Could not recall</string>
+    <string name="review_hard_hint">Recalled with effort</string>
+    <string name="review_good_hint">Recalled confidently</string>
+    <string name="review_easy_hint">Recalled instantly</string>
     <string name="all_words_title">All vocabulary</string>
     <string name="all_words_description">Browse and remove words you have added</string>
     <string name="dictionary_empty_title">Your vocabulary is empty</string>

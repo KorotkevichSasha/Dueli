@@ -337,6 +337,10 @@
     <string name="vocabulary_method_description">Откройте перевод, затем честно оцените сложность. Трудные слова вернутся раньше, знакомые — позже. Так вы тратите время только на то, что действительно нужно закрепить.</string>
     <string name="word_card_progress">Карточка %1$d из %2$d · нажмите, чтобы открыть перевод</string>
     <string name="word_review_prompt">Оцените, насколько легко вы вспомнили перевод</string>
+    <string name="review_again_hint">Не вспомнил</string>
+    <string name="review_hard_hint">Вспомнил с трудом</string>
+    <string name="review_good_hint">Вспомнил уверенно</string>
+    <string name="review_easy_hint">Вспомнил сразу</string>
     <string name="all_words_title">Весь словарь</string>
     <string name="all_words_description">Просматривайте и удаляйте добавленные слова</string>
     <string name="dictionary_empty_title">Словарь пока пуст</string>
