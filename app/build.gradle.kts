@@ -46,7 +46,7 @@ android {
         applicationId = applicationIdValue
         minSdk = 24
         targetSdk = 36
-        versionCode = providers.gradleProperty("VERSION_CODE").orElse("1").get().toInt()
+        versionCode = providers.gradleProperty("VERSION_CODE").orElse("6").get().toInt()
         versionName = providers.gradleProperty("VERSION_NAME").orElse("1.0.0").get()
         buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl.trimEnd('/')}\"")
         buildConfigField("String", "PRIVACY_POLICY_URL", "\"$privacyPolicyUrl\"")
@@ -94,8 +94,6 @@ android {
         viewBinding = true
         dataBinding = true
     }
-
-    sourceSets.getByName("main").assets.srcDir("../play-store")
 
     packaging.resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
 
