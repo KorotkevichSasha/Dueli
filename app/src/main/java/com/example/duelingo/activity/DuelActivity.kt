@@ -29,6 +29,7 @@ import com.example.duelingo.storage.LearningHabitTracker
 import com.example.duelingo.utils.RefreshEvents
 import com.example.duelingo.utils.UserMessage
 import com.example.duelingo.utils.AnswerEvaluator
+import com.example.duelingo.utils.AnswerDisplayFormatter
 import com.google.gson.Gson
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
@@ -517,7 +518,10 @@ class DuelActivity : AppCompatActivity() {
     )
 
     private fun answerForDisplay(question: QuestionDetailedResponse): String =
-        question.correctAnswers.joinToString(" / ")
+        AnswerDisplayFormatter.canonical(
+            question.correctAnswers,
+            submittedAnswers[question.id].orEmpty()
+        )
 
     private fun answerIsCorrect(question: QuestionDetailedResponse, answer: String): Boolean =
         AnswerEvaluator.matches(question, answer)

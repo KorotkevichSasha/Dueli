@@ -118,7 +118,7 @@
     <string name="duel_data_unavailable">This duel could not be opened. Start a new opponent search.</string>
     <string name="unknown_opponent">Opponent</string>
     <string name="opponent_name_format">Opponent: %1$s</string>
-    <string name="start_duel_search">Find an opponent</string>
+    <string name="start_duel_search">Find an opponent · 1 Spark</string>
     <string name="cancel_duel_search">Cancel search</string>
     <string name="searching_for_opponent">Finding an opponent at your level…</string>
     <string name="duel_subtitle">Challenge your knowledge and climb the ranking · stats include online matches</string>
