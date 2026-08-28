@@ -168,28 +168,66 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnDuel"
+    <FrameLayout
+        android:id="@+id/duelActionContainer"
         android:layout_width="0dp"
         android:layout_height="60dp"
         android:layout_marginHorizontal="24dp"
         android:layout_marginTop="8dp"
-        android:text="@string/start_duel_search"
-        android:textColor="@android:color/white"
-        android:textSize="19sp"
-        android:textStyle="bold"
-        android:elevation="8dp"
-        app:backgroundTint="@color/blue_primary"
-        app:cornerRadius="20dp"
-        app:icon="@drawable/swords24"
-        app:iconGravity="textStart"
-        app:iconPadding="14dp"
-        app:iconSize="28dp"
-        app:iconTint="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/duelEconomyCard"
-        tools:ignore="MissingConstraints" />
+        tools:ignore="MissingConstraints">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDuel"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:elevation="8dp"
+            android:paddingEnd="72dp"
+            android:text="@string/start_duel_search"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/blue_primary"
+            app:cornerRadius="20dp"
+            app:icon="@drawable/swords24"
+            app:iconGravity="textStart"
+            app:iconPadding="10dp"
+            app:iconSize="26dp"
+            app:iconTint="@color/white" />
+
+        <LinearLayout
+            android:layout_width="54dp"
+            android:layout_height="34dp"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_duel_cost_badge"
+            android:clickable="false"
+            android:contentDescription="@string/duel_search_cost_accessibility"
+            android:focusable="false"
+            android:gravity="center"
+            android:importantForAccessibility="yes"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:contentDescription="@null"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_rush_spark" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:importantForAccessibility="no"
+                android:text="@string/duel_search_cost_value"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </FrameLayout>
 
     <TextView
         android:id="@+id/duelSubtitle"
@@ -223,7 +261,7 @@
         app:strokeWidth="1dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnDuel" />
+        app:layout_constraintTop_toBottomOf="@id/duelActionContainer" />
 
     <TextView
         android:id="@+id/historyTitle"
