@@ -19,7 +19,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
-import android.widget.Toast
+import com.example.duelingo.utils.AppToast as Toast
 import android.widget.GridLayout
 import androidx.core.widget.NestedScrollView
 import androidx.activity.result.contract.ActivityResultContracts

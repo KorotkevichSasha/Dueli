@@ -425,6 +425,7 @@
     <string name="block_user_confirm_title">Block this user?</string>
     <string name="block_user_confirm_message">%1$s will no longer be able to interact with you.</string>
     <string name="report_reason_title">Reason for report</string>
+    <string name="report_reason_subtitle">Choose what violates the DuelRush rules</string>
     <string name="report_sent">Report submitted for review</string>
     <string name="user_blocked">User blocked</string>
     <string-array name="report_reasons"><item>Inappropriate profile photo</item><item>Offensive username</item><item>Harassment</item><item>Other violation</item></string-array>

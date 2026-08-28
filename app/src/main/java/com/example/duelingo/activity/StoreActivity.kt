@@ -1,7 +1,7 @@
 package com.example.duelingo.activity
 
 import android.os.Bundle
-import android.widget.Toast
+import com.example.duelingo.utils.AppToast as Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.duelingo.R

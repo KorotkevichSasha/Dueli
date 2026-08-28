@@ -7,7 +7,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
+import com.example.duelingo.utils.AppToast as Toast
 import android.app.Dialog
 import android.graphics.drawable.ColorDrawable
 import android.view.Window

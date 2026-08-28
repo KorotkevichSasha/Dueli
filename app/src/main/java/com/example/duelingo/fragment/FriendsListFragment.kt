@@ -26,11 +26,12 @@ import android.view.WindowManager
 import com.example.duelingo.databinding.DialogFriendProfileBinding
 import com.example.duelingo.databinding.DialogDuelDifficultyBinding
 import com.example.duelingo.databinding.DialogConfirmActionBinding
+import com.example.duelingo.databinding.DialogReportReasonBinding
 import com.example.duelingo.dto.request.RelationshipRequest
 import com.example.duelingo.dto.request.UserReportRequest
 import com.example.duelingo.dto.request.DuelChallengeRequest
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import android.widget.Toast
+import com.example.duelingo.utils.AppToast as Toast
 import com.example.duelingo.activity.MenuActivity
 
 class FriendsListFragment : Fragment() {
@@ -217,19 +218,43 @@ class FriendsListFragment : Fragment() {
     private fun showReportReasons(friend: com.example.duelingo.dto.response.FriendResponse, dialog: Dialog) {
         val labels = resources.getStringArray(R.array.report_reasons)
         val codes = arrayOf("INAPPROPRIATE_AVATAR", "OFFENSIVE_NAME", "HARASSMENT", "OTHER")
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.report_reason_title)
-            .setItems(labels) { _, index ->
+        val content = DialogReportReasonBinding.inflate(layoutInflater)
+        val reportDialog = createStyledDialog(content.root, 440)
+        val buttons = listOf(
+            content.reasonAvatarButton,
+            content.reasonNameButton,
+            content.reasonHarassmentButton,
+            content.reasonOtherButton
+        )
+        buttons.forEachIndexed { index, button ->
+            button.text = labels[index]
+            button.setOnClickListener {
+                buttons.forEach { it.isEnabled = false }
+                content.cancelButton.isEnabled = false
                 viewLifecycleOwner.lifecycleScope.launch {
-                    val response = ApiClient.relationshipService.reportUser(
-                        "Bearer ${tokenManager.getAccessToken()}", UserReportRequest(friend.id, codes[index])
-                    )
-                    if (response.isSuccessful) {
-                        Toast.makeText(requireContext(), R.string.report_sent, Toast.LENGTH_SHORT).show()
-                        dialog.dismiss()
+                    runCatching {
+                        ApiClient.relationshipService.reportUser(
+                            "Bearer ${tokenManager.getAccessToken()}",
+                            UserReportRequest(friend.id, codes[index])
+                        )
+                    }.onSuccess { response ->
+                        if (response.isSuccessful) {
+                            reportDialog.dismiss()
+                            dialog.dismiss()
+                            Toast.makeText(requireContext(), R.string.report_sent, Toast.LENGTH_SHORT).show()
+                        } else {
+                            buttons.forEach { it.isEnabled = true }
+                            content.cancelButton.isEnabled = true
+                        }
+                    }.onFailure {
+                        buttons.forEach { it.isEnabled = true }
+                        content.cancelButton.isEnabled = true
                     }
                 }
-            }.show()
+            }
+        }
+        content.cancelButton.setOnClickListener { reportDialog.dismiss() }
+        reportDialog.show()
     }
 
     private fun blockFriend(
