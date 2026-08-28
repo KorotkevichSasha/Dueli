@@ -373,6 +373,7 @@
     <string name="choose_practice_level">Выберите уровень тренировки</string>
     <string name="offline_practice_subtitle">Задания уже в приложении — интернет не нужен</string>
     <string name="challenge_to_duel">Вызвать на дуэль</string>
+    <string name="friend_duel_difficulty_subtitle">Выберите уровень вопросов. Дуэль с другом не расходует искры.</string>
     <string name="duel_challenge_sent">Вызов отправлен</string>
     <string name="duel_challenge_title">Вызов на дуэль</string>
     <string name="duel_challenge_message">%1$s приглашает вас сыграть. Уровень: %2$s.</string>
