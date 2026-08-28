@@ -19,7 +19,14 @@ object OfflineDuelFactory {
     private fun choice(id: String, level: String, text: String, answer: String, vararg distractors: String) =
         QuestionDetailedResponse(id, level, "FILL_IN_CHOICE", text, (listOf(answer) + distractors).shuffled(), listOf(answer))
     private fun sentence(id: String, level: String, russian: String, english: String) =
-        QuestionDetailedResponse(id, level, "SENTENCE_CONSTRUCTION", russian, english.split(' ').shuffled(), english.split(' '))
+        QuestionDetailedResponse(
+            id = id,
+            difficulty = level,
+            type = "SENTENCE_CONSTRUCTION",
+            questionText = russian,
+            options = english.split(' ').shuffled(),
+            correctAnswers = listOf(english)
+        )
 
     private val questions = mapOf(
         "EASY" to listOf(

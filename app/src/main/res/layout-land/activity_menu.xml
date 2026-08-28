@@ -70,7 +70,7 @@
                     android:layout_gravity="end|center_vertical" android:layout_marginEnd="10dp"
                     android:background="@drawable/bg_duel_cost_badge" android:clickable="false"
                     android:contentDescription="@string/duel_search_cost_accessibility" android:focusable="false"
-                    android:gravity="center" android:importantForAccessibility="yes" android:orientation="horizontal">
+                    android:elevation="12dp" android:gravity="center" android:importantForAccessibility="yes" android:orientation="horizontal">
                     <ImageView android:layout_width="15dp" android:layout_height="15dp" android:contentDescription="@null"
                         android:importantForAccessibility="no" android:src="@drawable/ic_rush_spark" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"

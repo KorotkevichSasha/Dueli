@@ -18,6 +18,13 @@ class OfflineDuelFactoryTest {
                 .all { it.options.containsAll(it.correctAnswers) })
             assertTrue(questions.filter { it.type == "SENTENCE_CONSTRUCTION" }
                 .all { it.questionText.contains(Regex("[А-Яа-яЁё]")) })
+            assertTrue(questions.filter { it.type == "SENTENCE_CONSTRUCTION" }.all { question ->
+                question.correctAnswers.size == 1 &&
+                    question.correctAnswers.single().contains(' ') &&
+                    question.correctAnswers.single()
+                        .split(' ')
+                        .sorted() == question.options.sorted()
+            })
         }
     }
 }
