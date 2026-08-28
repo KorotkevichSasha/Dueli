@@ -18,6 +18,7 @@ import com.example.duelingo.storage.TokenManager
 import com.example.duelingo.storage.OnboardingPreferences
 import com.example.duelingo.utils.UserMessage
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -30,6 +31,7 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private var loginRunning = false
+    private var connectionStatusJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -126,6 +128,17 @@ class LoginActivity : AppCompatActivity() {
         binding.loginBtn.isEnabled = !loading
         binding.loginProgress.visibility = if (loading) View.VISIBLE else View.GONE
         binding.loginStatus.visibility = if (loading) View.VISIBLE else View.GONE
+        connectionStatusJob?.cancel()
+        connectionStatusJob = null
+        if (loading) {
+            binding.loginStatus.setText(com.example.duelingo.R.string.login_connecting)
+            connectionStatusJob = lifecycleScope.launch {
+                delay(8_000)
+                if (loginRunning) {
+                    binding.loginStatus.setText(com.example.duelingo.R.string.login_waking_server)
+                }
+            }
+        }
     }
     private fun saveTokens(response: JwtAuthenticationResponse) {
         val tokenManager = TokenManager(this)

@@ -24,10 +24,14 @@ object ApiClient {
         tokenManager = TokenManager(context.applicationContext)
     }
 
+    // The warm-up request and authentication share one connection pool. If the
+    // user types while Render wakes, login can reuse the established TLS socket.
+    private val publicClient: OkHttpClient by lazy { baseClient() }
+
     private val publicRetrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(AppConfig.BASE_URL)
-            .client(baseClient())
+            .client(publicClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
@@ -42,7 +46,7 @@ object ApiClient {
             .url("${AppConfig.BASE_URL}actuator/health/liveness")
             .get()
             .build()
-        baseClient().newCall(request).enqueue(object : Callback {
+        publicClient.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 warmupRunning.set(false)
             }
