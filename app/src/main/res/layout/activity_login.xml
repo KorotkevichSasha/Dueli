@@ -79,22 +79,32 @@
                     android:textColorHint="?attr/secondaryTextColor"
                     app:drawableTint="@color/blue_primary" />
 
-                <androidx.appcompat.widget.AppCompatEditText
-                    android:id="@+id/password_et"
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:background="@drawable/bg_auth_field"
-                    android:drawableStart="@drawable/ic_lock"
-                    android:drawablePadding="12dp"
-                    android:hint="@string/password_hint"
-                    android:imeOptions="actionDone"
-                    android:inputType="textPassword"
-                    android:maxLines="1"
-                    android:paddingHorizontal="16dp"
-                    android:textColor="?attr/textColor"
-                    android:textColorHint="?attr/secondaryTextColor"
-                    app:drawableTint="@color/blue_primary" />
+                    app:boxBackgroundMode="none"
+                    app:endIconMode="password_toggle"
+                    app:endIconTint="@color/blue_primary"
+                    app:hintEnabled="false">
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/password_et"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:background="@drawable/bg_auth_field"
+                        android:drawableStart="@drawable/ic_lock"
+                        android:drawablePadding="12dp"
+                        android:hint="@string/password_hint"
+                        android:imeOptions="actionDone"
+                        android:inputType="textPassword"
+                        android:maxLines="1"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="52dp"
+                        android:textColor="?attr/textColor"
+                        android:textColorHint="?attr/secondaryTextColor"
+                        app:drawableTint="@color/blue_primary" />
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
                     android:id="@+id/forgot_password"

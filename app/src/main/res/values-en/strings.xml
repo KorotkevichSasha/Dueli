@@ -47,6 +47,7 @@
     <string name="confirm_password_hint">Confirm password</string>
     <string name="login_action">Log in</string>
     <string name="login_connecting">Connecting securely… The free server may need up to two minutes to wake after inactivity.</string>
+    <string name="login_waking_server">The server is waking after inactivity. This is a one-time delay — please keep the app open.</string>
     <string name="signup_prompt">No account? Sign up</string>
     <string name="forgot_password">Forgot password?</string>
     <string name="password_reset_title">Restore access</string>

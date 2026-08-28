@@ -49,6 +49,7 @@
     <string name="confirm_password_hint">Повторите пароль</string>
     <string name="login_action">Войти</string>
     <string name="login_connecting">Безопасно подключаемся… После простоя бесплатному серверу может потребоваться до двух минут.</string>
+    <string name="login_waking_server">Сервер запускается после простоя. Это разовая задержка — пожалуйста, не закрывайте приложение.</string>
     <string name="signup_prompt">Нет аккаунта? Зарегистрироваться</string>
     <string name="forgot_password">Забыли пароль?</string>
     <string name="password_reset_title">Восстановление доступа</string>
