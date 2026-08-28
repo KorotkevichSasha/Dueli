@@ -462,6 +462,7 @@
     <string name="block_user_confirm_title">Заблокировать пользователя?</string>
     <string name="block_user_confirm_message">%1$s не сможет взаимодействовать с вами.</string>
     <string name="report_reason_title">Причина жалобы</string>
+    <string name="report_reason_subtitle">Выберите, что именно нарушает правила DuelRush</string>
     <string name="report_sent">Жалоба отправлена на проверку</string>
     <string name="user_blocked">Пользователь заблокирован</string>
     <string-array name="report_reasons"><item>Недопустимая фотография</item><item>Оскорбительное имя</item><item>Домогательства</item><item>Другое нарушение</item></string-array>

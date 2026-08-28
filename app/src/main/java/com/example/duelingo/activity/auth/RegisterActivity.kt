@@ -7,7 +7,7 @@ import android.util.Patterns
 import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
-import android.widget.Toast
+import com.example.duelingo.utils.AppToast as Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.duelingo.activity.MenuActivity

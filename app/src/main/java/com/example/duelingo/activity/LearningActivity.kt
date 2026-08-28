@@ -158,10 +158,10 @@ class LearningActivity : AppCompatActivity() {
                                 binding.learningTipCard.animate().scaleX(1f).scaleY(1f)
                                     .setDuration(170).start()
                             }.start()
-                        android.widget.Toast.makeText(
+                        com.example.duelingo.utils.AppToast.makeText(
                             this@LearningActivity,
                             getString(R.string.tip_gold_received, reward.goldAwarded),
-                            android.widget.Toast.LENGTH_SHORT
+                            com.example.duelingo.utils.AppToast.LENGTH_SHORT
                         ).show()
                     }
                 }
