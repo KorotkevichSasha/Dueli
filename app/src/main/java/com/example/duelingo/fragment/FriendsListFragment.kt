@@ -24,6 +24,8 @@ import android.app.Dialog
 import android.view.Window
 import android.view.WindowManager
 import com.example.duelingo.databinding.DialogFriendProfileBinding
+import com.example.duelingo.databinding.DialogDuelDifficultyBinding
+import com.example.duelingo.databinding.DialogConfirmActionBinding
 import com.example.duelingo.dto.request.RelationshipRequest
 import com.example.duelingo.dto.request.UserReportRequest
 import com.example.duelingo.dto.request.DuelChallengeRequest
@@ -112,29 +114,7 @@ class FriendsListFragment : Fragment() {
         avatarManager.loadAvatar(friend.id.toString(), content.avatarImage, friend.avatarUrl)
         content.closeButton.setOnClickListener { dialog.dismiss() }
         content.challengeButton.setOnClickListener {
-            val labels = arrayOf(
-                getString(R.string.duel_easy_description),
-                getString(R.string.duel_medium_description),
-                getString(R.string.duel_hard_description)
-            )
-            val levels = arrayOf("EASY", "MEDIUM", "HARD")
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.challenge_to_duel)
-                .setItems(labels) { _, index ->
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        runCatching {
-                            ApiClient.duelHistoryService.challengeFriend(
-                                DuelChallengeRequest(friend.id.toString(), levels[index])
-                            )
-                        }.onSuccess {
-                            dialog.dismiss()
-                            Toast.makeText(requireContext(), R.string.duel_challenge_sent, Toast.LENGTH_SHORT).show()
-                            startActivity(Intent(requireContext(), MenuActivity::class.java))
-                        }.onFailure {
-                            Toast.makeText(requireContext(), R.string.duel_challenge_expired, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }.show()
+            showFriendDuelDifficulty(friend, dialog)
         }
         content.removeButton.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())
@@ -156,15 +136,83 @@ class FriendsListFragment : Fragment() {
         }
         content.reportButton.setOnClickListener { showReportReasons(friend, dialog) }
         content.blockButton.setOnClickListener {
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.block_user_confirm_title)
-                .setMessage(getString(R.string.block_user_confirm_message, friend.username))
-                .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.block_user) { _, _ -> blockFriend(friend, dialog) }
-                .show()
+            showBlockConfirmation(friend, dialog)
         }
         dialog.show()
     }
+
+    private fun showFriendDuelDifficulty(
+        friend: com.example.duelingo.dto.response.FriendResponse,
+        profileDialog: Dialog
+    ) {
+        val content = DialogDuelDifficultyBinding.inflate(layoutInflater)
+        val difficultyDialog = createStyledDialog(content.root, 520)
+        content.titleText.setText(R.string.challenge_to_duel)
+        content.subtitleText.setText(R.string.friend_duel_difficulty_subtitle)
+        content.closeButton.setOnClickListener { difficultyDialog.dismiss() }
+
+        fun challenge(level: String) {
+            content.closeButton.isEnabled = false
+            content.easyButton.isEnabled = false
+            content.mediumButton.isEnabled = false
+            content.hardButton.isEnabled = false
+            viewLifecycleOwner.lifecycleScope.launch {
+                runCatching {
+                    ApiClient.duelHistoryService.challengeFriend(
+                        DuelChallengeRequest(friend.id.toString(), level)
+                    )
+                }.onSuccess {
+                    difficultyDialog.dismiss()
+                    profileDialog.dismiss()
+                    Toast.makeText(requireContext(), R.string.duel_challenge_sent, Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(requireContext(), MenuActivity::class.java))
+                }.onFailure {
+                    content.closeButton.isEnabled = true
+                    content.easyButton.isEnabled = true
+                    content.mediumButton.isEnabled = true
+                    content.hardButton.isEnabled = true
+                    Toast.makeText(requireContext(), R.string.duel_challenge_expired, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        content.easyButton.setOnClickListener { challenge("EASY") }
+        content.mediumButton.setOnClickListener { challenge("MEDIUM") }
+        content.hardButton.setOnClickListener { challenge("HARD") }
+        difficultyDialog.show()
+    }
+
+    private fun showBlockConfirmation(
+        friend: com.example.duelingo.dto.response.FriendResponse,
+        profileDialog: Dialog
+    ) {
+        val content = DialogConfirmActionBinding.inflate(layoutInflater)
+        val confirmationDialog = createStyledDialog(content.root, 440)
+        content.titleText.setText(R.string.block_user_confirm_title)
+        content.messageText.text = getString(R.string.block_user_confirm_message, friend.username)
+        content.cancelButton.setOnClickListener { confirmationDialog.dismiss() }
+        content.confirmButton.setOnClickListener {
+            content.cancelButton.isEnabled = false
+            content.confirmButton.isEnabled = false
+            blockFriend(friend, profileDialog, confirmationDialog) {
+                content.cancelButton.isEnabled = true
+                content.confirmButton.isEnabled = true
+            }
+        }
+        confirmationDialog.show()
+    }
+
+    private fun createStyledDialog(content: View, maxWidthDp: Int): Dialog =
+        Dialog(requireContext()).apply {
+            requestWindowFeature(Window.FEATURE_NO_TITLE)
+            setContentView(content)
+            window?.setBackgroundDrawableResource(android.R.color.transparent)
+            setOnShowListener {
+                val width = (resources.displayMetrics.widthPixels - 32 * resources.displayMetrics.density)
+                    .toInt().coerceAtMost((maxWidthDp * resources.displayMetrics.density).toInt())
+                window?.setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT)
+            }
+        }
 
     private fun showReportReasons(friend: com.example.duelingo.dto.response.FriendResponse, dialog: Dialog) {
         val labels = resources.getStringArray(R.array.report_reasons)
@@ -184,15 +232,27 @@ class FriendsListFragment : Fragment() {
             }.show()
     }
 
-    private fun blockFriend(friend: com.example.duelingo.dto.response.FriendResponse, dialog: Dialog) {
+    private fun blockFriend(
+        friend: com.example.duelingo.dto.response.FriendResponse,
+        profileDialog: Dialog,
+        confirmationDialog: Dialog,
+        onFailure: () -> Unit
+    ) {
         viewLifecycleOwner.lifecycleScope.launch {
-            val response = ApiClient.relationshipService.blockUser(
-                "Bearer ${tokenManager.getAccessToken()}", RelationshipRequest(friend.id)
-            )
-            if (response.isSuccessful) {
-                dialog.dismiss(); loadFriends()
-                Toast.makeText(requireContext(), R.string.user_blocked, Toast.LENGTH_SHORT).show()
-            }
+            runCatching {
+                ApiClient.relationshipService.blockUser(
+                    "Bearer ${tokenManager.getAccessToken()}", RelationshipRequest(friend.id)
+                )
+            }.onSuccess { response ->
+                if (response.isSuccessful) {
+                    confirmationDialog.dismiss()
+                    profileDialog.dismiss()
+                    loadFriends()
+                    Toast.makeText(requireContext(), R.string.user_blocked, Toast.LENGTH_SHORT).show()
+                } else {
+                    onFailure()
+                }
+            }.onFailure { onFailure() }
         }
     }
 

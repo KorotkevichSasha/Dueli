@@ -435,6 +435,7 @@
     <string name="choose_practice_level">Choose a practice level</string>
     <string name="offline_practice_subtitle">Questions are stored on your device — no internet needed</string>
     <string name="challenge_to_duel">Challenge to a duel</string>
+    <string name="friend_duel_difficulty_subtitle">Choose the question level. Friend duels do not use Sparks.</string>
     <string name="duel_challenge_sent">Challenge sent</string>
     <string name="duel_challenge_title">Duel challenge</string>
     <string name="duel_challenge_message">%1$s invites you to play. Level: %2$s.</string>
