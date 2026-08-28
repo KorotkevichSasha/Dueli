@@ -205,6 +205,7 @@
             android:background="@drawable/bg_duel_cost_badge"
             android:clickable="false"
             android:contentDescription="@string/duel_search_cost_accessibility"
+            android:elevation="12dp"
             android:focusable="false"
             android:gravity="center"
             android:importantForAccessibility="yes"
