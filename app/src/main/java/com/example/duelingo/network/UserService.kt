@@ -41,6 +41,11 @@ interface UserService {
         @Query("similarityPercent") similarityPercent: Int
     ): LearningRewardResponse
 
+    @POST("/users/economy/rewarded-ad")
+    suspend fun claimRewardedAdGold(
+        @Header("Authorization") token: String
+    ): LearningRewardResponse
+
     @DELETE("/users/me")
     suspend fun deleteAccount(
         @Header("Authorization") token: String

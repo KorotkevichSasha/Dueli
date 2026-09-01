@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.WindowManager
 import com.example.duelingo.manager.LocaleManager
 import com.example.duelingo.manager.ThemeManager
+import com.example.duelingo.manager.RewardedAdManager
 import com.example.duelingo.network.ApiClient
 import com.example.duelingo.network.AuthSessionManager
 import com.example.duelingo.utils.BottomNavigationController
@@ -21,6 +22,7 @@ class DuelingoApplication : Application() {
         AuthSessionManager.initialize(this)
         ApiClient.initialize(this)
         ApiClient.warmUpServer()
+        RewardedAdManager.initialize(this, BuildConfig.YANDEX_REWARDED_AD_UNIT_ID)
         Glide.with(this).load(R.drawable.duel_hero_wide).preload(1536, 512)
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {

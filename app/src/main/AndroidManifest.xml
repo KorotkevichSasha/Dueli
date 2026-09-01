@@ -7,6 +7,11 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Test ads don't need a persistent advertising identifier. Reconsider this
+         only after the production consent flow and target audience are approved. -->
+    <uses-permission
+        android:name="com.google.android.gms.permission.AD_ID"
+        tools:node="remove" />
 
     <queries>
         <intent>
@@ -30,6 +35,9 @@
         android:theme="@style/Theme.Duelingo"
         android:usesCleartextTraffic="false"
         tools:targetApi="31">
+        <meta-data
+            android:name="com.yandex.mobile.ads.AUTOMATIC_SDK_INITIALIZATION"
+            android:value="false" />
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
             android:enabled="false"
