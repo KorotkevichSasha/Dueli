@@ -16,6 +16,9 @@ val applicationIdValue = providers.gradleProperty("APPLICATION_ID")
 val privacyPolicyUrl = providers.gradleProperty("PRIVACY_POLICY_URL")
     .orElse(if (buildingRelease) "" else "http://127.0.0.1:5173/privacy")
     .get()
+val yandexRewardedAdUnitId = providers.gradleProperty("YANDEX_REWARDED_AD_UNIT_ID")
+    .orElse(if (buildingRelease) "" else "demo-rewarded-yandex")
+    .get()
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties().apply {
     if (keystorePropertiesFile.exists()) {
@@ -50,6 +53,7 @@ android {
         versionName = providers.gradleProperty("VERSION_NAME").orElse("1.0.0").get()
         buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl.trimEnd('/')}\"")
         buildConfigField("String", "PRIVACY_POLICY_URL", "\"$privacyPolicyUrl\"")
+        buildConfigField("String", "YANDEX_REWARDED_AD_UNIT_ID", "\"$yandexRewardedAdUnitId\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -126,6 +130,7 @@ dependencies {
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.github.NaikSoftware:StompProtocolAndroid:1.6.6")
+    implementation("com.yandex.android:mobileads:8.2.0")
     implementation("io.reactivex.rxjava2:rxjava:2.2.21")
     implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
 
