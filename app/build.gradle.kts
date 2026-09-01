@@ -128,7 +128,7 @@ dependencies {
     implementation("androidx.viewpager2:viewpager2:1.1.0")
     implementation("com.airbnb.android:lottie:6.6.2")
     implementation("de.hdodenhof:circleimageview:3.1.0")
-    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("com.github.bumptech.glide:glide:5.0.9")
     implementation("com.github.NaikSoftware:StompProtocolAndroid:1.6.6")
     implementation("com.yandex.android:mobileads:8.2.0")
     implementation("io.reactivex.rxjava2:rxjava:2.2.21")
